@@ -379,7 +379,7 @@ public class Order {
 
             rs.close();
         } catch (SQLException se) {
-            //Handle errors for JDBC
+            //Handle errors for JDBC            
             se.printStackTrace();
         } catch (ClassNotFoundException se) {
             //Handle errors for Class.forName
