@@ -388,15 +388,16 @@ public class Material {
     
     public static Float getPricePerGram(SimpleIntegerProperty material_id, User user) {        
                 
-        float totalObjectsWeight = 0;        
+        float totalObjectsWeight = 0;
+        String query = "SELECT Materials.MaterialWeight, SUM(Materials.MaterialPrice + MaterialShipping) AS 'MaterialPrice' FROM Materials";
         
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + address + "/" + dbName;
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
 
         //  Database credentials
-        String USER = user;
-        String PASS = pass;
+        String USER = user.getName();
+        String PASS = user.getPass();
 
 
         Connection conn = null;
