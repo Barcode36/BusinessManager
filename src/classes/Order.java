@@ -337,11 +337,11 @@ public class Order {
         return itemBuildTime;
     }
     
-    private int getTotalCosts(SimpleIntegerProperty order_id, User user) {
+    private double getTotalCosts(SimpleIntegerProperty order_id, User user) {
         double itemCosts = 0;
         
         //Create query
-        String query = "SELECT SUM(ItemBuildTime) FROM OrderItems WHERE OrderID=" + order_id.get();
+        String query = "SELECT SUM((Materials.MaterialPrice + Materials.MaterialShipping)/Materials.MaterialWeight*OrderItems.ItemWeight) AS 'Costs' FROM OrderItems JOIN Materials ON OrderItems.ItemMaterialID = Materials.MaterialID WHERE OrderItems.OrderID=" + order_id.get();
         
         //Create list
         List<Order> orderList = new ArrayList<>();
@@ -358,6 +358,7 @@ public class Order {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
+        
         try {
             
             //STEP 2: Register JDBC driver
@@ -374,7 +375,7 @@ public class Order {
             //rs.next() loads row            
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
-                                
+               itemCosts = rs.getDouble("Costs");
             }
 
             rs.close();
