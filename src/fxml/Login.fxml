@@ -14,18 +14,18 @@
    
        <Label text="User Name:" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
    
-       <TextField fx:id="uName" text="db3admin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+       <TextField fx:id="uName" text="edemko" GridPane.columnIndex="1" GridPane.rowIndex="1" />
    
        <Label text="Password:" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
    
-       <PasswordField fx:id="uPasswd" text="Visna123" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+       <PasswordField fx:id="uPasswd" text="5fsDhbBL7" GridPane.columnIndex="1" GridPane.rowIndex="2" />
    
        <Label text="Database address: " GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
    
-       <TextField fx:id="ipAddress" text="192.168.1.4" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+       <TextField fx:id="ipAddress" text="localhost" GridPane.columnIndex="1" GridPane.rowIndex="3" />
    
        <Text GridPane.columnIndex="1" GridPane.rowIndex="6" />
-      <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="178.0" text="Login" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+      <Button fx:id="btn_login" mnemonicParsing="false" onAction="#signIn" prefHeight="25.0" prefWidth="178.0" text="Login" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
    </children>
 
     <padding><Insets bottom="10" left="25" right="25" top="25" /></padding>

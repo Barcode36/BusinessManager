@@ -1,6 +1,7 @@
 package controllers;
 
 import classes.MngApi;
+import classes.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,14 +18,14 @@ public class LoginController {
     @FXML
     private PasswordField uPasswd;
     @FXML
-    private Button btn;    
+    private Button btn_login;    
 
     //signs in user into database and displays application's main window with loaded "Orders" table
     public void signIn(ActionEvent event) {
-        MngApi.closeWindow(btn); //closes parent window of specified node
+        MngApi.closeWindow(btn_login); //closes parent window of specified node
 
         try{            
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));            
             Parent root1 = fxmlLoader.load();
             MainController ctrl = fxmlLoader.getController();
             Stage stage = new Stage();
@@ -35,12 +36,15 @@ public class LoginController {
             stage.setScene(new Scene(root1));
             stage.setMaximized(true);
             
+            //creating user
+            User user = new User(uName.getText(), uPasswd.getText(), ipAddress.getText(), uName.getText());
+            
             //passing credentials to main controller
-            ctrl.setCredentials(uName.getText(), uPasswd.getText(), ipAddress.getText(), uName.getText());            
+            ctrl.setUser(user);            
             stage.show();            
             
             //when we first open up main windows, we need to load all orders - that's default view
-            ctrl.displayOrdersTable();
+            ctrl.refreshOrdersTable(user);
         }catch (IOException e){
 
         }

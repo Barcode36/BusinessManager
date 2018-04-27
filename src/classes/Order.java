@@ -128,14 +128,14 @@ public class Order {
         this.order_weighht = order_weighht;
     }
     
-    public List<Order> getOrders(User user){
-        
-        //Create query
-        String query = "SELECT Orders.OrderID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID";
+    public static List<Order> getOrders(User user){
         
         //Create list
         List<Order> orderList = new ArrayList<>();
         
+        //Create query
+        String query = "SELECT Orders.OrderID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID";
+                
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
         String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
@@ -177,11 +177,16 @@ public class Order {
                 
                 id = new SimpleIntegerProperty(rs.getInt("OrderID"));
                 
-                totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(order_id, user));
-                totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(order_id, user));
+                totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(id, user));
+                totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
                 
-                totalCosts = new SimpleDoubleProperty(getTotalCosts(order_id, user));                        
+                totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
+                totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
+                totalWeighht = new SimpleDoubleProperty(getTotalWeight(id, user));
                 
+                Order order = new Order(customer, status, comment, dateCreated, dueDate, id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeighht);
+                
+                orderList.add(order);
             }
 
             rs.close();
@@ -209,7 +214,7 @@ public class Order {
         return orderList;
     } 
 
-    private int getTotalOrderQuantity(SimpleIntegerProperty order_id, User user) {
+    private static int getTotalOrderQuantity(SimpleIntegerProperty order_id, User user) {
         int itemQuantity = 1;
         
         //Create query
@@ -273,7 +278,7 @@ public class Order {
         return itemQuantity;
     }
     
-    private int getTotalBuildTime(SimpleIntegerProperty order_id, User user) {
+    private static int getTotalBuildTime(SimpleIntegerProperty order_id, User user) {
         int itemBuildTime = 1;
         
         //Create query
@@ -337,7 +342,7 @@ public class Order {
         return itemBuildTime;
     }
     
-    private double getTotalCosts(SimpleIntegerProperty order_id, User user) {
+    private static double getTotalCosts(SimpleIntegerProperty order_id, User user) {
         double itemCosts = 0;
         
         //Create query
@@ -400,5 +405,133 @@ public class Order {
             }
         }//end finally
         return itemCosts;
+    }
+    
+    private static double getTotalPrice(SimpleIntegerProperty order_id, User user) {
+        double totalprice = 0;
+        
+        //Create query
+        String query = "SELECT SUM(ItemPrice) FROM OrderItems WHERE OrderID=" + order_id.get();
+        
+        //Create list
+        List<Order> orderList = new ArrayList<>();
+        
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                totalprice = rs.getInt("SUM(ItemPrice)");                
+            }
+
+            rs.close();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }//end finally
+        return totalprice;
+    }
+    
+    private static double getTotalWeight(SimpleIntegerProperty order_id, User user) {
+        double totalWeight = 0;
+        
+        //Create query
+        String query = "SELECT SUM(ItemWeight) FROM OrderItems WHERE OrderID=" + order_id.get();
+        
+        //Create list
+        List<Order> orderList = new ArrayList<>();
+        
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                totalWeight = rs.getInt("SUM(ItemWeight)");                
+            }
+
+            rs.close();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }//end finally
+        return totalWeight;
     }
 }
