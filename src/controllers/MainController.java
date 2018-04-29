@@ -94,7 +94,7 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-    /*****************************          ORDERS TAB          *****************************/    
+    /*****************************          INITIALIZE ORDERS TAB          *****************************/    
     
         tab_orders.setOnSelectionChanged(new EventHandler<Event>() {
             @Override
@@ -111,7 +111,7 @@ public class MainController implements Initializable {
     *
     *    
     */
-    /*****************************          CUSTOMERS TAB          *****************************/
+    /*****************************          INITIALIZE CUSTOMERS TAB          *****************************/
     
     tab_customers.setOnSelectionChanged(new EventHandler<Event>() {
             @Override
@@ -126,7 +126,7 @@ public class MainController implements Initializable {
     }//end initialize    
     /*
     *
-    *
+    *                                       METHODS
     *
     *
     *    
@@ -137,7 +137,8 @@ public class MainController implements Initializable {
     }
 
     
-    /*****************************          ORDERS TAB          *****************************/      
+    /*****************************          ORDERS TAB
+     * @param user *****************************/      
     
     public void refreshOrdersTable(User user) {
         //Create list of orders
@@ -195,24 +196,9 @@ public class MainController implements Initializable {
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
         
         //set cell value factory for columns by type
-        
+        //customer_col_lastName, customer_col_firstName, customer_col_mail, customer_col_phone, customer_col_address, customer_col_city, customer_col_zipCode, customer_col_state, customer_col_company, customer_col_comment;
         //Strings
-        order_col_comment.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_comment());        
-        order_col_customer.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_customer());
-        order_col_dateCreated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dateCreated());
-        order_col_dueDate.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dueDate());
-        order_col_status.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_status());
         
-        
-        //Integers
-        order_col_orderId.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_id().asObject());
-        order_col_totalBuildTime.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_buildTime().asObject());
-        order_col_totalQuantity.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_quantity().asObject());
-        
-        //Doubles
-        order_col_totalCosts.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_costs().asObject());
-        order_col_totalPrice.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_price().asObject());
-        order_col_totalWeight.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_weighht().asObject());
         
         //centering content of columns
         order_col_comment.setStyle("-fx-alignment: CENTER;");        
