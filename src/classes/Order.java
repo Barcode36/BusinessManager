@@ -22,9 +22,9 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class Order {
     
-    SimpleStringProperty order_customer, order_status, order_comment, order_dateCreated, order_dueDate;    
-    SimpleIntegerProperty order_id, order_quantity, order_buildTime;
-    SimpleDoubleProperty order_costs, order_price, order_weighht;
+    private SimpleStringProperty order_customer, order_status, order_comment, order_dateCreated, order_dueDate;    
+    private SimpleIntegerProperty order_id, order_quantity, order_buildTime;
+    private SimpleDoubleProperty order_costs, order_price, order_weighht;
 
     public Order(SimpleStringProperty order_customer, SimpleStringProperty order_status, SimpleStringProperty order_comment, SimpleStringProperty order_dateCreated, SimpleStringProperty order_dueDate, SimpleIntegerProperty order_id, SimpleIntegerProperty order_quantity, SimpleIntegerProperty order_buildTime, SimpleDoubleProperty order_costs, SimpleDoubleProperty order_price, SimpleDoubleProperty order_weighht) {
         this.order_customer = order_customer;

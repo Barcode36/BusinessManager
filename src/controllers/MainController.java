@@ -5,6 +5,7 @@
  */
 package controllers;
 
+import classes.Customer;
 import classes.Order;
 import classes.User;
 import java.net.URL;
@@ -14,8 +15,12 @@ import java.util.ResourceBundle;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
@@ -26,33 +31,114 @@ import javafx.util.Callback;
  * @author Erik PC
  */
 public class MainController implements Initializable {
-    //login credentials which are set in loginController through setUser method
+    
+    
+    /*****************************          GENERAL          *****************************/      
+        
     private User user = null;    
     
-    
-    //order table columns
     @FXML
-    private TableColumn<Order, String> col_customer, col_status, col_comment, col_dateCreated, col_dueDate;
+    private TabPane tp_main;       
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */    
+    /*****************************          ORDERS TAB          *****************************/      
     
     @FXML
-    private TableColumn<Order, Integer> col_orderId, col_totalQuantity, col_totalBuildTime;
+    private Tab tab_orders;
     
     @FXML
-    private TableColumn<Order, Double> col_totalCosts, col_totalPrice, col_totalWeight; 
+    private TableView<Order> tv_orders;
     
     @FXML
-    private TableView<Order> tw_orders;
+    private TableColumn<Order, String> order_col_customer, order_col_status, order_col_comment, order_col_dateCreated, order_col_dueDate;
+    
+    @FXML
+    private TableColumn<Order, Integer> order_col_orderId, order_col_totalQuantity, order_col_totalBuildTime;
+    
+    @FXML
+    private TableColumn<Order, Double> order_col_totalCosts, order_col_totalPrice, order_col_totalWeight;     
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    /*****************************          CUSTOMERS TAB          *****************************/
+    
+    @FXML
+    private Tab tab_customers;
+    
+    @FXML
+    private TableView<Customer> tv_customers;
+    
+    @FXML
+    private TableColumn<Customer, String> customer_col_lastName, customer_col_firstName, customer_col_mail, customer_col_phone, customer_col_address, customer_col_city, customer_col_zipCode, customer_col_state, customer_col_company, customer_col_comment;
+    
+    @FXML 
+    private TableColumn<Customer, Integer> customer_col_customerId;
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
-    
         
+    /*****************************          ORDERS TAB          *****************************/    
+    
+        tab_orders.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event t) {
+                if (tab_orders.isSelected()) {
+                    refreshOrdersTable(user);
+                }
+            }
+        });    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    /*****************************          CUSTOMERS TAB          *****************************/
+    
+    tab_customers.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event t) {
+                if (tab_customers.isSelected()) {
+                    refreshCustomersTable(user);
+                }
+            }
+        });
+    
+    
+    }//end initialize    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    /*****************************          GENERAL          *****************************/          
     public void setUser(User user){
         this.user = user;        
     }
 
+    
+    /*****************************          ORDERS TAB          *****************************/      
+    
     public void refreshOrdersTable(User user) {
         //Create list of orders
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
@@ -60,41 +146,97 @@ public class MainController implements Initializable {
         //set cell value factory for columns by type
         
         //Strings
-        col_comment.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_comment());        
-        col_customer.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_customer());
-        col_dateCreated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dateCreated());
-        col_dueDate.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dueDate());
-        col_status.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_status());
+        order_col_comment.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_comment());        
+        order_col_customer.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_customer());
+        order_col_dateCreated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dateCreated());
+        order_col_dueDate.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dueDate());
+        order_col_status.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_status());
         
         
         //Integers
-        col_orderId.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_id().asObject());
-        col_totalBuildTime.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_buildTime().asObject());
-        col_totalQuantity.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_quantity().asObject());
+        order_col_orderId.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_id().asObject());
+        order_col_totalBuildTime.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_buildTime().asObject());
+        order_col_totalQuantity.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_quantity().asObject());
         
         //Doubles
-        col_totalCosts.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_costs().asObject());
-        col_totalPrice.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_price().asObject());
-        col_totalWeight.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_weighht().asObject());
+        order_col_totalCosts.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_costs().asObject());
+        order_col_totalPrice.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_price().asObject());
+        order_col_totalWeight.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_weighht().asObject());
         
         //centering content of columns
-        col_comment.setStyle("-fx-alignment: CENTER;");        
-        col_customer.setStyle("-fx-alignment: CENTER;");
-        col_dateCreated.setStyle("-fx-alignment: CENTER;");
-        col_dueDate.setStyle("-fx-alignment: CENTER;");
-        col_status.setStyle("-fx-alignment: CENTER;");
+        order_col_comment.setStyle("-fx-alignment: CENTER;");        
+        order_col_customer.setStyle("-fx-alignment: CENTER;");
+        order_col_dateCreated.setStyle("-fx-alignment: CENTER;");
+        order_col_dueDate.setStyle("-fx-alignment: CENTER;");
+        order_col_status.setStyle("-fx-alignment: CENTER;");
         
-        col_orderId.setStyle("-fx-alignment: CENTER;");
-        col_totalBuildTime.setStyle("-fx-alignment: CENTER;");
-        col_totalQuantity.setStyle("-fx-alignment: CENTER;");
+        order_col_orderId.setStyle("-fx-alignment: CENTER;");
+        order_col_totalBuildTime.setStyle("-fx-alignment: CENTER;");
+        order_col_totalQuantity.setStyle("-fx-alignment: CENTER;");
         
-        col_totalCosts.setStyle("-fx-alignment: CENTER;");
-        col_totalPrice.setStyle("-fx-alignment: CENTER;");
-        col_totalWeight.setStyle("-fx-alignment: CENTER;");
+        order_col_totalCosts.setStyle("-fx-alignment: CENTER;");
+        order_col_totalPrice.setStyle("-fx-alignment: CENTER;");
+        order_col_totalWeight.setStyle("-fx-alignment: CENTER;");
         
         //set list to display in table
-        tw_orders.setItems(orderList);
+        tv_orders.setItems(orderList);
     }
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    /*****************************          CUSTOMERS TAB          *****************************/
     
-    
+    public void refreshCustomersTable(User user) {
+        //Create list of orders
+        ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
+        
+        //set cell value factory for columns by type
+        
+        //Strings
+        order_col_comment.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_comment());        
+        order_col_customer.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_customer());
+        order_col_dateCreated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dateCreated());
+        order_col_dueDate.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dueDate());
+        order_col_status.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_status());
+        
+        
+        //Integers
+        order_col_orderId.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_id().asObject());
+        order_col_totalBuildTime.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_buildTime().asObject());
+        order_col_totalQuantity.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_quantity().asObject());
+        
+        //Doubles
+        order_col_totalCosts.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_costs().asObject());
+        order_col_totalPrice.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_price().asObject());
+        order_col_totalWeight.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_weighht().asObject());
+        
+        //centering content of columns
+        order_col_comment.setStyle("-fx-alignment: CENTER;");        
+        order_col_customer.setStyle("-fx-alignment: CENTER;");
+        order_col_dateCreated.setStyle("-fx-alignment: CENTER;");
+        order_col_dueDate.setStyle("-fx-alignment: CENTER;");
+        order_col_status.setStyle("-fx-alignment: CENTER;");
+        
+        order_col_orderId.setStyle("-fx-alignment: CENTER;");
+        order_col_totalBuildTime.setStyle("-fx-alignment: CENTER;");
+        order_col_totalQuantity.setStyle("-fx-alignment: CENTER;");
+        
+        order_col_totalCosts.setStyle("-fx-alignment: CENTER;");
+        order_col_totalPrice.setStyle("-fx-alignment: CENTER;");
+        order_col_totalWeight.setStyle("-fx-alignment: CENTER;");
+        
+        //set list to display in table
+        tv_orders.setItems(orderList);
+    }
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
 }

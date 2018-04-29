@@ -62,7 +62,7 @@
    <center>
       <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
-          <Tab fx:id="tabOrders" closable="false" text="Orders">
+          <Tab fx:id="tab_orders" closable="false" text="Orders">
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <top>
@@ -349,7 +349,7 @@
                   </BorderPane>
                </content>
           </Tab>
-            <Tab fx:id="tabCustomers" closable="false" text="Customers">
+            <Tab fx:id="tab_customers" closable="false" text="Customers">
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <right>
