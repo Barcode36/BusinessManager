@@ -78,10 +78,13 @@ public class MainController implements Initializable {
     private TableView<Customer> tv_customers;
     
     @FXML
-    private TableColumn<Customer, String> customer_col_lastName, customer_col_firstName, customer_col_mail, customer_col_phone, customer_col_address, customer_col_city, customer_col_zipCode, customer_col_state, customer_col_company, customer_col_comment;
+    private TableColumn<Customer, String> customer_col_lastName, customer_col_firstName, customer_col_dateCreated, customer_col_mail, customer_col_phone, customer_col_address, customer_col_city, customer_col_zipCode, customer_col_country, customer_col_company, customer_col_comment;
     
     @FXML 
-    private TableColumn<Customer, Integer> customer_col_customerId;
+    private TableColumn<Customer, Integer> customer_col_id, customer_col_orderCount;
+    
+    @FXML
+    private TableColumn<Customer, Double> customer_col_ordersPrice;
     
     /*
     *
@@ -90,6 +93,22 @@ public class MainController implements Initializable {
     *
     *    
     */    
+    /*****************************          OBJECTS TAB          *****************************/
+    @FXML
+    private Tab tab_objects;
+    
+    @FXML
+    private TableView<Object> tv_objects;
+    
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -193,30 +212,51 @@ public class MainController implements Initializable {
     
     public void refreshCustomersTable(User user) {
         //Create list of orders
-        ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
+        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(user));
         
         //set cell value factory for columns by type
-        //customer_col_lastName, customer_col_firstName, customer_col_mail, customer_col_phone, customer_col_address, customer_col_city, customer_col_zipCode, customer_col_state, customer_col_company, customer_col_comment;
+        // customer_col_company, customer_col_comment;
         //Strings
+        customer_col_lastName.setCellValueFactory((param) -> {return param.getValue().getCustomer_lastName();});
+        customer_col_firstName.setCellValueFactory((param) -> {return param.getValue().getCustomer_firstName();});
+        customer_col_dateCreated.setCellValueFactory((param) -> {return param.getValue().getCustomer_dateCreated();});
+        customer_col_mail.setCellValueFactory((param) -> {return param.getValue().getCustomer_mail();});
+        customer_col_phone.setCellValueFactory((param) -> {return param.getValue().getCustomer_phone();});
+        customer_col_address.setCellValueFactory((param) -> {return param.getValue().getCustomer_address();});        
+        customer_col_city.setCellValueFactory((param) -> {return param.getValue().getCustomer_city();});
+        customer_col_zipCode.setCellValueFactory((param) -> {return param.getValue().getCustomer_zipCode();});
+        customer_col_country.setCellValueFactory((param) -> {return param.getValue().getCustomer_country();});
+        customer_col_company.setCellValueFactory((param) -> {return param.getValue().getCustomer_company();});
+        customer_col_comment.setCellValueFactory((param) -> {return param.getValue().getCustomer_comment();});
         
+        //Integers
+        customer_col_id.setCellValueFactory((param) -> {return param.getValue().getCustomer_id().asObject();});
+        customer_col_orderCount.setCellValueFactory((param) -> {return param.getValue().getCustomer_orderCount().asObject();});
+        
+        //Doubles
+        customer_col_ordersPrice.setCellValueFactory((param) -> {return param.getValue().getCustomer_ordersPrice().asObject();});
         
         //centering content of columns
-        order_col_comment.setStyle("-fx-alignment: CENTER;");        
-        order_col_customer.setStyle("-fx-alignment: CENTER;");
-        order_col_dateCreated.setStyle("-fx-alignment: CENTER;");
-        order_col_dueDate.setStyle("-fx-alignment: CENTER;");
-        order_col_status.setStyle("-fx-alignment: CENTER;");
+        customer_col_lastName.setStyle("-fx-alignment: CENTER;");        
+        customer_col_firstName.setStyle("-fx-alignment: CENTER;");
+        customer_col_dateCreated.setStyle("-fx-alignment: CENTER;");
+        customer_col_mail.setStyle("-fx-alignment: CENTER;");
+        customer_col_phone.setStyle("-fx-alignment: CENTER;");
+        customer_col_address.setStyle("-fx-alignment: CENTER;");        
+        customer_col_city.setStyle("-fx-alignment: CENTER;");        
+        customer_col_zipCode.setStyle("-fx-alignment: CENTER;");
+        customer_col_country.setStyle("-fx-alignment: CENTER;");
+        customer_col_company.setStyle("-fx-alignment: CENTER;");
+        customer_col_comment.setStyle("-fx-alignment: CENTER;");
         
-        order_col_orderId.setStyle("-fx-alignment: CENTER;");
-        order_col_totalBuildTime.setStyle("-fx-alignment: CENTER;");
-        order_col_totalQuantity.setStyle("-fx-alignment: CENTER;");
+        customer_col_id.setStyle("-fx-alignment: CENTER;");
+        customer_col_orderCount.setStyle("-fx-alignment: CENTER;");
         
-        order_col_totalCosts.setStyle("-fx-alignment: CENTER;");
-        order_col_totalPrice.setStyle("-fx-alignment: CENTER;");
-        order_col_totalWeight.setStyle("-fx-alignment: CENTER;");
+        customer_col_ordersPrice.setStyle("-fx-alignment: CENTER;");
+        
         
         //set list to display in table
-        tv_orders.setItems(orderList);
+        tv_customers.setItems(customerList);
     }
     /*
     *
