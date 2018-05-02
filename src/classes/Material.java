@@ -54,6 +54,7 @@ public class Material {
         return materialTypeProperty;
     }
 
+    
     public void setMaterialTypeProperty(SimpleStringProperty materialTypeProperty) {
         this.materialTypeProperty = materialTypeProperty;
     }
