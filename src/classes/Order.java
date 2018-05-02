@@ -22,16 +22,17 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class Order {
     
-    private SimpleStringProperty order_customer, order_status, order_comment, order_dateCreated, order_dueDate;    
+    private SimpleStringProperty order_customer, order_status, order_comment, order_dateCreated, order_dueDate, order_buildTime_formated;    
     private SimpleIntegerProperty order_id, order_quantity, order_buildTime;
     private SimpleDoubleProperty order_costs, order_price, order_weighht;
 
-    public Order(SimpleStringProperty order_customer, SimpleStringProperty order_status, SimpleStringProperty order_comment, SimpleStringProperty order_dateCreated, SimpleStringProperty order_dueDate, SimpleIntegerProperty order_id, SimpleIntegerProperty order_quantity, SimpleIntegerProperty order_buildTime, SimpleDoubleProperty order_costs, SimpleDoubleProperty order_price, SimpleDoubleProperty order_weighht) {
+    public Order(SimpleStringProperty order_customer, SimpleStringProperty order_status, SimpleStringProperty order_comment, SimpleStringProperty order_dateCreated, SimpleStringProperty order_dueDate, SimpleStringProperty order_buildTime_formated, SimpleIntegerProperty order_id, SimpleIntegerProperty order_quantity, SimpleIntegerProperty order_buildTime, SimpleDoubleProperty order_costs, SimpleDoubleProperty order_price, SimpleDoubleProperty order_weighht) {
         this.order_customer = order_customer;
         this.order_status = order_status;
         this.order_comment = order_comment;
         this.order_dateCreated = order_dateCreated;
         this.order_dueDate = order_dueDate;
+        this.order_buildTime_formated = order_buildTime_formated;
         this.order_id = order_id;
         this.order_quantity = order_quantity;
         this.order_buildTime = order_buildTime;
@@ -78,6 +79,14 @@ public class Order {
 
     public void setOrder_dueDate(SimpleStringProperty order_dueDate) {
         this.order_dueDate = order_dueDate;
+    }
+
+    public SimpleStringProperty getOrder_buildTime_formated() {
+        return order_buildTime_formated;
+    }
+
+    public void setOrder_buildTime_formated(SimpleStringProperty order_buildTime_formated) {
+        this.order_buildTime_formated = order_buildTime_formated;
     }
 
     public SimpleIntegerProperty getOrder_id() {
@@ -127,6 +136,8 @@ public class Order {
     public void setOrder_weighht(SimpleDoubleProperty order_weighht) {
         this.order_weighht = order_weighht;
     }
+
+    
     
     public static List<Order> getOrders(User user){
         
@@ -165,7 +176,7 @@ public class Order {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                SimpleStringProperty customer, status, comment, dateCreated, dueDate;    
+                SimpleStringProperty customer, status, comment, dateCreated, dueDate, buildTime_formated;    
                 SimpleIntegerProperty id, totalQuantity, totalBuildTime;
                 SimpleDoubleProperty totalCosts, totalPrice, totalWeighht;
                 
@@ -179,12 +190,13 @@ public class Order {
                 
                 totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(id, user));
                 totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
+                    buildTime_formated = MngApi.convertToHours(totalBuildTime.get());
                 
                 totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
                 totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
                 totalWeighht = new SimpleDoubleProperty(getTotalWeight(id, user));
                 
-                Order order = new Order(customer, status, comment, dateCreated, dueDate, id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeighht);
+                Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeighht);
                 
                 orderList.add(order);
             }

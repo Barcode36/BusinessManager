@@ -14,6 +14,7 @@ import javafx.scene.Parent;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.stage.Modality;
 
 /**
@@ -76,6 +77,18 @@ public class MngApi {
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+    
+    //converting minutes into minutes and hours
+    public static SimpleStringProperty convertToHours (int time){
+        SimpleStringProperty newTime;
+        
+        int hours = time / 60; //since both are ints, you get an int
+        int minutes = time % 60;
+        
+        newTime = new SimpleStringProperty(String.format("%dh %02dm", hours, minutes));
+        
+        return newTime;
     }
 }
 
