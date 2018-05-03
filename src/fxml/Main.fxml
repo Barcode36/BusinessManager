@@ -330,19 +330,19 @@
                         </VBox>
                      </right>
                      <center>
-                        <TableView fx:id="tw_orders" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <TableView fx:id="tv_orders" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                           <columns>
-                            <TableColumn fx:id="col_orderId" prefWidth="100.0" text="Order ID" />
-                            <TableColumn fx:id="col_customer" prefWidth="150.0" text="Customer" />
-                              <TableColumn fx:id="col_totalQuantity" prefWidth="100.0" text="Quantity" />
-                              <TableColumn fx:id="col_totalPrice" prefWidth="100.0" text="Price" />
-                              <TableColumn fx:id="col_totalCosts" prefWidth="100.0" text="Costs" />
-                              <TableColumn fx:id="col_totalWeight" prefWidth="100.0" text="Weight" />
-                              <TableColumn fx:id="col_totalBuildTime" prefWidth="100.0" text="Build Time" />
-                              <TableColumn fx:id="col_dueDate" prefWidth="100.0" text="Due Date" />
-                              <TableColumn fx:id="col_dateCreated" prefWidth="100.0" text="Date Created" />
-                              <TableColumn fx:id="col_status" minWidth="0.0" prefWidth="100.0" text="Status" />
-                              <TableColumn fx:id="col_comment" prefWidth="200.0" text="Comment" />
+                            <TableColumn fx:id="order_col_orderId" prefWidth="100.0" text="Order ID" />
+                            <TableColumn fx:id="order_col_customer" prefWidth="150.0" text="Customer" />
+                              <TableColumn fx:id="order_col_totalQuantity" prefWidth="100.0" text="Quantity" />
+                              <TableColumn fx:id="order_col_totalPrice" prefWidth="100.0" text="Price" />
+                              <TableColumn fx:id="order_col_totalCosts" prefWidth="100.0" text="Costs" />
+                              <TableColumn fx:id="order_col_totalWeight" prefWidth="100.0" text="Weight" />
+                              <TableColumn fx:id="order_col_totalBuildTime_formated" prefWidth="100.0" text="Build Time" />
+                              <TableColumn fx:id="order_col_dueDate" prefWidth="100.0" text="Due Date" />
+                              <TableColumn fx:id="order_col_dateCreated" prefWidth="100.0" text="Date Created" />
+                              <TableColumn fx:id="order_col_status" minWidth="0.0" prefWidth="100.0" text="Status" />
+                              <TableColumn fx:id="order_col_comment" prefWidth="200.0" text="Comment" />
                           </columns>
                         </TableView>
                      </center>
@@ -382,38 +382,42 @@
                         </HBox>
                      </top>
                      <center>
-                        <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <TableView fx:id="tv_customers" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                           <columns>
-                            <TableColumn prefWidth="100.0" text="Customer ID" />
-                            <TableColumn prefWidth="100.0" text="Last Name" />
-                              <TableColumn prefWidth="100.0" text="First Name" />
-                              <TableColumn prefWidth="125.0" text="Mail" />
-                              <TableColumn prefWidth="100.0" text="Phone" />
-                              <TableColumn prefWidth="135.0" text="Address" />
-                              <TableColumn prefWidth="110.0" text="City" />
-                              <TableColumn prefWidth="100.0" text="ZIP Code" />
-                              <TableColumn prefWidth="100.0" text="State" />
-                              <TableColumn prefWidth="125.0" text="Company" />
-                              <TableColumn prefWidth="100.0" text="Date Created" />
-                              <TableColumn prefWidth="150.0" text="Comment" />
+                            <TableColumn fx:id="customer_col_id" prefWidth="100.0" text="Customer ID" />
+                            <TableColumn fx:id="customer_col_lastName" prefWidth="100.0" text="Last Name" />
+                              <TableColumn fx:id="customer_col_firstName" prefWidth="100.0" text="First Name" />
+                              <TableColumn fx:id="customer_col_orderCount" prefWidth="100.0" text="Order Count" />
+                              <TableColumn fx:id="customer_col_ordersPrice" prefWidth="100.0" text="Orders Price" />
+                              <TableColumn fx:id="customer_col_mail" prefWidth="125.0" text="Mail" />
+                              <TableColumn fx:id="customer_col_phone" prefWidth="100.0" text="Phone" />
+                              <TableColumn fx:id="customer_col_address" prefWidth="135.0" text="Address" />
+                              <TableColumn fx:id="customer_col_city" prefWidth="110.0" text="City" />
+                              <TableColumn fx:id="customer_col_zipCode" prefWidth="100.0" text="ZIP Code" />
+                              <TableColumn fx:id="customer_col_country" prefWidth="100.0" text="Country" />
+                              <TableColumn fx:id="customer_col_company" prefWidth="125.0" text="Company" />
+                              <TableColumn fx:id="customer_col_dateCreated" prefWidth="100.0" text="Date Created" />
+                              <TableColumn fx:id="customer_col_comment" prefWidth="150.0" text="Comment" />
                           </columns>
                         </TableView>
                      </center>
                   </BorderPane>
                </content>
             </Tab>
-            <Tab fx:id="tabCustomers1" closable="false" text="Objects">
+            <Tab fx:id="tab_objects" closable="false" text="Objects">
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <center>
-                        <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <TableView fx:id="tv_objects" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <columns>
-                              <TableColumn prefWidth="100.0" text="Object ID" />
-                              <TableColumn prefWidth="100.0" text="Object Name" />
-                              <TableColumn prefWidth="100.0" text="Object Weight" />
-                              <TableColumn prefWidth="125.0" text="Support Weight" />
-                              <TableColumn prefWidth="100.0" text="Project ID" />
-                              <TableColumn prefWidth="135.0" text="Build Time" />
+                              <TableColumn fx:id="object_col_id" prefWidth="100.0" text="Object ID" />
+                              <TableColumn fx:id="object_col_name" prefWidth="130.0" text="Object Name" />
+                              <TableColumn fx:id="object_col_soldCount" prefWidth="75.0" text="Sold" />
+                              <TableColumn fx:id="object_col_weight" prefWidth="100.0" text="Object Weight" />
+                              <TableColumn fx:id="object_col_supportWeight" prefWidth="125.0" text="Support Weight" />
+                              <TableColumn fx:id="object_col_buildTime_formated" prefWidth="100.0" text="Build Time" />
+                              <TableColumn fx:id="object_col_projectId" prefWidth="100.0" text="Project ID" />
+                              <TableColumn fx:id="object_col_stlLink" prefWidth="200.0" text="Stl Link" />
                            </columns>
                         </TableView>
                      </center>

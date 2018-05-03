@@ -22,7 +22,7 @@
    
        <Label text="Database address: " GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
    
-       <TextField fx:id="ipAddress" text="localhost" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+       <TextField fx:id="ipAddress" text="database" GridPane.columnIndex="1" GridPane.rowIndex="3" />
    
        <Text GridPane.columnIndex="1" GridPane.rowIndex="6" />
       <Button fx:id="btn_login" mnemonicParsing="false" onAction="#signIn" prefHeight="25.0" prefWidth="178.0" text="Login" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
