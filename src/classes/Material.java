@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -22,142 +22,157 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class Material {
     
-    SimpleStringProperty materialManufacturerProperty,  materialTypeProperty,  materialColorProperty, materialPurchaseDateProperty,  materialSellerProperty, materialFinishedProperty, materialMaterialSpentProperty;        
-    SimpleIntegerProperty materialIDProperty;     
-    SimpleFloatProperty materialWeightProperty, materialPriceProperty, materialShippingProperty, materialTrashProperty, materialSpentProperty;
+    SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate;
+    SimpleIntegerProperty material_id;
+    SimpleDoubleProperty material_weight, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
 
-    public Material(SimpleStringProperty materialManufacturerProperty, SimpleStringProperty materialTypeProperty, SimpleStringProperty materialColorProperty, SimpleStringProperty materialPurchaseDateProperty, SimpleStringProperty materialSellerProperty, SimpleStringProperty materialFinishedProperty, SimpleIntegerProperty materialIDProperty, SimpleFloatProperty materialWeightProperty, SimpleFloatProperty materialPriceProperty, SimpleFloatProperty materialShippingProperty, SimpleStringProperty materialMaterialSpentProperty, SimpleFloatProperty materialTrashProperty, SimpleFloatProperty materialSpentProperty) {
-        this.materialManufacturerProperty = materialManufacturerProperty;
-        this.materialTypeProperty = materialTypeProperty;
-        this.materialColorProperty = materialColorProperty;
-        this.materialPurchaseDateProperty = materialPurchaseDateProperty;
-        this.materialSellerProperty = materialSellerProperty;
-        this.materialFinishedProperty = materialFinishedProperty;
-        this.materialIDProperty = materialIDProperty;
-        this.materialWeightProperty = materialWeightProperty;
-        this.materialPriceProperty = materialPriceProperty;
-        this.materialShippingProperty = materialShippingProperty;
-        this.materialMaterialSpentProperty = materialMaterialSpentProperty;
-        this.materialTrashProperty = materialTrashProperty;
-        this.materialSpentProperty = materialSpentProperty;
+    public Material(SimpleStringProperty material_color, SimpleStringProperty material_manufacturer, SimpleStringProperty material_type, SimpleStringProperty material_finished, SimpleStringProperty material_distributor, SimpleStringProperty material_purchaseDate, SimpleIntegerProperty material_id, SimpleDoubleProperty material_weight, SimpleDoubleProperty material_price, SimpleDoubleProperty material_shipping, SimpleDoubleProperty material_used, SimpleDoubleProperty material_trash, SimpleDoubleProperty material_soldFor, SimpleDoubleProperty material_profit) {
+        this.material_color = material_color;
+        this.material_manufacturer = material_manufacturer;
+        this.material_type = material_type;
+        this.material_finished = material_finished;
+        this.material_distributor = material_distributor;
+        this.material_purchaseDate = material_purchaseDate;
+        this.material_id = material_id;
+        this.material_weight = material_weight;
+        this.material_price = material_price;
+        this.material_shipping = material_shipping;
+        this.material_used = material_used;
+        this.material_trash = material_trash;
+        this.material_soldFor = material_soldFor;
+        this.material_profit = material_profit;
     }
 
-    public SimpleStringProperty getMaterialManufacturerProperty() {
-        return materialManufacturerProperty;
+    public SimpleStringProperty getMaterial_color() {
+        return material_color;
     }
 
-    public void setMaterialManufacturerProperty(SimpleStringProperty materialManufacturerProperty) {
-        this.materialManufacturerProperty = materialManufacturerProperty;
+    public void setMaterial_color(SimpleStringProperty material_color) {
+        this.material_color = material_color;
     }
 
-    public SimpleStringProperty getMaterialTypeProperty() {
-        return materialTypeProperty;
+    public SimpleStringProperty getMaterial_manufacturer() {
+        return material_manufacturer;
     }
 
-    public void setMaterialTypeProperty(SimpleStringProperty materialTypeProperty) {
-        this.materialTypeProperty = materialTypeProperty;
+    public void setMaterial_manufacturer(SimpleStringProperty material_manufacturer) {
+        this.material_manufacturer = material_manufacturer;
     }
 
-    public SimpleStringProperty getMaterialColorProperty() {
-        return materialColorProperty;
+    public SimpleStringProperty getMaterial_type() {
+        return material_type;
     }
 
-    public void setMaterialColorProperty(SimpleStringProperty materialColorProperty) {
-        this.materialColorProperty = materialColorProperty;
+    public void setMaterial_type(SimpleStringProperty material_type) {
+        this.material_type = material_type;
     }
 
-    public SimpleStringProperty getMaterialPurchaseDateProperty() {
-        return materialPurchaseDateProperty;
+    public SimpleStringProperty getMaterial_finished() {
+        return material_finished;
     }
 
-    public void setMaterialPurchaseDateProperty(SimpleStringProperty materialPurchaseDateProperty) {
-        this.materialPurchaseDateProperty = materialPurchaseDateProperty;
+    public void setMaterial_finished(SimpleStringProperty material_finished) {
+        this.material_finished = material_finished;
     }
 
-    public SimpleStringProperty getMaterialSellerProperty() {
-        return materialSellerProperty;
+    public SimpleStringProperty getMaterial_distributor() {
+        return material_distributor;
     }
 
-    public void setMaterialSellerProperty(SimpleStringProperty materialSellerProperty) {
-        this.materialSellerProperty = materialSellerProperty;
+    public void setMaterial_distributor(SimpleStringProperty material_distributor) {
+        this.material_distributor = material_distributor;
     }
 
-    public SimpleStringProperty getMaterialFinishedProperty() {
-        return materialFinishedProperty;
+    public SimpleStringProperty getMaterial_purchaseDate() {
+        return material_purchaseDate;
     }
 
-    public void setMaterialFinishedProperty(SimpleStringProperty materialFinishedProperty) {
-        this.materialFinishedProperty = materialFinishedProperty;
+    public void setMaterial_purchaseDate(SimpleStringProperty material_purchaseDate) {
+        this.material_purchaseDate = material_purchaseDate;
     }
 
-    public SimpleIntegerProperty getMaterialIDProperty() {
-        return materialIDProperty;
+    public SimpleIntegerProperty getMaterial_id() {
+        return material_id;
     }
 
-    public void setMaterialIDProperty(SimpleIntegerProperty materialIDProperty) {
-        this.materialIDProperty = materialIDProperty;
+    public void setMaterial_id(SimpleIntegerProperty material_id) {
+        this.material_id = material_id;
     }
 
-    public SimpleFloatProperty getMaterialWeightProperty() {
-        return materialWeightProperty;
+    public SimpleDoubleProperty getMaterial_weight() {
+        return material_weight;
     }
 
-    public SimpleFloatProperty getMaterialSpentProperty() {
-        return materialSpentProperty;
-    }    
-
-    public void setMaterialWeightProperty(SimpleFloatProperty materialWeightProperty) {
-        this.materialWeightProperty = materialWeightProperty;
+    public void setMaterial_weight(SimpleDoubleProperty material_weight) {
+        this.material_weight = material_weight;
     }
 
-    public SimpleFloatProperty getMaterialPriceProperty() {
-        return materialPriceProperty;
+    public SimpleDoubleProperty getMaterial_price() {
+        return material_price;
     }
 
-    public void setMaterialPriceProperty(SimpleFloatProperty materialPriceProperty) {
-        this.materialPriceProperty = materialPriceProperty;
+    public void setMaterial_price(SimpleDoubleProperty material_price) {
+        this.material_price = material_price;
     }
 
-    public SimpleFloatProperty getMaterialShippingProperty() {
-        return materialShippingProperty;
+    public SimpleDoubleProperty getMaterial_shipping() {
+        return material_shipping;
     }
 
-    public void setMaterialShippingProperty(SimpleFloatProperty materialShippingProperty) {
-        this.materialShippingProperty = materialShippingProperty;
+    public void setMaterial_shipping(SimpleDoubleProperty material_shipping) {
+        this.material_shipping = material_shipping;
     }
 
-    public SimpleStringProperty getMaterialMaterialSpentProperty() {
-        return materialMaterialSpentProperty;
+    public SimpleDoubleProperty getMaterial_used() {
+        return material_used;
     }
 
-    public void setMaterialMaterialSpentProperty(SimpleStringProperty materialMaterialSpentProperty) {
-        this.materialMaterialSpentProperty = materialMaterialSpentProperty;
+    public void setMaterial_used(SimpleDoubleProperty material_used) {
+        this.material_used = material_used;
     }
 
-    public SimpleFloatProperty getMaterialTrashProperty() {
-        return materialTrashProperty;
+    public SimpleDoubleProperty getMaterial_trash() {
+        return material_trash;
     }
 
-    public void setMaterialTrashProperty(SimpleFloatProperty materialTrashProperty) {
-        this.materialTrashProperty = materialTrashProperty;
+    public void setMaterial_trash(SimpleDoubleProperty material_trash) {
+        this.material_trash = material_trash;
     }
 
-    public void setMaterialSpentProperty(SimpleFloatProperty materialSpentProperty) {
-        this.materialSpentProperty = materialSpentProperty;
-    }    
+    public SimpleDoubleProperty getMaterial_soldFor() {
+        return material_soldFor;
+    }
+
+    public void setMaterial_soldFor(SimpleDoubleProperty material_soldFor) {
+        this.material_soldFor = material_soldFor;
+    }
+
+    public SimpleDoubleProperty getMaterial_profit() {
+        return material_profit;
+    }
+
+    public void setMaterial_profit(SimpleDoubleProperty material_profit) {
+        this.material_profit = material_profit;
+    }
+
+        
     
     //this method get list of materials - ONLY materials, without statistics
-    public static List<Material> loadMaterialsList(String user, String pass, String address, String dbName, String query) {
+    public static List<Material> getmaterials(User user) {
+        
         //Create list
         List<Material> allMaterialsList = new ArrayList<>();
+        
+        //Create query
+        String query = " SELECT Materials.MaterialID, Materials.Manufacturer, MaterialTypes.MaterialType, Materials.Color, Materials.MaterialWeight, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, Materials.Seller, Materials.Finished, Materials.Trash, Materials.MaterialDiameter FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + address + "/" + dbName;
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
 
         //  Database credentials
-        String USER = user;
-        String PASS = pass;
+        String USER = user.getName();
+        String PASS = user.getPass();
 
 
         Connection conn = null;
@@ -180,36 +195,10 @@ public class Material {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                SimpleIntegerProperty materialIDProperty = new SimpleIntegerProperty(rs.getInt("MaterialID"));
-                
-                SimpleStringProperty manufacturerProperty = new SimpleStringProperty(rs.getString("Manufacturer"));
-                SimpleStringProperty materialTypeProperty = new SimpleStringProperty(rs.getString("Type"));
-                SimpleStringProperty materialColorProperty = new SimpleStringProperty(rs.getString("Color"));
-                SimpleStringProperty materialPurchaseDateProperty = new SimpleStringProperty(rs.getString("PurchaseDate"));
-                SimpleStringProperty materialSellerProperty = new SimpleStringProperty(rs.getString("Seller"));
-                SimpleStringProperty materialFinishedProperty = new SimpleStringProperty(rs.getString("Finished"));
-                
-                SimpleFloatProperty materialWeightProperty = new SimpleFloatProperty(rs.getFloat("MaterialWeight"));
-                SimpleFloatProperty materialPriceProperty = new SimpleFloatProperty(rs.getFloat("MaterialPrice"));
-                SimpleFloatProperty materialShippingProperty = new SimpleFloatProperty(rs.getFloat("MaterialShipping"));                
-                SimpleFloatProperty materialTrashProperty = new SimpleFloatProperty(rs.getFloat("Trash"));
-                
-                String orderQuery = "SELECT Orders.ObjectID, Objects.ObjectWeight, Orders.Quantity, Orders.MaterialID, Materials.MaterialWeight, Materials.MaterialPrice FROM Orders JOIN Objects ON Orders.ObjectID = Objects.ObjectID JOIN Materials ON Orders.MaterialID = Materials.MaterialID WHERE Orders.MaterialID=" + materialIDProperty.get();
-                String inStockQuery = "SELECT InStock.ObjectID, Objects.ObjectWeight, InStock.Quantity, InStock.MaterialID, Materials.MaterialWeight, Materials.MaterialPrice FROM InStock JOIN Objects ON InStock.ObjectID = Objects.ObjectID JOIN Materials ON InStock.MaterialID = Materials.MaterialID WHERE InStock.MaterialID=" + materialIDProperty.get();
-                
-                Float orderMaterialConsumption = loadMaterialConsuption(user, pass, address, dbName, orderQuery, materialIDProperty.get());
-                Float inStockMaterialConsumption = loadMaterialConsuption(user, pass, address, dbName, inStockQuery, materialIDProperty.get());
-                
-                float materialConsumption = orderMaterialConsumption + inStockMaterialConsumption;
-                
-                float materialWeight = materialWeightProperty.get()*1000;
-                float materialConsumptionPercentage = materialConsumption/materialWeight*100;
-                
-                SimpleStringProperty materialMaterialSpentProperty = new SimpleStringProperty(String.format("%.2f %%", materialConsumptionPercentage));
-                
-                Material material = new Material(manufacturerProperty, materialTypeProperty, materialColorProperty, materialPurchaseDateProperty, materialSellerProperty, materialFinishedProperty, materialIDProperty, materialWeightProperty, materialPriceProperty, materialShippingProperty, materialMaterialSpentProperty, materialTrashProperty, new SimpleFloatProperty(0));
-                
-                allMaterialsList.add(material);                
+                SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate;
+                SimpleIntegerProperty material_id;
+                SimpleDoubleProperty material_weight, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
+                               
             }
 
             rs.close();
@@ -237,94 +226,8 @@ public class Material {
     return allMaterialsList;
     }
     
-    public static Material loadMaterialID(String user, String pass, String address, String dbName, int materialID) {
-        String query = "Select * from Materials WHERE MaterialID=" + materialID;        
-        Material material = null;
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + address + "/" + dbName;
-
-        //  Database credentials
-        String USER = user;
-        String PASS = pass;
-
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                SimpleIntegerProperty materialIDProperty = new SimpleIntegerProperty(rs.getInt("MaterialID"));
-                
-                SimpleStringProperty materialManufacturerProperty = new SimpleStringProperty(rs.getString("Manufacturer"));
-                SimpleStringProperty materialTypeProperty = new SimpleStringProperty(rs.getString("Type"));
-                SimpleStringProperty materialColorProperty = new SimpleStringProperty(rs.getString("Color"));
-                SimpleStringProperty materialPurchaseDateProperty = new SimpleStringProperty(rs.getString("PurchaseDate"));
-                SimpleStringProperty materialSellerProperty = new SimpleStringProperty(rs.getString("Seller"));
-                SimpleStringProperty materialFinishedProperty = new SimpleStringProperty(rs.getString("Finished"));
-                
-                SimpleFloatProperty materialWeightProperty = new SimpleFloatProperty(rs.getFloat("MaterialWeight"));
-                SimpleFloatProperty materialPriceProperty = new SimpleFloatProperty(rs.getFloat("MaterialPrice"));
-                SimpleFloatProperty materialShippingProperty = new SimpleFloatProperty(rs.getFloat("MaterialShipping"));                
-                SimpleFloatProperty materialTrashProperty = new SimpleFloatProperty(rs.getFloat("Trash"));
-                
-                String orderQuery = "SELECT Orders.ObjectID, Objects.ObjectWeight, Orders.Quantity, Orders.MaterialID, Materials.MaterialWeight, Materials.MaterialPrice FROM Orders JOIN Objects ON Orders.ObjectID = Objects.ObjectID JOIN Materials ON Orders.MaterialID = Materials.MaterialID WHERE Orders.MaterialID=" + materialIDProperty.get();
-                String inStockQuery = "SELECT InStock.ObjectID, Objects.ObjectWeight, InStock.Quantity, InStock.MaterialID, Materials.MaterialWeight, Materials.MaterialPrice FROM InStock JOIN Objects ON InStock.ObjectID = Objects.ObjectID JOIN Materials ON InStock.MaterialID = Materials.MaterialID WHERE InStock.MaterialID=" + materialIDProperty.get();
-                
-                Float orderMaterialConsumption = loadMaterialConsuption(user, pass, address, dbName, orderQuery, materialIDProperty.get());
-                Float inStockMaterialConsumption = loadMaterialConsuption(user, pass, address, dbName, inStockQuery, materialIDProperty.get());
-                
-                float materialConsumption = orderMaterialConsumption + inStockMaterialConsumption;
-                
-                float materialWeight = materialWeightProperty.get()*1000;
-                float materialConsumptionPercentage = materialConsumption/materialWeight*100;
-
-                SimpleStringProperty materialMaterialSpentProperty = new SimpleStringProperty(String.format("%.2f %%", materialConsumptionPercentage));
-                
-                material = new Material(materialManufacturerProperty, materialTypeProperty, materialColorProperty, materialPurchaseDateProperty, materialSellerProperty, materialFinishedProperty, materialIDProperty, materialWeightProperty, materialPriceProperty, materialShippingProperty, materialMaterialSpentProperty, materialTrashProperty, new SimpleFloatProperty(0));
-            }
-
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return material;
-    }
     
+    //prerobit  
     public static Float loadMaterialConsuption(String user, String pass, String address, String dbName, String query, int materialID) {        
                 
         float totalObjectsWeight = 0;        
