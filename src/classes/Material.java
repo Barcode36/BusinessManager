@@ -158,13 +158,13 @@ public class Material {
         
     
     //this method get list of materials - ONLY materials, without statistics
-    public static List<Material> getmaterials(User user) {
+    public static List<Material> getMaterials(User user) {
         
         //Create list
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
-        String query = " SELECT Materials.MaterialID, Materials.Manufacturer, MaterialTypes.MaterialType, Materials.Color, Materials.MaterialWeight, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, Materials.Seller, Materials.Finished, Materials.Trash, Materials.MaterialDiameter FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID";
+        String query = "SELECT Materials.MaterialID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialType, Materials.Color, Materials.MaterialWeight, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, Materials.MaterialDiameter FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID ORDER BY Materials.MaterialID ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -198,7 +198,29 @@ public class Material {
                 SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate;
                 SimpleIntegerProperty material_id;
                 SimpleDoubleProperty material_weight, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
-                               
+                
+                material_color = new SimpleStringProperty(rs.getString("Color"));
+                material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
+                material_type = new SimpleStringProperty(rs.getString("MaterialType"));
+                material_finished = new SimpleStringProperty(rs.getString("Finished"));
+                material_distributor = new SimpleStringProperty(rs.getString("Seller"));
+                material_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
+                
+                material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
+                
+                material_weight = new SimpleDoubleProperty(rs.getDouble("MaterialWeight"));
+                material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
+                material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
+                
+                material_used = new SimpleDoubleProperty(getMaterialUsed(user, material_id));
+                material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
+                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
+                material_profit = new SimpleDoubleProperty(material_soldFor.get() - material_price.get());
+                
+                Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_id, material_weight, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit);
+                
+                allMaterialsList.add(material);
+                
             }
 
             rs.close();
@@ -227,72 +249,12 @@ public class Material {
     }
     
     
-    //prerobit  
-    public static Float loadMaterialConsuption(String user, String pass, String address, String dbName, String query, int materialID) {        
+      
+    public static Double getMaterialUsed(User user, SimpleIntegerProperty materialID) {        
                 
-        float totalObjectsWeight = 0;        
+        double used = 0;        
         
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + address + "/" + dbName;
-
-        //  Database credentials
-        String USER = user;
-        String PASS = pass;
-
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data            
-            while(rs.next()){                
-                float objectWeight = rs.getFloat("Quantity")*rs.getFloat("ObjectWeight");
-                totalObjectsWeight = totalObjectsWeight + objectWeight;                
-            }
-            
-            
-
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return totalObjectsWeight;
-    }
-    
-    public static Float getPricePerGram(SimpleIntegerProperty material_id, User user) {        
-                
-        float totalObjectsWeight = 0;
-        String query = "SELECT Materials.MaterialWeight, SUM(Materials.MaterialPrice + MaterialShipping) AS 'MaterialPrice' FROM Materials";
+        String query = "SELECT Materials.MaterialWeight, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemQuantity FROM OrderItems JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID WHERE MaterialID=" + materialID.get();
         
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -320,8 +282,13 @@ public class Material {
             rs = stmt.executeQuery(query);            
             //Query is executed, resultSet saved. Now we need to process the data            
             while(rs.next()){                
-                float objectWeight = rs.getFloat("Quantity")*rs.getFloat("ObjectWeight");
-                totalObjectsWeight = totalObjectsWeight + objectWeight;                
+                double itemQuantity = rs.getDouble("ItemQuantity");
+                double itemSupportWeight = rs.getDouble("ItemSupportWeight");
+                double itemWeight = rs.getDouble("ItemWeight");
+                double materialWeight = rs.getDouble("MaterialWeight");
+                
+                used = itemQuantity*(itemSupportWeight + itemWeight)/materialWeight*100;
+                        
             }
             
             
@@ -348,6 +315,70 @@ public class Material {
             }//end finally try
         }//end try
         
-    return totalObjectsWeight;
+    return used;
+    }
+    
+    public static Double getMaterialSoldFor(User user, SimpleIntegerProperty materialID) {        
+                
+        double soldFor = 0;        
+        
+        String query = "SELECT SUM(ItemPrice) AS 'SoldFor' FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
+        
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data            
+            while(rs.next()){                
+                                
+                soldFor = rs.getDouble("SoldFor");
+                        
+            }
+            
+            
+
+            rs.close();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+    return soldFor;
     }
 }

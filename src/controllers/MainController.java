@@ -6,14 +6,12 @@
 package controllers;
 
 import classes.Customer;
+import classes.Material;
 import classes.Object;
 import classes.Order;
 import classes.User;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -24,7 +22,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
 
 /**
  * FXML Controller class
@@ -117,7 +114,29 @@ public class MainController implements Initializable {
     *
     *    
     */
+    /*****************************          MATERIALS TAB          *****************************/
     
+    @FXML
+    private Tab tab_materials;
+    
+    @FXML
+    private TableView<Material> tv_materials;
+    
+    @FXML
+    private TableColumn<Material, String> material_col_color, material_col_manufacturer, material_col_type, material_col_finished, material_col_distributor, material_col_purchaseDate;
+    
+    @FXML
+    private TableColumn<Material, Integer> material_col_id;
+    
+    @FXML
+    private TableColumn<Material, Double> material_col_weight, material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit; 
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -157,6 +176,24 @@ public class MainController implements Initializable {
             public void handle(Event t) {
                 if (tab_objects.isSelected()) {
                     refreshObjectsTable(user);
+                }
+            }
+        });
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    /*****************************          INITIALIZE MATERIALS TAB          *****************************/
+    
+    tab_materials.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event t) {
+                if (tab_materials.isSelected()) {
+                    refreshMaterialsTable(user);
                 }
             }
         });
@@ -330,4 +367,59 @@ public class MainController implements Initializable {
     *
     *    
     */
+    
+    /*****************************          MATERIALS TAB          *****************************/
+    
+    public void refreshMaterialsTable(User user){
+        
+        //Create list of orders
+        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(user));
+        
+        material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
+        material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});           
+        material_col_finished.setCellValueFactory((param) -> {return param.getValue().getMaterial_finished();});
+        material_col_manufacturer.setCellValueFactory((param) -> {return param.getValue().getMaterial_manufacturer();});
+        material_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getMaterial_purchaseDate();});
+        material_col_type.setCellValueFactory((param) -> {return param.getValue().getMaterial_type();});
+        
+        material_col_id.setCellValueFactory((param) -> {return param.getValue().getMaterial_id().asObject();});        
+                
+        material_col_price.setCellValueFactory((param) -> {return param.getValue().getMaterial_price().asObject();});
+        material_col_shipping.setCellValueFactory((param) -> {return param.getValue().getMaterial_shipping().asObject();});
+        material_col_profit.setCellValueFactory((param) -> {return param.getValue().getMaterial_profit().asObject();});        
+        material_col_soldFor.setCellValueFactory((param) -> {return param.getValue().getMaterial_soldFor().asObject();});
+        material_col_trash.setCellValueFactory((param) -> {return param.getValue().getMaterial_trash().asObject();});
+        material_col_used.setCellValueFactory((param) -> {return param.getValue().getMaterial_used().asObject();});
+        material_col_weight.setCellValueFactory((param) -> {return param.getValue().getMaterial_weight().asObject();});
+        
+        //Centering content
+        material_col_color.setStyle("-fx-alignment: CENTER;");
+        material_col_distributor.setStyle("-fx-alignment: CENTER;");
+        material_col_finished.setStyle("-fx-alignment: CENTER;");
+        material_col_manufacturer.setStyle("-fx-alignment: CENTER;");
+        material_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
+        material_col_type.setStyle("-fx-alignment: CENTER;");
+        
+        material_col_id.setStyle("-fx-alignment: CENTER;");
+        
+        material_col_price.setStyle("-fx-alignment: CENTER;");
+        material_col_profit.setStyle("-fx-alignment: CENTER;");
+        material_col_shipping.setStyle("-fx-alignment: CENTER;");        
+        material_col_soldFor.setStyle("-fx-alignment: CENTER;");
+        material_col_trash.setStyle("-fx-alignment: CENTER;");
+        material_col_used.setStyle("-fx-alignment: CENTER;");        
+        material_col_weight.setStyle("-fx-alignment: CENTER;");        
+        
+        tv_materials.setItems(materialList);        
+    }    
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    
+    
 }//end MainController

@@ -453,11 +453,11 @@
                   </BorderPane>
                </content>
             </Tab>
-            <Tab fx:id="tabCustomers11" closable="false" text="Materials">
+            <Tab fx:id="tab_materials" closable="false" text="Materials">
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <center>
-                        <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <TableView fx:id="tv_materials" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <columns>
                               <TableColumn fx:id="material_col_id" prefWidth="90.0" text="Material ID" />
                               <TableColumn fx:id="material_col_type" prefWidth="75.0" text="Type" />
@@ -465,6 +465,7 @@
                               <TableColumn fx:id="material_col_manufacturer" prefWidth="140.0" text="Manufacturer" />
                               <TableColumn fx:id="material_col_weight" text="Weight (g)" />
                               <TableColumn fx:id="material_col_price" text="Price" />
+                              <TableColumn fx:id="material_col_shipping" text="Shipping" />
                               <TableColumn fx:id="material_col_used" minWidth="7.0" text="Used (%)" />
                               <TableColumn fx:id="material_col_finished" minWidth="7.0" prefWidth="65.0" text="Finished" />
                               <TableColumn fx:id="material_col_trash" text="Trash" />
