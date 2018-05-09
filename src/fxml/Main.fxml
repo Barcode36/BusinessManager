@@ -460,16 +460,16 @@
                         <TableView fx:id="tv_materials" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <columns>
                               <TableColumn fx:id="material_col_id" prefWidth="90.0" text="Material ID" />
-                              <TableColumn fx:id="material_col_type" prefWidth="75.0" text="Type" />
+                              <TableColumn fx:id="material_col_type" prefWidth="50.0" text="Type" />
                               <TableColumn fx:id="material_col_color" minWidth="7.0" prefWidth="110.0" text="Color" />
-                              <TableColumn fx:id="material_col_manufacturer" prefWidth="140.0" text="Manufacturer" />
+                              <TableColumn fx:id="material_col_manufacturer" prefWidth="125.0" text="Manufacturer" />
                               <TableColumn fx:id="material_col_weight" text="Weight (g)" />
-                              <TableColumn fx:id="material_col_price" text="Price" />
-                              <TableColumn fx:id="material_col_shipping" text="Shipping" />
+                              <TableColumn fx:id="material_col_price" prefWidth="65.0" text="Price" />
+                              <TableColumn fx:id="material_col_shipping" prefWidth="70.0" text="Shipping" />
                               <TableColumn fx:id="material_col_used" minWidth="7.0" text="Used (%)" />
                               <TableColumn fx:id="material_col_finished" minWidth="7.0" prefWidth="65.0" text="Finished" />
-                              <TableColumn fx:id="material_col_trash" text="Trash" />
-                              <TableColumn fx:id="material_col_soldFor" text="Sold For" />
+                              <TableColumn fx:id="material_col_trash" prefWidth="60.0" text="Trash" />
+                              <TableColumn fx:id="material_col_soldFor" prefWidth="70.0" text="Sold For" />
                               <TableColumn fx:id="material_col_profit" text="Profit" />
                               <TableColumn fx:id="material_col_distributor" prefWidth="140.0" text="Distributor" />
                               <TableColumn fx:id="material_col_purchaseDate" minWidth="7.0" prefWidth="100.0" text="Purchase Date" />
@@ -508,19 +508,19 @@
                   </BorderPane>
                </content>
             </Tab>
-            <Tab fx:id="tabCustomers111" closable="false" text="Costs">
+            <Tab fx:id="tab_costs" closable="false" text="Costs">
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <center>
-                        <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <TableView fx:id="tv_costs" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <columns>
-                              <TableColumn prefWidth="100.0" text="Cost ID" />
-                              <TableColumn prefWidth="100.0" text="Item Name" />
-                              <TableColumn prefWidth="125.0" text="Quantity" />
-                              <TableColumn prefWidth="100.0" text="Unit Price" />
-                              <TableColumn prefWidth="100.0" text="Total Price" />
-                              <TableColumn prefWidth="135.0" text="Purchase Date" />
-                              <TableColumn prefWidth="135.0" text="Comment" />
+                              <TableColumn fx:id="cost_col_id" prefWidth="72.0" text="Cost ID" />
+                              <TableColumn fx:id="cost_col_name" prefWidth="185.0" text="Item Name" />
+                              <TableColumn fx:id="cost_col_quantity" prefWidth="81.0" text="Quantity" />
+                              <TableColumn fx:id="cost_col_price" prefWidth="96.0" text="Price" />
+                              <TableColumn fx:id="cost_col_shipping" prefWidth="224.0" text="Shipping" />
+                              <TableColumn fx:id="cost_col_purchaseDate" prefWidth="115.0" text="Purchase Date" />
+                              <TableColumn fx:id="cost_col_comment" prefWidth="224.0" text="Comment" />
                            </columns>
                         </TableView>
                      </center>
