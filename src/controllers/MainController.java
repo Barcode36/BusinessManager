@@ -5,6 +5,7 @@
  */
 package controllers;
 
+import classes.Cost;
 import classes.Customer;
 import classes.Material;
 import classes.Object;
@@ -137,6 +138,29 @@ public class MainController implements Initializable {
     *
     *    
     */
+    /*****************************          COSTS TAB          *****************************/
+    
+    @FXML
+    private Tab tab_costs;
+    
+    @FXML
+    private TableView<Cost> tv_costs;
+    
+    @FXML
+    private TableColumn<Cost, Integer> cost_col_id, cost_col_quantity;
+    
+    @FXML
+    private TableColumn<Cost, String> cost_col_name, cost_col_purchaseDate, cost_col_comment;
+    
+    @FXML
+    private TableColumn<Cost, Double> cost_col_price, cost_col_shipping;
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -205,8 +229,32 @@ public class MainController implements Initializable {
     *
     *    
     */
+     /*****************************          INITIALIZE COSTS TAB          *****************************/
+    
+    tab_costs.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event t) {
+                if (tab_costs.isSelected()) {
+                    refreshCostsTable(user);
+                }
+            }
+        });
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
     
     }//end initialize    
+    
+    
+    
+    
+    
+    
     /*
     *
     *                                       METHODS
@@ -411,6 +459,46 @@ public class MainController implements Initializable {
         material_col_weight.setStyle("-fx-alignment: CENTER;");        
         
         tv_materials.setItems(materialList);        
+    }    
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    
+    /*****************************          COSTS TAB          *****************************/
+    
+    public void refreshCostsTable(User user){
+        
+        //Create list of orders
+        ObservableList<Cost> costsList = FXCollections.observableArrayList(Cost.getCosts(user));
+        
+        cost_col_comment.setCellValueFactory((param) -> {return param.getValue().getCost_comment();});
+        cost_col_name.setCellValueFactory((param) -> {return param.getValue().getCost_name();});           
+        cost_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getCost_purchaseDate();});
+        
+        cost_col_id.setCellValueFactory((param) -> {return param.getValue().getCost_id().asObject();});        
+        cost_col_quantity.setCellValueFactory((param) -> {return param.getValue().getCost_quantity().asObject();});
+        
+        cost_col_price.setCellValueFactory((param) -> {return param.getValue().getCost_price().asObject();});
+        cost_col_shipping.setCellValueFactory((param) -> {return param.getValue().getCost_shipping().asObject();});
+        
+        //Centering content
+        cost_col_comment.setStyle("-fx-alignment: CENTER;");
+        cost_col_name.setStyle("-fx-alignment: CENTER;");
+        cost_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
+        
+        cost_col_id.setStyle("-fx-alignment: CENTER;");
+        cost_col_quantity.setStyle("-fx-alignment: CENTER;");
+                
+        cost_col_price.setStyle("-fx-alignment: CENTER;");
+        cost_col_shipping.setStyle("-fx-alignment: CENTER;");
+        
+        tv_costs.setItems(costsList);
+        
     }    
     
     /*
