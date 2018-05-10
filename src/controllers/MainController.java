@@ -11,6 +11,7 @@ import classes.Material;
 import classes.Object;
 import classes.Order;
 import classes.User;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -18,11 +19,16 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.stage.Stage;
 
 /**
  * FXML Controller class
@@ -61,6 +67,9 @@ public class MainController implements Initializable {
     
     @FXML
     private TableColumn<Order, Double> order_col_totalCosts, order_col_totalPrice, order_col_totalWeight;     
+    
+    @FXML
+    private Button btn_newOrder;
     /*
     *
     *
@@ -154,6 +163,9 @@ public class MainController implements Initializable {
     
     @FXML
     private TableColumn<Cost, Double> cost_col_price, cost_col_shipping;
+    
+    @FXML
+    private Button cost_btn_newCost;
     /*
     *
     *
@@ -174,7 +186,10 @@ public class MainController implements Initializable {
                     refreshOrdersTable(user);
                 }
             }
-        });    
+        });
+        
+        btn_newOrder.setOnAction((event) -> {
+        });
     /*
     *
     *
@@ -311,6 +326,24 @@ public class MainController implements Initializable {
         
         //set list to display in table
         tv_orders.setItems(orderList);
+    }
+    
+    private void openNewOrderWin() throws IOException{
+            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/NewOrder.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewOrderController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.setTitle("New Order");
+            //stage.setMinHeight(680);
+            //stage.setMinWidth(1139);
+           
+            stage.setScene(new Scene(root1));
+            stage.setMaximized(true);
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);            
+            stage.show();
     }
     /*
     *

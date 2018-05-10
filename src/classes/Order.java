@@ -5,6 +5,7 @@
  */
 package classes;
 
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,7 +16,6 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-
 /**
  *
  * @author Erik PC
@@ -546,4 +546,6 @@ public class Order {
         }//end finally
         return totalWeight;
     }
-}
+    
+    
+}//class end

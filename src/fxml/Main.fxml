@@ -141,7 +141,7 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Button fx:id="btnNewBlankOrder" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Blank Order" GridPane.columnSpan="2" />
+                                    <Button fx:id="btn_newOrder" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Order" GridPane.columnSpan="2" />
                                     <Button fx:id="btnMarkAsSold" layoutX="110.0" layoutY="13.0" mnemonicParsing="false" prefWidth="150.0" text="Mark As Sold" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <Button fx:id="btnCancelOrder" mnemonicParsing="false" prefWidth="150.0" text="Cancel Order(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Button fx:id="btnOrdersFilters" mnemonicParsing="false" prefWidth="150.0" text="Filters" GridPane.rowIndex="2" />
@@ -527,7 +527,7 @@
                      <right>
                         <VBox spacing="10.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button mnemonicParsing="false" prefWidth="105.0" text="New Object" />
+                              <Button fx:id="cost_btn_newCost" mnemonicParsing="false" prefWidth="105.0" text="New Cost" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Edit Object" />
                               <Button layoutX="10.0" layoutY="35.0" mnemonicParsing="false" prefWidth="105.0" text="Delete Object(s)" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Filters: Inactive" />
