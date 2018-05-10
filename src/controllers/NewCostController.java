@@ -5,9 +5,12 @@
  */
 package controllers;
 
+import classes.User;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 
 /**
  * FXML Controller class
@@ -16,12 +19,32 @@ import javafx.fxml.Initializable;
  */
 public class NewCostController implements Initializable {
 
-    /**
-     * Initializes the controller class.
-     */
+    private User user;
+    
+    @FXML
+    private Label cost_label_id;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
     }    
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Label getCost_label_id() {
+        return cost_label_id;
+    }
+
+    public void setCost_label_id_value(int id) {
+        this.cost_label_id.setText(String.valueOf(id));
+    }
+    
+    
     
 }

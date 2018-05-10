@@ -8,6 +8,7 @@ package controllers;
 import classes.Cost;
 import classes.Customer;
 import classes.Material;
+import classes.MngApi;
 import classes.Object;
 import classes.Order;
 import classes.User;
@@ -254,6 +255,31 @@ public class MainController implements Initializable {
                 }
             }
         });
+    
+    cost_btn_newCost.setOnAction((event) -> {
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/costs/NewCost.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewCostController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.setTitle("New Cost");
+            stage.setMinHeight(440);
+            stage.setMinWidth(400);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setCost_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Costs"));
+            stage.show();                        
+            
+        }catch (IOException e){
+
+        }
+    });
     
     /*
     *
@@ -533,6 +559,8 @@ public class MainController implements Initializable {
         tv_costs.setItems(costsList);
         
     }    
+    
+    
     
     /*
     *
