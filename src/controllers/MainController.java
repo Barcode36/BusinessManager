@@ -5,6 +5,7 @@
  */
 package controllers;
 
+import controllers.costs.NewCostController;
 import classes.Cost;
 import classes.Customer;
 import classes.Material;
@@ -14,7 +15,10 @@ import classes.Order;
 import classes.User;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLNonTransientConnectionException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -166,7 +170,7 @@ public class MainController implements Initializable {
     private TableColumn<Cost, Double> cost_col_price, cost_col_shipping;
     
     @FXML
-    private Button cost_btn_newCost;
+    private Button cost_btn_newCost, cost_btn_refresh;
     /*
     *
     *
@@ -183,8 +187,8 @@ public class MainController implements Initializable {
         tab_orders.setOnSelectionChanged(new EventHandler<Event>() {
             @Override
             public void handle(Event t) {
-                if (tab_orders.isSelected()) {
-                    refreshOrdersTable(user);
+                if (tab_orders.isSelected()) {                   
+                        refreshOrdersTable(user);                    
                 }
             }
         });
@@ -273,12 +277,17 @@ public class MainController implements Initializable {
             
             //passing credentials to main controller
             ctrl.setUser(user);
+            ctrl.setMainController(this);
             ctrl.setCost_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Costs"));
             stage.show();                        
             
         }catch (IOException e){
 
         }
+    });//end new cost button  setOnAction
+    
+    cost_btn_refresh.setOnAction((event) -> {
+        refreshCostsTable(user);
     });
     
     /*
@@ -307,12 +316,24 @@ public class MainController implements Initializable {
     public void setUser(User user){
         this.user = user;        
     }
-
+    
     
     /*****************************          ORDERS TAB
-     * @param user *****************************/      
+     * @param user      
+     * @throws java.sql.SQLNonTransientConnectionException *****************************/      
     
     public void refreshOrdersTable(User user) {
+        
+        //connection lost
+        if (Order.getOrders(user) == null) {
+            
+            //alertConnectionLost();
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+            
+        return;
+        }
+        
         //Create list of orders
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
         
@@ -371,6 +392,14 @@ public class MainController implements Initializable {
             ctrl.setUser(user);            
             stage.show();
     }
+
+    public Button getBtn_newOrder() {
+        return btn_newOrder;
+    }
+
+    
+    
+    
     /*
     *
     *
@@ -558,8 +587,7 @@ public class MainController implements Initializable {
         
         tv_costs.setItems(costsList);
         
-    }    
-    
+    }
     
     
     /*

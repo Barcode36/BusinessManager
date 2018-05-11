@@ -479,7 +479,7 @@
                      <right>
                         <VBox spacing="10.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button mnemonicParsing="false" prefWidth="105.0" text="New Object" />
+                              <Button fx:id="material_btn_new" mnemonicParsing="false" prefWidth="105.0" text="New Material" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Edit Object" />
                               <Button layoutX="10.0" layoutY="35.0" mnemonicParsing="false" prefWidth="105.0" text="Delete Object(s)" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Filters: Inactive" />
@@ -531,7 +531,7 @@
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Edit Object" />
                               <Button layoutX="10.0" layoutY="35.0" mnemonicParsing="false" prefWidth="105.0" text="Delete Object(s)" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Filters: Inactive" />
-                              <Button layoutX="10.0" layoutY="35.0" mnemonicParsing="false" prefWidth="105.0" text="Refresh" />
+                              <Button fx:id="cost_btn_refresh" layoutX="10.0" layoutY="35.0" mnemonicParsing="false" prefWidth="105.0" text="Refresh" />
                            </children>
                            <padding>
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />

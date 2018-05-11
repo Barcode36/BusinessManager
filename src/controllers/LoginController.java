@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.sql.SQLNonTransientConnectionException;
 import javafx.fxml.FXML;
 
 public class LoginController {
@@ -45,6 +46,8 @@ public class LoginController {
             
             //when we first open up main windows, we need to load all orders - that's default view
             ctrl.refreshOrdersTable(user);
+                
+            
         }catch (IOException e){
 
         }

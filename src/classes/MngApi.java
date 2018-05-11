@@ -19,7 +19,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.stage.Modality;
 
@@ -160,5 +159,77 @@ public class MngApi {
         
         return currentAutoIncrementValue;
     }
-}
+    
+    public static void performUpdate(String query, User user){
+        //Create query
+        String updateQuery = query;
+
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            if(conn.isValid(15) == false) {
+                System.out.print("Connection Lost");
+            }
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            stmt.executeUpdate(updateQuery);
+                       
+            
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+    }
+    
+    //diplays connetion lost dialog window
+    public void alertConnectionLost(){
+        try{            
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/ConnectionLost.fxml"));            
+                Parent root1 = fxmlLoader.load();                
+                Stage stage = new Stage();
+                stage.setTitle("Connection Lost");
+                stage.centerOnScreen();           
+                stage.setScene(new Scene(root1));
+                stage.setResizable(false);            
+                stage.show();            
+                //ctrl.setMain_controller(this);
+            }catch (IOException e){
+
+            }  
+    }
+}//end of class
 

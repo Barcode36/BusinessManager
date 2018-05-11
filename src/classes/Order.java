@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,7 +140,7 @@ public class Order {
 
     
     
-    public static List<Order> getOrders(User user){
+    public static List<Order> getOrders(User user) {
         
         //Create list
         List<Order> orderList = new ArrayList<>();
@@ -167,6 +168,7 @@ public class Order {
             //STEP 3: Open a connection
 
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -202,11 +204,13 @@ public class Order {
             }
 
             rs.close();
+        } catch (SQLNonTransientConnectionException se) {
+            return orderList = null;
         } catch (SQLException se) {
-            //Handle errors for JDBC
             se.printStackTrace();
         } catch (ClassNotFoundException se) {
             //Handle errors for Class.forName
+            
             se.printStackTrace();
         } finally {
             //finally block used to close resources
