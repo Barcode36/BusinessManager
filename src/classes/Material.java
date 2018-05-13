@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -186,6 +187,12 @@ public class Material {
             //STEP 3: Open a connection
 
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            
+            if(conn.isValid(10) == false) {
+                MngApi obj = new MngApi();
+                obj.alertConnectionLost();
+            }
+            
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -224,6 +231,9 @@ public class Material {
             }
 
             rs.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();

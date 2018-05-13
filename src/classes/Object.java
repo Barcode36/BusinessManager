@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,6 +164,9 @@ public class Object {
             }
 
             rs.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();

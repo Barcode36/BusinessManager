@@ -5,23 +5,68 @@
  */
 package classes;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.concurrent.Task;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  *
  * @author Erik PC
  */
-public class Customer {
+public class Customer  implements Runnable {
+    
+    private Thread worker;
+    private final AtomicBoolean running = new AtomicBoolean(false);
+    private int interval;
+    
+    public Customer(int sleepInterval) {
+        interval = sleepInterval;
+    }
+  
+    public void start() {
+        worker = new Thread(this);
+        worker.start();
+    }
+  
+    public void stop() {
+        running.set(false);
+    }
+ 
+    @Override
+    public void run() { 
+        while (running.get()) {
+            try { 
+                Thread.sleep(interval); 
+            } catch (InterruptedException e){ 
+                Thread.currentThread().interrupt();
+                System.out.println(
+                  "Thread was interrupted, Failed to complete operation");
+            }
+            // do something here 
+         } 
+    } 
+    
 
     private SimpleStringProperty customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment;
     private SimpleIntegerProperty customer_id, customer_orderCount;
@@ -160,6 +205,7 @@ public class Customer {
 
 
     public static List<Customer> getCustomers(User user){
+            
         //Create list
         List<Customer> customersList = new ArrayList<>();
         
@@ -223,6 +269,9 @@ public class Customer {
             }
 
             rs.close();
+        } catch (SQLNonTransientConnectionException se) {            
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();
@@ -243,6 +292,7 @@ public class Customer {
                 se.printStackTrace();
             }//end finally try
         }//end try
+        
         
         return customersList;
     }

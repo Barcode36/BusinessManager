@@ -9,12 +9,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.stage.Stage;
 
 /**
  *
@@ -94,6 +96,9 @@ public class Cost {
     
     public static List<Cost> getCosts(User user) {
         
+       
+        
+        
         //Create list
         List<Cost> allCostsList = new ArrayList<>();
         
@@ -149,6 +154,9 @@ public class Cost {
             }
 
             rs.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();
@@ -169,6 +177,7 @@ public class Cost {
                 se.printStackTrace();
             }//end finally try
         }//end try
+    
         
     return allCostsList;
     }

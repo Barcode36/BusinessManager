@@ -18,9 +18,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
+import javafx.stage.StageStyle;
 
 /**
  * Created by erikd on 2/22/2017.
@@ -193,6 +197,9 @@ public class MngApi {
             stmt.executeUpdate(updateQuery);
                        
             
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();
@@ -222,14 +229,40 @@ public class MngApi {
                 Parent root1 = fxmlLoader.load();                
                 Stage stage = new Stage();
                 stage.setTitle("Connection Lost");
+                stage.setAlwaysOnTop(true);
                 stage.centerOnScreen();           
                 stage.setScene(new Scene(root1));
-                stage.setResizable(false);            
+                stage.setResizable(false);                
                 stage.show();            
-                //ctrl.setMain_controller(this);
+                
             }catch (IOException e){
 
             }  
     }
+    
+    public static void openLoadingWindow(Stage loadingStage){
+        loadingStage.initStyle(StageStyle.TRANSPARENT);
+        
+                ProgressIndicator loadProgress = new ProgressIndicator(-1.0f);
+                loadProgress.setSkin(null);
+                
+        
+                VBox box = new VBox();
+                box.getChildren().add(loadProgress);
+        
+                final Scene scene = new Scene(box, 40, 40);
+
+                scene.setFill(Color.TRANSPARENT);
+                scene.getStylesheets().add("/css/loading.css");
+                
+                loadingStage.setMinHeight(40);
+                loadingStage.setMinWidth(40);
+                loadingStage.setScene(scene);
+                loadingStage.setResizable(false);
+                loadingStage.setAlwaysOnTop(true);
+                loadingStage.centerOnScreen(); 
+                loadingStage.showAndWait();
+    }
+   
 }//end of class
 

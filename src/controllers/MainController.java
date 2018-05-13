@@ -324,16 +324,6 @@ public class MainController implements Initializable {
     
     public void refreshOrdersTable(User user) {
         
-        //connection lost
-        if (Order.getOrders(user) == null) {
-            
-            //alertConnectionLost();
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-            
-        return;
-        }
-        
         //Create list of orders
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
         
