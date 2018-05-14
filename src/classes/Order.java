@@ -205,8 +205,7 @@ public class Order {
 
             rs.close();
         } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
+            return orderList = null;
         } catch (SQLException se) {
             se.printStackTrace();
         } catch (ClassNotFoundException se) {

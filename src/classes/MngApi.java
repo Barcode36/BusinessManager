@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.concurrent.Task;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -240,28 +241,46 @@ public class MngApi {
             }  
     }
     
-    public static void openLoadingWindow(Stage loadingStage){
-        loadingStage.initStyle(StageStyle.TRANSPARENT);
+    public static class OpenLoadingWindowTask extends Task<Stage> {
         
-                ProgressIndicator loadProgress = new ProgressIndicator(-1.0f);
-                loadProgress.setSkin(null);
-                
-        
-                VBox box = new VBox();
-                box.getChildren().add(loadProgress);
-        
-                final Scene scene = new Scene(box, 40, 40);
+        private Stage loadingStage;
 
-                scene.setFill(Color.TRANSPARENT);
-                scene.getStylesheets().add("/css/loading.css");
-                
-                loadingStage.setMinHeight(40);
-                loadingStage.setMinWidth(40);
-                loadingStage.setScene(scene);
-                loadingStage.setResizable(false);
-                loadingStage.setAlwaysOnTop(true);
-                loadingStage.centerOnScreen(); 
-                loadingStage.showAndWait();
+        public void setLoadingStage(Stage loadingStage) {
+            this.loadingStage = loadingStage;
+        }
+        
+        public OpenLoadingWindowTask(Stage loadingStage){
+            this.loadingStage = loadingStage;
+        }
+        
+        @Override
+        protected Stage call() throws Exception {
+                    
+            ProgressIndicator loadProgress = new ProgressIndicator(-1.0f);
+            loadProgress.setSkin(null);
+        
+            VBox box = new VBox();
+            box.getChildren().add(loadProgress);
+        
+            final Scene scene = new Scene(box, 40, 40);
+
+            scene.setFill(Color.TRANSPARENT);
+            scene.getStylesheets().add("/css/loading.css");
+        
+            loadingStage.initStyle(StageStyle.TRANSPARENT);        
+            loadingStage.setMinHeight(40);
+            loadingStage.setMinWidth(40);
+            loadingStage.setScene(scene);
+            loadingStage.setResizable(false);
+            loadingStage.setAlwaysOnTop(true);
+            loadingStage.centerOnScreen(); 
+            loadingStage.showAndWait();
+            
+            return null;
+        }
+        
+        
+        
     }
    
 }//end of class

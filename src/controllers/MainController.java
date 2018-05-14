@@ -318,17 +318,23 @@ public class MainController implements Initializable {
     }
     
     
-    /*****************************          ORDERS TAB
+    /*****************************          ORDERS TAB     
      * @param user      
-     * @throws java.sql.SQLNonTransientConnectionException *****************************/      
+     * @return       
+     *****************************/      
     
-    public void refreshOrdersTable(User user) {
+    public boolean refreshOrdersTable(User user) {
         
+        if (Order.getOrders(user) == null){
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+            return false;
+        } 
+                
         //Create list of orders
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
         
         //set cell value factory for columns by type
-        
         //Strings
         order_col_comment.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_comment());        
         order_col_customer.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_customer());
@@ -363,6 +369,8 @@ public class MainController implements Initializable {
         
         //set list to display in table
         tv_orders.setItems(orderList);
+        
+        return true;
     }
     
     private void openNewOrderWin() throws IOException{

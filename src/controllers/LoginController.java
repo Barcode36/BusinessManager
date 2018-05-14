@@ -10,7 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.sql.SQLNonTransientConnectionException;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 
 public class LoginController {
@@ -44,8 +44,23 @@ public class LoginController {
             ctrl.setUser(user);            
             stage.show();            
             
+            Stage loadingStage = new Stage();
+            
+            Task openLoadingWindowTask = new MngApi.OpenLoadingWindowTask(loadingStage);
+            
+            Thread t1 = new Thread(openLoadingWindowTask);
+            
+            t1.setDaemon(true);
+            t1.start();
+            
             //when we first open up main windows, we need to load all orders - that's default view
-            ctrl.refreshOrdersTable(user);
+            if (ctrl.refreshOrdersTable(user) == false){
+                MngApi obj = new MngApi();
+                obj.alertConnectionLost();
+                loadingStage.close();
+            } else {
+                loadingStage.close();
+            }
                 
             
         }catch (IOException e){
