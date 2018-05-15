@@ -10,8 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.io.IOException;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 
 public class LoginController {

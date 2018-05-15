@@ -241,48 +241,7 @@ public class MngApi {
             }  
     }
     
-        
-    public static class OpenLoadingWindowTask extends Task<Stage> {
-        
-        private Stage loadingStage;
-
-        public void setLoadingStage(Stage loadingStage) {
-            this.loadingStage = loadingStage;
-        }
-        
-        public OpenLoadingWindowTask(Stage loadingStage){
-            this.loadingStage = loadingStage;
-        }
-        
-        @Override
-        protected Stage call() throws Exception {
-                    
-            ProgressIndicator loadProgress = new ProgressIndicator(-1.0f);
-            loadProgress.setSkin(null);
-        
-            VBox box = new VBox();
-            box.getChildren().add(loadProgress);
-        
-            final Scene scene = new Scene(box, 40, 40);
-
-            scene.setFill(Color.TRANSPARENT);
-            scene.getStylesheets().add("/css/loading.css");
-        
-            loadingStage.initStyle(StageStyle.TRANSPARENT);        
-            loadingStage.setMinHeight(40);
-            loadingStage.setMinWidth(40);
-            loadingStage.setScene(scene);
-            loadingStage.setResizable(false);
-            loadingStage.setAlwaysOnTop(true);
-            loadingStage.centerOnScreen(); 
-            loadingStage.showAndWait();
-            
-            return null;
-        }
-        
-        
-        
-    }
+     
    
 }//end of class
 

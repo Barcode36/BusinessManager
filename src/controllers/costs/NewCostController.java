@@ -75,7 +75,8 @@ public class NewCostController implements Initializable {
             }
             
             MngApi.closeWindow(cost_btn_create);
-            mainController.refreshCostsTable(user);
+            //mainController.refreshCostsTable(user);
+            mainController.runTask(mainController.getRefreshCostsTask());
             
         });
         

@@ -165,17 +165,13 @@ public class Order {
             //STEP 2: Register JDBC driver
             Class.forName("org.mariadb.jdbc.Driver");
 
-            //STEP 3: Open a connection
-
+            //STEP 3: Open a connection            
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
             rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
+            
             while(rs.next()){
                 
                 SimpleStringProperty customer, status, comment, dateCreated, dueDate, buildTime_formated;    

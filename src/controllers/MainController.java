@@ -16,6 +16,8 @@ import classes.User;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -191,7 +193,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_orders.isSelected()) {                   
-                        refreshOrdersTable(user);                    
+                        runTask(task_refreshOrdersTable);                    
                 }
             }
         });
@@ -211,7 +213,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_customers.isSelected()) {
-                    refreshCustomersTable(user);
+                    runTask(task_refreshCustomersTable);
                 }
             }
         });
@@ -222,7 +224,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_objects.isSelected()) {
-                    refreshObjectsTable(user);
+                    runTask(task_refreshObjectsTable);
                 }
             }
         });
@@ -240,7 +242,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_materials.isSelected()) {
-                    refreshMaterialsTable(user);
+                    runTask(task_refreshMaterialsTable);
                 }
             }
         });
@@ -258,7 +260,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_costs.isSelected()) {
-                    refreshCostsTable(user);
+                    runTask(task_refreshCostsTable);
                 }
             }
         });
@@ -315,7 +317,23 @@ public class MainController implements Initializable {
     *
     *    
     */
-    /*****************************          GENERAL          *****************************/          
+    /*****************************          GENERAL
+     * @param task *****************************/          
+    
+    public void runTask(Task task){
+            Thread t1 = new Thread(task);
+            
+            t1.setDaemon(true);
+            t1.start();            
+            progressBar.setProgress(task.getProgress());
+            
+            task.setOnSucceeded((event) -> {
+                
+                progressBar.setProgress(1);
+                
+            });
+    }
+    
     public void setUser(User user){
         this.user = user;        
     }
@@ -337,15 +355,8 @@ public class MainController implements Initializable {
      * @return       
      *****************************/      
     
-    public boolean refreshOrdersTable(User user) {
+    public void refreshOrdersTable(User user) {
         
-        //progressBar.setProgress(-1);
-//        if (Order.getOrders(user) == null){
-//            MngApi obj = new MngApi();
-//            obj.alertConnectionLost();
-//            return false;
-//        } 
-                
         //Create list of orders
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
         
@@ -383,12 +394,10 @@ public class MainController implements Initializable {
         order_col_totalWeight.setStyle("-fx-alignment: CENTER;");
         
         //set list to display in table
-        tv_orders.setItems(orderList);
-        
-        return true;
+        tv_orders.setItems(orderList);        
     }    
     
-    private final Task<Void> task_refreshOrders = new Task<Void>() {
+    private final Task<Void> task_refreshOrdersTable = new Task<Void>() {
             
         {
             updateProgress(-1, 100);
@@ -396,26 +405,13 @@ public class MainController implements Initializable {
 
         @Override
         public Void call() throws Exception {
-            Thread.sleep(5000);
+            
             refreshOrdersTable(user);            
             
         return null;
         }       
         
     };
-    
-    
-    public void runTask(Task task){
-            Thread t1 = new Thread(task);
-            
-            t1.setDaemon(true);
-            t1.start();            
-            progressBar.setProgress(task.getProgress());
-            
-            task.setOnSucceeded((event) -> {
-                progressBar.setProgress(1);
-            });
-    }
     
     private void openNewOrderWin() throws IOException{
             
@@ -436,7 +432,7 @@ public class MainController implements Initializable {
     }
     
     public Task getRefreshOrdersTask(){
-        return this.task_refreshOrders;
+        return this.task_refreshOrdersTable;
     }
     
     public Button getBtn_newOrder() {
@@ -503,6 +499,22 @@ public class MainController implements Initializable {
         //set list to display in table
         tv_customers.setItems(customerList);
     }
+    
+    private final Task<Void> task_refreshCustomersTable = new Task<Void>() {
+            
+        {
+            updateProgress(-1, 100);
+        }
+
+        @Override
+        public Void call() throws Exception {
+            Thread.sleep(400);
+            refreshCustomersTable(user);            
+            Thread.sleep(400);
+        return null;
+        }       
+        
+    };
     /*
     *
     *
@@ -541,6 +553,22 @@ public class MainController implements Initializable {
         tv_objects.setItems(objectList);
         
     }    
+    
+    private final Task<Void> task_refreshObjectsTable = new Task<Void>() {
+            
+        {
+            updateProgress(-1, 100);
+        }
+
+        @Override
+        public Void call() throws Exception {
+            
+            refreshObjectsTable(user);            
+            
+        return null;
+        }       
+        
+    };
     
     /*
     *
@@ -595,6 +623,22 @@ public class MainController implements Initializable {
         tv_materials.setItems(materialList);        
     }    
     
+    private final Task<Void> task_refreshMaterialsTable = new Task<Void>() {
+            
+        {
+            updateProgress(-1, 100);
+        }
+
+        @Override
+        public Void call() throws Exception {
+            
+            refreshMaterialsTable(user);            
+            
+        return null;
+        }       
+        
+    };
+    
     /*
     *
     *
@@ -635,7 +679,25 @@ public class MainController implements Initializable {
         
     }
     
+    private final Task<Void> task_refreshCostsTable = new Task<Void>() {
+            
+        {
+            updateProgress(-1, 100);
+        }
+
+        @Override
+        public Void call() throws Exception {
+            
+            refreshCostsTable(user);            
+            
+        return null;
+        }       
+        
+    };
     
+    public Task getRefreshCostsTask(){
+        return this.task_refreshCostsTable;
+    }
     /*
     *
     *
