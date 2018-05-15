@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.io.IOException;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 
@@ -43,25 +44,10 @@ public class LoginController {
             //passing credentials to main controller
             ctrl.setUser(user);            
             stage.show();            
+            ctrl.runTask(ctrl.getRefreshOrdersTask());
             
-            Stage loadingStage = new Stage();
             
-            Task openLoadingWindowTask = new MngApi.OpenLoadingWindowTask(loadingStage);
-            
-            Thread t1 = new Thread(openLoadingWindowTask);
-            
-            t1.setDaemon(true);
-            t1.start();
-            
-            //when we first open up main windows, we need to load all orders - that's default view
-            if (ctrl.refreshOrdersTable(user) == false){
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-                loadingStage.close();
-            } else {
-                loadingStage.close();
-            }
-                
+
             
         }catch (IOException e){
 

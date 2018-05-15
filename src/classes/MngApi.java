@@ -241,6 +241,7 @@ public class MngApi {
             }  
     }
     
+        
     public static class OpenLoadingWindowTask extends Task<Stage> {
         
         private Stage loadingStage;

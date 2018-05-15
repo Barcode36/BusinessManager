@@ -15,12 +15,11 @@ import classes.Order;
 import classes.User;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLNonTransientConnectionException;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -29,6 +28,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -48,7 +48,10 @@ public class MainController implements Initializable {
     private User user = null;    
     
     @FXML
-    private TabPane tp_main;       
+    private TabPane tp_main;
+    
+    @FXML
+    private ProgressBar progressBar;
     /*
     *
     *
@@ -316,7 +319,18 @@ public class MainController implements Initializable {
     public void setUser(User user){
         this.user = user;        
     }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    public void setProgressBar(ProgressBar progressBar) {
+        this.progressBar = progressBar;
+    }
     
+    public static void setProgress(ProgressBar progressBar, double progress){
+        progressBar.setProgress(progress);
+    }
     
     /*****************************          ORDERS TAB     
      * @param user      
@@ -325,11 +339,12 @@ public class MainController implements Initializable {
     
     public boolean refreshOrdersTable(User user) {
         
-        if (Order.getOrders(user) == null){
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-            return false;
-        } 
+        //progressBar.setProgress(-1);
+//        if (Order.getOrders(user) == null){
+//            MngApi obj = new MngApi();
+//            obj.alertConnectionLost();
+//            return false;
+//        } 
                 
         //Create list of orders
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
@@ -371,6 +386,35 @@ public class MainController implements Initializable {
         tv_orders.setItems(orderList);
         
         return true;
+    }    
+    
+    private final Task<Void> task_refreshOrders = new Task<Void>() {
+            
+        {
+            updateProgress(-1, 100);
+        }
+
+        @Override
+        public Void call() throws Exception {
+            Thread.sleep(5000);
+            refreshOrdersTable(user);            
+            
+        return null;
+        }       
+        
+    };
+    
+    
+    public void runTask(Task task){
+            Thread t1 = new Thread(task);
+            
+            t1.setDaemon(true);
+            t1.start();            
+            progressBar.setProgress(task.getProgress());
+            
+            task.setOnSucceeded((event) -> {
+                progressBar.setProgress(1);
+            });
     }
     
     private void openNewOrderWin() throws IOException{
@@ -390,7 +434,11 @@ public class MainController implements Initializable {
             ctrl.setUser(user);            
             stage.show();
     }
-
+    
+    public Task getRefreshOrdersTask(){
+        return this.task_refreshOrders;
+    }
+    
     public Button getBtn_newOrder() {
         return btn_newOrder;
     }
