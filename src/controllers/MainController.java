@@ -16,14 +16,17 @@ import classes.User;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -193,7 +196,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_orders.isSelected()) {                   
-                        runTask(task_refreshOrdersTable);                    
+                        runService(service_refreshOrders);                    
                 }
             }
         });
@@ -213,7 +216,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_customers.isSelected()) {
-                    runTask(task_refreshCustomersTable);
+                    runService(service_refreshCustomers);
                 }
             }
         });
@@ -224,7 +227,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_objects.isSelected()) {
-                    runTask(task_refreshObjectsTable);
+                    runService(service_refreshObjects);
                 }
             }
         });
@@ -242,7 +245,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_materials.isSelected()) {
-                    runTask(task_refreshMaterialsTable);
+                    runService(service_refreshMaterials);
                 }
             }
         });
@@ -260,7 +263,7 @@ public class MainController implements Initializable {
             @Override
             public void handle(Event t) {
                 if (tab_costs.isSelected()) {
-                    runTask(task_refreshCostsTable);
+                    runService(service_refreshCosts);
                 }
             }
         });
@@ -320,16 +323,19 @@ public class MainController implements Initializable {
     /*****************************          GENERAL
      * @param task *****************************/          
     
-    public void runTask(Task task){
-            Thread t1 = new Thread(task);
+    public void runService(Service service){
             
-            t1.setDaemon(true);
-            t1.start();            
-            progressBar.setProgress(task.getProgress());
+            service.start();
+            progressBar.setProgress(service.getWorkDone());
             
-            task.setOnSucceeded((event) -> {
-                
+            service.setOnSucceeded((event) -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 progressBar.setProgress(1);
+                service.reset();
                 
             });
     }
@@ -397,20 +403,24 @@ public class MainController implements Initializable {
         tv_orders.setItems(orderList);        
     }    
     
-    private final Task<Void> task_refreshOrdersTable = new Task<Void>() {
-            
-        {
-            updateProgress(-1, 100);
-        }
-
+    // Create the service
+    private final Service<Void> service_refreshOrders = new Service<Void>() {
         @Override
-        public Void call() throws Exception {
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {
             
-            refreshOrdersTable(user);            
-            
-        return null;
-        }       
-        
+            {
+            updateProgress(-1, 100);
+            }
+
+            @Override
+            public Void call() throws Exception {            
+                refreshOrdersTable(user);                        
+                return null;
+            }        
+        };
+        return task_refreshCostsTable;
+        }
     };
     
     private void openNewOrderWin() throws IOException{
@@ -430,10 +440,11 @@ public class MainController implements Initializable {
             ctrl.setUser(user);            
             stage.show();
     }
-    
-    public Task getRefreshOrdersTask(){
-        return this.task_refreshOrdersTable;
+
+    public Service<Void> getService_refreshOrders() {
+        return service_refreshOrders;
     }
+    
     
     public Button getBtn_newOrder() {
         return btn_newOrder;
@@ -500,20 +511,24 @@ public class MainController implements Initializable {
         tv_customers.setItems(customerList);
     }
     
-    private final Task<Void> task_refreshCustomersTable = new Task<Void>() {
-            
-        {
-            updateProgress(-1, 100);
-        }
-
+    // Create the service
+    private final Service<Void> service_refreshCustomers = new Service<Void>() {
         @Override
-        public Void call() throws Exception {
-            Thread.sleep(400);
-            refreshCustomersTable(user);            
-            Thread.sleep(400);
-        return null;
-        }       
-        
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {
+            
+            {
+            updateProgress(-1, 100);
+            }
+
+            @Override
+            public Void call() throws Exception {            
+                refreshCustomersTable(user);                        
+                return null;
+            }        
+        };
+        return task_refreshCostsTable;
+        }
     };
     /*
     *
@@ -554,20 +569,24 @@ public class MainController implements Initializable {
         
     }    
     
-    private final Task<Void> task_refreshObjectsTable = new Task<Void>() {
-            
-        {
-            updateProgress(-1, 100);
-        }
-
+    // Create the service
+    private final Service<Void> service_refreshObjects = new Service<Void>() {
         @Override
-        public Void call() throws Exception {
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {
             
-            refreshObjectsTable(user);            
-            
-        return null;
-        }       
-        
+            {
+            updateProgress(-1, 100);
+            }
+
+            @Override
+            public Void call() throws Exception {            
+                refreshObjectsTable(user);                        
+                return null;
+            }        
+        };
+        return task_refreshCostsTable;
+        }
     };
     
     /*
@@ -623,21 +642,42 @@ public class MainController implements Initializable {
         tv_materials.setItems(materialList);        
     }    
     
-    private final Task<Void> task_refreshMaterialsTable = new Task<Void>() {
-            
-        {
-            updateProgress(-1, 100);
-        }
-
+    
+    // Create the service
+    private final Service<Void> service_refreshMaterials = new Service<Void>() {
         @Override
-        public Void call() throws Exception {
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {
             
-            refreshMaterialsTable(user);            
-            
-        return null;
-        }       
-        
+            {
+            updateProgress(-1, 100);
+            }
+
+            @Override
+            public Void call() throws Exception {            
+                refreshMaterialsTable(user);                        
+                return null;
+            }        
+        };
+        return task_refreshCostsTable;
+        }
     };
+        
+//    private final Task<Void> task_refreshMaterialsTable = new Task<Void>() {
+//            
+//        {
+//            updateProgress(-1, 100);
+//        }
+//
+//        @Override
+//        public Void call() throws Exception {
+//            
+//            refreshMaterialsTable(user);            
+//            
+//        return null;
+//        }       
+//        
+//    };
     
     /*
     *
@@ -679,25 +719,46 @@ public class MainController implements Initializable {
         
     }
     
-    private final Task<Void> task_refreshCostsTable = new Task<Void>() {
-            
-        {
-            updateProgress(-1, 100);
-        }
-
+    // Create the service
+    private final Service<Void> service_refreshCosts = new Service<Void>() {
         @Override
-        public Void call() throws Exception {
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {
             
-            refreshCostsTable(user);            
-            
-        return null;
-        }       
-        
+            {
+            updateProgress(-1, 100);
+            }
+
+            @Override
+            public Void call() throws Exception {            
+                refreshCostsTable(user);                        
+                return null;
+            }        
+        };
+        return task_refreshCostsTable;
+        }
     };
     
-    public Task getRefreshCostsTask(){
-        return this.task_refreshCostsTable;
+    public Service<Void> getService_refreshCosts() {
+        return service_refreshCosts;
     }
+
+//    private final Task<Void> task_refreshCostsTable = new Task<Void>() {
+//            
+//        {
+//            updateProgress(-1, 100);
+//        }
+//
+//        @Override
+//        public Void call() throws Exception {
+//            
+//            refreshCostsTable(user);            
+//            
+//        return null;
+//        }       
+//        
+//    };
+    
     /*
     *
     *
@@ -705,6 +766,4 @@ public class MainController implements Initializable {
     *
     *    
     */
-    
-    
 }//end MainController

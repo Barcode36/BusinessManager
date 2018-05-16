@@ -12,7 +12,6 @@ import controllers.MainController;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -74,9 +73,8 @@ public class NewCostController implements Initializable {
                 cost_label_id.setStyle("-fx-text-inner-color: red;");
             }
             
-            MngApi.closeWindow(cost_btn_create);
-            //mainController.refreshCostsTable(user);
-            mainController.runTask(mainController.getRefreshCostsTask());
+            MngApi.closeWindow(cost_btn_create);            
+            mainController.runService(mainController.getService_refreshCosts());
             
         });
         

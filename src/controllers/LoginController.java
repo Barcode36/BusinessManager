@@ -42,7 +42,7 @@ public class LoginController {
             //passing credentials to main controller
             ctrl.setUser(user);            
             stage.show();            
-            ctrl.runTask(ctrl.getRefreshOrdersTask());
+            ctrl.runService(ctrl.getService_refreshOrders());
             
             
 
