@@ -326,17 +326,20 @@ public class MainController implements Initializable {
     public void runService(Service service){
             
             service.start();
-            progressBar.setProgress(service.getWorkDone());
+            progressBar.progressProperty().bind(service.progressProperty());
             
             service.setOnSucceeded((event) -> {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                progressBar.setProgress(1);
                 service.reset();
-                
+                progressBar.progressProperty().unbind();
+                progressBar.setProgress(1);                
+            });
+            
+            service.setOnFailed((event) -> {
+                service.reset();
+                progressBar.progressProperty().unbind();
+                progressBar.setProgress(-1);
+                service.start();                
+                System.out.print(service.getState().toString());
             });
     }
     
@@ -362,6 +365,8 @@ public class MainController implements Initializable {
      *****************************/      
     
     public void refreshOrdersTable(User user) {
+        
+        tv_orders.setItems(null);
         
         //Create list of orders
         ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
@@ -408,17 +413,13 @@ public class MainController implements Initializable {
         @Override
         protected Task<Void> createTask(){
             Task<Void> task_refreshCostsTable = new Task<Void>() {
-            
-            {
-            updateProgress(-1, 100);
-            }
-
-            @Override
-            public Void call() throws Exception {            
-                refreshOrdersTable(user);                        
-                return null;
-            }        
-        };
+                @Override
+                public Void call() throws Exception {
+                    updateProgress(-1, 100);
+                    refreshOrdersTable(user);
+                    return null;
+                }        
+            };
         return task_refreshCostsTable;
         }
     };
@@ -463,6 +464,9 @@ public class MainController implements Initializable {
     /*****************************          CUSTOMERS TAB          *****************************/
     
     public void refreshCustomersTable(User user) {
+        
+        tv_customers.setItems(null);
+        
         //Create list of orders
         ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(user));
         
@@ -515,18 +519,14 @@ public class MainController implements Initializable {
     private final Service<Void> service_refreshCustomers = new Service<Void>() {
         @Override
         protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {
-            
-            {
-            updateProgress(-1, 100);
-            }
-
-            @Override
-            public Void call() throws Exception {            
-                refreshCustomersTable(user);                        
-                return null;
-            }        
-        };
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    updateProgress(-1, 100);
+                    refreshCustomersTable(user);                    
+                    return null;
+                }        
+            };
         return task_refreshCostsTable;
         }
     };
@@ -540,6 +540,8 @@ public class MainController implements Initializable {
     /*****************************          OBJECTS TAB          *****************************/
     
     public void refreshObjectsTable(User user){
+        
+        tv_objects.setItems(null);
         
         //Create list of orders
         ObservableList<Object> objectList = FXCollections.observableArrayList(Object.getObjects(user));
@@ -573,18 +575,14 @@ public class MainController implements Initializable {
     private final Service<Void> service_refreshObjects = new Service<Void>() {
         @Override
         protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {
-            
-            {
-            updateProgress(-1, 100);
-            }
-
-            @Override
-            public Void call() throws Exception {            
-                refreshObjectsTable(user);                        
-                return null;
-            }        
-        };
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {            
+                    updateProgress(-1, 100);
+                    refreshObjectsTable(user);
+                    return null;
+                }        
+            };
         return task_refreshCostsTable;
         }
     };
@@ -600,7 +598,7 @@ public class MainController implements Initializable {
     /*****************************          MATERIALS TAB          *****************************/
     
     public void refreshMaterialsTable(User user){
-        
+        tv_materials.setItems(null);
         //Create list of orders
         ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(user));
         
@@ -647,38 +645,17 @@ public class MainController implements Initializable {
     private final Service<Void> service_refreshMaterials = new Service<Void>() {
         @Override
         protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {
-            
-            {
-            updateProgress(-1, 100);
-            }
-
-            @Override
-            public Void call() throws Exception {            
-                refreshMaterialsTable(user);                        
-                return null;
-            }        
-        };
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    updateProgress(-1, 100);
+                    refreshMaterialsTable(user);
+                    return null;
+                }        
+            };
         return task_refreshCostsTable;
         }
     };
-        
-//    private final Task<Void> task_refreshMaterialsTable = new Task<Void>() {
-//            
-//        {
-//            updateProgress(-1, 100);
-//        }
-//
-//        @Override
-//        public Void call() throws Exception {
-//            
-//            refreshMaterialsTable(user);            
-//            
-//        return null;
-//        }       
-//        
-//    };
-    
     /*
     *
     *
@@ -690,6 +667,8 @@ public class MainController implements Initializable {
     /*****************************          COSTS TAB          *****************************/
     
     public void refreshCostsTable(User user){
+        
+        tv_costs.setItems(null);
         
         //Create list of orders
         ObservableList<Cost> costsList = FXCollections.observableArrayList(Cost.getCosts(user));
@@ -723,18 +702,14 @@ public class MainController implements Initializable {
     private final Service<Void> service_refreshCosts = new Service<Void>() {
         @Override
         protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {
-            
-            {
-            updateProgress(-1, 100);
-            }
-
-            @Override
-            public Void call() throws Exception {            
-                refreshCostsTable(user);                        
-                return null;
-            }        
-        };
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {            
+                    updateProgress(-1, 100);                 
+                    refreshCostsTable(user);                    
+                    return null;
+                }        
+            };
         return task_refreshCostsTable;
         }
     };
@@ -742,23 +717,6 @@ public class MainController implements Initializable {
     public Service<Void> getService_refreshCosts() {
         return service_refreshCosts;
     }
-
-//    private final Task<Void> task_refreshCostsTable = new Task<Void>() {
-//            
-//        {
-//            updateProgress(-1, 100);
-//        }
-//
-//        @Override
-//        public Void call() throws Exception {
-//            
-//            refreshCostsTable(user);            
-//            
-//        return null;
-//        }       
-//        
-//    };
-    
     /*
     *
     *
