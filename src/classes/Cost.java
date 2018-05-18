@@ -103,7 +103,7 @@ public class Cost {
         List<Cost> allCostsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT * FROM Costs ORDER BY CostID ASC";
+        String query = "SELECT * FROM Costs ORDER BY CostID DESC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";

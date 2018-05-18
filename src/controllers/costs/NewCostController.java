@@ -10,6 +10,8 @@ import classes.MngApi;
 import classes.User;
 import controllers.MainController;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -21,6 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 
 /**
  * FXML Controller class
@@ -48,11 +51,19 @@ public class NewCostController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         cost_btn_create.setOnAction((event) -> {
+            boolean isEmpty = MngApi.isTextFieldEmpty(cost_txtField_name, cost_txtField_quantity, cost_txtField_price, cost_txtField_shipping, cost_txtField_comment);
+            
+            if (isEmpty == true){
+                cost_label_info.setText("Fields cannot be empty.");
+                cost_label_info.setTextFill(Color.web("#ff0000"));
+                return;
+            }
+            
             SimpleIntegerProperty cost_id, cost_quantity;
             SimpleStringProperty cost_name, cost_purchaseDate, cost_comment;
             SimpleDoubleProperty cost_shipping, cost_price;
             
-            Cost newCost = null;
+            Cost newCost;
             
             try {
             cost_id = new SimpleIntegerProperty(getCost_label_id_value());
@@ -68,13 +79,16 @@ public class NewCostController implements Initializable {
             newCost = new Cost(cost_id, cost_quantity, cost_name, cost_purchaseDate, cost_comment, cost_shipping, cost_price);
             
             Cost.insertNewCost(newCost, user);
-            } catch (NumberFormatException e) {
-                cost_label_info.setText("Wrong number format, please check your fields.");
-                cost_label_id.setStyle("-fx-text-inner-color: red;");
-            }
             
             MngApi.closeWindow(cost_btn_create);            
             mainController.runService(mainController.getService_refreshCosts());
+            
+            } catch (NumberFormatException e) {
+                cost_label_info.setText("Wrong number format, please check your fields.");
+                cost_label_info.setTextFill(Color.web("#ff0000"));
+            }
+            
+            
             
         });
         
@@ -83,18 +97,11 @@ public class NewCostController implements Initializable {
         });
     }    
 
-    public User getUser() {
-        return user;
-    }
-
+    
     public void setUser(User user) {
         this.user = user;
     }
-
-    public Label getCost_label_id() {
-        return cost_label_id;
-    }
-
+    
     public void setCost_label_id_value(int id) {
         this.cost_label_id.setText(String.valueOf(id));        
     }
@@ -105,6 +112,10 @@ public class NewCostController implements Initializable {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+    }
+
+    public void setDefaultPurchaseDate(){
+        this.cost_datePicker_purchaseDate.setValue(LocalDateTime.now().toLocalDate());
     }
     
     

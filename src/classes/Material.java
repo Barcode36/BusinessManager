@@ -165,7 +165,7 @@ public class Material {
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Materials.MaterialID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialType, MaterialColors.ColorName AS 'Color', Materials.MaterialWeight, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, Materials.MaterialDiameter FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID ORDER BY Materials.MaterialID ASC";
+        String query = "SELECT Materials.MaterialID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialType, MaterialColors.ColorName AS 'Color', Materials.WeightID, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, Materials.MaterialDiameter FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID ORDER BY Materials.MaterialID DESC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";

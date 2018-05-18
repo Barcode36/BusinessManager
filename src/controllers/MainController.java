@@ -5,6 +5,7 @@
  */
 package controllers;
 
+import controllers.orders.NewOrderController;
 import controllers.costs.NewCostController;
 import classes.Cost;
 import classes.Customer;
@@ -13,20 +14,16 @@ import classes.MngApi;
 import classes.Object;
 import classes.Order;
 import classes.User;
+import controllers.materials.NewMaterialController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.Executor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -153,6 +150,9 @@ public class MainController implements Initializable {
     
     @FXML
     private TableColumn<Material, Double> material_col_weight, material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit; 
+    
+    @FXML
+    private Button material_btn_new;
     /*
     *
     *
@@ -178,7 +178,7 @@ public class MainController implements Initializable {
     private TableColumn<Cost, Double> cost_col_price, cost_col_shipping;
     
     @FXML
-    private Button cost_btn_newCost, cost_btn_refresh;
+    private Button cost_btn_new, cost_btn_refresh;
     /*
     *
     *
@@ -250,6 +250,33 @@ public class MainController implements Initializable {
             }
         });
     
+    material_btn_new.setOnAction((event) -> {
+        
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/materials/NewMaterial.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewMaterialController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.setTitle("New Material");
+            stage.setMinHeight(440);
+            stage.setMinWidth(400);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setMaterial_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Materials"));
+            stage.show();                        
+            
+        }catch (IOException e){
+
+        }        
+    });
+    
     /*
     *
     *
@@ -268,7 +295,7 @@ public class MainController implements Initializable {
             }
         });
     
-    cost_btn_newCost.setOnAction((event) -> {
+    cost_btn_new.setOnAction((event) -> {
         try{            
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/costs/NewCost.fxml"));            
             Parent root1 = fxmlLoader.load();
@@ -287,6 +314,7 @@ public class MainController implements Initializable {
             ctrl.setUser(user);
             ctrl.setMainController(this);
             ctrl.setCost_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Costs"));
+            ctrl.setDefaultPurchaseDate();
             stage.show();                        
             
         }catch (IOException e){
@@ -325,7 +353,7 @@ public class MainController implements Initializable {
     
     public void runService(Service service){
             
-            service.start();
+            service.restart();
             progressBar.progressProperty().bind(service.progressProperty());
             
             service.setOnSucceeded((event) -> {

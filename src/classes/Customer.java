@@ -5,11 +5,10 @@
  */
 package classes;
 
-import java.io.IOException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
@@ -19,16 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+
 
 /**
  *
@@ -210,7 +200,7 @@ public class Customer  implements Runnable {
         List<Customer> customersList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Customers.DateCreated, Customers.LastName, Customers.FirstName, Customers.Comment, Customers.Mail, Customers.Phone, Customers.Address, Customers.City, Customers.ZipCode , Countries.CountryName, Customers.Company, Customers.CustomerID FROM Customers JOIN Countries ON Customers.CountryID=Countries.CountryID";
+        String query = "SELECT Customers.DateCreated, Customers.LastName, Customers.FirstName, Customers.Comment, Customers.Mail, Customers.Phone, Customers.Address, Customers.City, Customers.ZipCode , Countries.CountryName, Customers.Company, Customers.CustomerID FROM Customers JOIN Countries ON Customers.CountryID=Countries.CountryID ORDER BY Customers.CustomerID DESC";
                 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";

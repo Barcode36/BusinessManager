@@ -241,6 +241,18 @@ public class MngApi {
             }  
     }
     
+    public static boolean isTextFieldEmpty(TextField... textfields) {
+        
+        boolean isEmpty = false;
+        
+        for (int i = 0; i < textfields.length; i++) {
+            TextField textfield = textfields[i];
+            if(textfield.lengthProperty().get() == 0)isEmpty = true;
+        }
+        
+        return isEmpty;
+    }
+    
      
    
 }//end of class

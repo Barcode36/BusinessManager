@@ -110,7 +110,7 @@ public class Object {
         List<Object> objectList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT * FROM Objects";
+        String query = "SELECT * FROM Objects ORDER BY ObjectID ASC";
                 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
