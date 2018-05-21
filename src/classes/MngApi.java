@@ -22,6 +22,7 @@ import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -98,6 +99,17 @@ public class MngApi {
         int minutes = time % 60;
         
         newTime = new SimpleStringProperty(String.format("%dh %02dm", hours, minutes));
+        
+        return newTime;
+    }
+    
+    public static SimpleIntegerProperty convertToMinutes(String[] time){
+        SimpleIntegerProperty newTime;
+        
+        int hours = Integer.parseInt(time[0]);
+        int minutes = Integer.parseInt(time[1]);
+        
+        newTime = new SimpleIntegerProperty(hours + minutes);
         
         return newTime;
     }

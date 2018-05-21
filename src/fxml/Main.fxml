@@ -388,11 +388,10 @@
                            <columns>
                               <TableColumn fx:id="object_col_id" prefWidth="100.0" text="Object ID" />
                               <TableColumn fx:id="object_col_name" prefWidth="130.0" text="Object Name" />
-                              <TableColumn fx:id="object_col_soldCount" prefWidth="75.0" text="Sold" />
+                              <TableColumn fx:id="object_col_soldCount" prefWidth="75.0" text="Sold Count" />
                               <TableColumn fx:id="object_col_weight" prefWidth="100.0" text="Object Weight" />
                               <TableColumn fx:id="object_col_supportWeight" prefWidth="125.0" text="Support Weight" />
                               <TableColumn fx:id="object_col_buildTime_formated" prefWidth="100.0" text="Build Time" />
-                              <TableColumn fx:id="object_col_projectId" prefWidth="100.0" text="Project ID" />
                               <TableColumn fx:id="object_col_stlLink" prefWidth="200.0" text="Stl Link" />
                            </columns>
                         </TableView>
@@ -400,7 +399,7 @@
                      <right>
                         <VBox spacing="10.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button mnemonicParsing="false" prefWidth="105.0" text="New Object" />
+                              <Button fx:id="object_btn_new" mnemonicParsing="false" prefWidth="105.0" text="New Object" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Edit Object" />
                               <Button layoutX="10.0" layoutY="35.0" mnemonicParsing="false" prefWidth="105.0" text="Delete Object(s)" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Filters: Inactive" />

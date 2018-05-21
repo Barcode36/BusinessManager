@@ -14,6 +14,7 @@ import classes.Object;
 import classes.Order;
 import classes.User;
 import controllers.materials.NewMaterialController;
+import controllers.objects.NewObjectController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -34,6 +35,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -125,6 +127,9 @@ public class MainController implements Initializable {
     
     @FXML
     private TableColumn<Object, Double> object_col_weight, object_col_supportWeight;
+    
+    @FXML
+    private Button object_btn_new;
     
     /*
     *
@@ -231,6 +236,34 @@ public class MainController implements Initializable {
             }
         });
     
+    object_btn_new.setOnAction((event) -> {
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/objects/NewObject.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewObjectController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("New Object");
+            stage.setMinHeight(400);
+            stage.setMinWidth(440);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setObject_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Objects"));
+            stage.show();  
+            stage.setAlwaysOnTop(true);
+            
+        }catch (IOException e){
+            
+        }
+    });//end new cost button  setOnAction
+    
     /*
     *
     *
@@ -259,6 +292,7 @@ public class MainController implements Initializable {
             NewMaterialController ctrl = fxmlLoader.getController();
             Stage stage = new Stage();
             stage.setTitle("New Material");
+            stage.initModality(Modality.APPLICATION_MODAL);
             //stage.setMinHeight(440);
             //stage.setMinWidth(400);
            
@@ -305,6 +339,7 @@ public class MainController implements Initializable {
             Parent root1 = fxmlLoader.load();
             NewCostController ctrl = fxmlLoader.getController();
             Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("New Cost");
             stage.setMinHeight(440);
             stage.setMinWidth(400);
