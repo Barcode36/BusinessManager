@@ -48,8 +48,11 @@ public class LoginController {
             ctrl.runService(ctrl.getService_refreshOrders());
                 
             
-        }catch (IOException e){
-
+        } catch (IOException e){
+            e.printStackTrace();
+        } catch (NullPointerException e){
+            signIn(event);
+            e.printStackTrace();
         }
 
     }//signIn end

@@ -21,7 +21,10 @@ import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.stage.Modality;
 
 
@@ -267,5 +270,14 @@ public class MngApi {
         datePicker.setValue(LocalDateTime.now().toLocalDate());
     }
    
+    public static ListView<SimpleTableObject> convertToListView(List<SimpleTableObject> list){
+        //Create list of orders
+        ObservableList<SimpleTableObject> observableList = FXCollections.observableArrayList(list);
+        
+        ListView<SimpleTableObject> listView = new ListView<>(observableList);
+
+        return listView;
+    }
+    
 }//end of class
 

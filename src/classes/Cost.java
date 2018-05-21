@@ -96,9 +96,6 @@ public class Cost {
     
     public static List<Cost> getCosts(User user) {
         
-       
-        
-        
         //Create list
         List<Cost> allCostsList = new ArrayList<>();
         

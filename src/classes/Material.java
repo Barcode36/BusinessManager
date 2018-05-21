@@ -16,6 +16,9 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.ListView;
 
 /**
  *
@@ -24,10 +27,10 @@ import javafx.beans.property.SimpleStringProperty;
 public class Material {
     
     SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
-    SimpleIntegerProperty material_id, material_weight;
+    SimpleIntegerProperty material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
     SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
 
-    public Material(SimpleStringProperty material_color, SimpleStringProperty material_manufacturer, SimpleStringProperty material_type, SimpleStringProperty material_finished, SimpleStringProperty material_distributor, SimpleStringProperty material_purchaseDate, SimpleStringProperty material_comment, SimpleIntegerProperty material_id, SimpleIntegerProperty material_weight, SimpleDoubleProperty material_diameter, SimpleDoubleProperty material_price, SimpleDoubleProperty material_shipping, SimpleDoubleProperty material_used, SimpleDoubleProperty material_trash, SimpleDoubleProperty material_soldFor, SimpleDoubleProperty material_profit) {
+    public Material(SimpleStringProperty material_color, SimpleStringProperty material_manufacturer, SimpleStringProperty material_type, SimpleStringProperty material_finished, SimpleStringProperty material_distributor, SimpleStringProperty material_purchaseDate, SimpleStringProperty material_comment, SimpleIntegerProperty material_id, SimpleIntegerProperty material_weight, SimpleIntegerProperty material_id_manufacturer, SimpleIntegerProperty material_id_materialType, SimpleIntegerProperty material_id_color, SimpleIntegerProperty material_id_weight, SimpleIntegerProperty material_id_seller, SimpleIntegerProperty material_id_diameter, SimpleDoubleProperty material_diameter, SimpleDoubleProperty material_price, SimpleDoubleProperty material_shipping, SimpleDoubleProperty material_used, SimpleDoubleProperty material_trash, SimpleDoubleProperty material_soldFor, SimpleDoubleProperty material_profit) {
         this.material_color = material_color;
         this.material_manufacturer = material_manufacturer;
         this.material_type = material_type;
@@ -37,6 +40,12 @@ public class Material {
         this.material_comment = material_comment;
         this.material_id = material_id;
         this.material_weight = material_weight;
+        this.material_id_manufacturer = material_id_manufacturer;
+        this.material_id_materialType = material_id_materialType;
+        this.material_id_color = material_id_color;
+        this.material_id_weight = material_id_weight;
+        this.material_id_seller = material_id_seller;
+        this.material_id_diameter = material_id_diameter;
         this.material_diameter = material_diameter;
         this.material_price = material_price;
         this.material_shipping = material_shipping;
@@ -46,24 +55,6 @@ public class Material {
         this.material_profit = material_profit;
     }
 
-    public SimpleStringProperty getMaterial_comment() {
-        return material_comment;
-    }
-
-    public void setMaterial_comment(SimpleStringProperty material_comment) {
-        this.material_comment = material_comment;
-    }
-
-    
-
-    public SimpleDoubleProperty getMaterial_diameter() {
-        return material_diameter;
-    }
-
-    public void setMaterial_diameter(SimpleDoubleProperty material_diameter) {
-        this.material_diameter = material_diameter;
-    }
-    
     public SimpleStringProperty getMaterial_color() {
         return material_color;
     }
@@ -112,6 +103,14 @@ public class Material {
         this.material_purchaseDate = material_purchaseDate;
     }
 
+    public SimpleStringProperty getMaterial_comment() {
+        return material_comment;
+    }
+
+    public void setMaterial_comment(SimpleStringProperty material_comment) {
+        this.material_comment = material_comment;
+    }
+
     public SimpleIntegerProperty getMaterial_id() {
         return material_id;
     }
@@ -128,7 +127,61 @@ public class Material {
         this.material_weight = material_weight;
     }
 
-    
+    public SimpleIntegerProperty getMaterial_id_manufacturer() {
+        return material_id_manufacturer;
+    }
+
+    public void setMaterial_id_manufacturer(SimpleIntegerProperty material_id_manufacturer) {
+        this.material_id_manufacturer = material_id_manufacturer;
+    }
+
+    public SimpleIntegerProperty getMaterial_id_materialType() {
+        return material_id_materialType;
+    }
+
+    public void setMaterial_id_materialType(SimpleIntegerProperty material_id_materialType) {
+        this.material_id_materialType = material_id_materialType;
+    }
+
+    public SimpleIntegerProperty getMaterial_id_color() {
+        return material_id_color;
+    }
+
+    public void setMaterial_id_color(SimpleIntegerProperty material_id_color) {
+        this.material_id_color = material_id_color;
+    }
+
+    public SimpleIntegerProperty getMaterial_id_weight() {
+        return material_id_weight;
+    }
+
+    public void setMaterial_id_weight(SimpleIntegerProperty material_id_weight) {
+        this.material_id_weight = material_id_weight;
+    }
+
+    public SimpleIntegerProperty getMaterial_id_seller() {
+        return material_id_seller;
+    }
+
+    public void setMaterial_id_seller(SimpleIntegerProperty material_id_seller) {
+        this.material_id_seller = material_id_seller;
+    }
+
+    public SimpleIntegerProperty getMaterial_id_diameter() {
+        return material_id_diameter;
+    }
+
+    public void setMaterial_id_diameter(SimpleIntegerProperty material_id_diameter) {
+        this.material_id_diameter = material_id_diameter;
+    }
+
+    public SimpleDoubleProperty getMaterial_diameter() {
+        return material_diameter;
+    }
+
+    public void setMaterial_diameter(SimpleDoubleProperty material_diameter) {
+        this.material_diameter = material_diameter;
+    }
 
     public SimpleDoubleProperty getMaterial_price() {
         return material_price;
@@ -178,6 +231,8 @@ public class Material {
         this.material_profit = material_profit;
     }
 
+    
+
         
     
     //this method get list of materials - ONLY materials, without statistics
@@ -187,7 +242,7 @@ public class Material {
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Materials.Comment, Materials.MaterialID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialType, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID ORDER BY Materials.MaterialID DESC";
+        String query = "SELECT Materials.Comment, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID ORDER BY Materials.MaterialID DESC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -225,7 +280,7 @@ public class Material {
             while(rs.next()){
                 
                 SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
-                SimpleIntegerProperty material_id,material_weight;
+                SimpleIntegerProperty material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
                 SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
                 
                 material_color = new SimpleStringProperty(rs.getString("Color"));
@@ -234,10 +289,16 @@ public class Material {
                 material_finished = new SimpleStringProperty(rs.getString("Finished"));
                 material_distributor = new SimpleStringProperty(rs.getString("Seller"));
                 material_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
-                material_comment = new SimpleStringProperty(rs.getString("Comment"));
+                material_comment = new SimpleStringProperty(rs.getString("Comment"));                
                 
                 material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
                 material_weight = new SimpleIntegerProperty(rs.getInt("WeightValue"));
+                material_id_manufacturer = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
+                material_id_materialType = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
+                material_id_color = new SimpleIntegerProperty(rs.getInt("ColorID"));
+                material_id_weight = new SimpleIntegerProperty(rs.getInt("WeightID"));
+                material_id_seller = new SimpleIntegerProperty(rs.getInt("SellerID"));
+                material_id_diameter = new SimpleIntegerProperty(rs.getInt("DiameterID"));
                 
                 material_diameter = new SimpleDoubleProperty(rs.getDouble("DiameterValue"));
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
@@ -248,7 +309,7 @@ public class Material {
                 material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
                 material_profit = new SimpleDoubleProperty(material_soldFor.get() - material_price.get());
                 
-                Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit);
+                Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit);
                 
                 allMaterialsList.add(material);
                 
@@ -416,13 +477,14 @@ public class Material {
     return soldFor;
     }
     
-    public static List<String> getMaterialTypes(User user) {
+    
+    public static List<SimpleTableObject> getMaterialTypes(User user) {
         
         //Create list
-        List<String> materialTypes = new ArrayList<>();
+        List<SimpleTableObject> materialTypes = new ArrayList<>();
         
         //Create query
-        String query = "SELECT MaterialType FROM MaterialTypes ORDER BY MaterialType ASC";
+        String query = "SELECT MaterialTypeID, MaterialType FROM MaterialTypes ORDER BY MaterialType ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -459,9 +521,12 @@ public class Material {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                String type = rs.getString("MaterialType");
+                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
+                SimpleStringProperty name = new SimpleStringProperty(rs.getString("MaterialType"));
                 
-                materialTypes.add(type);
+                SimpleTableObject sto = new SimpleTableObject(id, name);
+                
+                materialTypes.add(sto);
                 
             }
 
@@ -493,13 +558,13 @@ public class Material {
     return materialTypes;
     }
     
-    public static List<String> getMaterialManufacturers(User user) {
+    public static List<SimpleTableObject> getMaterialManufacturers(User user) {
         
         //Create list
-        List<String> materialManufacturers = new ArrayList<>();
+        List<SimpleTableObject> materialManufacturers = new ArrayList<>();
         
         //Create query
-        String query = "SELECT ManufacturerName FROM MaterialManufacturers ORDER BY ManufacturerName ASC";
+        String query = "SELECT ManufacturerID, ManufacturerName FROM MaterialManufacturers ORDER BY ManufacturerName ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -536,9 +601,13 @@ public class Material {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                String manufacturer = rs.getString("ManufacturerName");
                 
-                materialManufacturers.add(manufacturer);
+                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
+                SimpleStringProperty name = new SimpleStringProperty(rs.getString("ManufacturerName"));
+                
+                SimpleTableObject sto = new SimpleTableObject(id, name);
+                
+                materialManufacturers.add(sto);
                 
             }
 
@@ -570,13 +639,13 @@ public class Material {
     return materialManufacturers;
     }
     
-    public static List<String> getMaterialSellers(User user) {
+    public static List<SimpleTableObject> getMaterialSellers(User user) {
         
         //Create list
-        List<String> materialSellers = new ArrayList<>();
+        List<SimpleTableObject> materialSellers = new ArrayList<>();
         
         //Create query
-        String query = "SELECT SellerName FROM MaterialSellers ORDER BY SellerName ASC";
+        String query = "SELECT SellerID, SellerName FROM MaterialSellers ORDER BY SellerName ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -611,11 +680,14 @@ public class Material {
             //Query is executed, resultSet saved. Now we need to process the data
             //rs.next() loads row            
             //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
+            while(rs.next()){                
                 
-                String seller = rs.getString("SellerName");
+                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("SellerID"));
+                SimpleStringProperty name = new SimpleStringProperty(rs.getString("SellerName"));
                 
-                materialSellers.add(seller);
+                SimpleTableObject sto = new SimpleTableObject(id, name);
+                
+                materialSellers.add(sto);
                 
             }
 
@@ -647,13 +719,13 @@ public class Material {
     return materialSellers;
     }
     
-    public static List<String> getMaterialColors(User user) {
+    public static List<SimpleTableObject> getMaterialColors(User user) {
         
         //Create list
-        List<String> materialColors = new ArrayList<>();
+        List<SimpleTableObject> materialColors = new ArrayList<>();
         
         //Create query
-        String query = "SELECT ColorName FROM MaterialColors ORDER BY ColorName ASC";
+        String query = "SELECT ColorID, ColorName FROM MaterialColors ORDER BY ColorName ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -688,11 +760,13 @@ public class Material {
             //Query is executed, resultSet saved. Now we need to process the data
             //rs.next() loads row            
             //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
+            while(rs.next()){                
                 
-                String color = rs.getString("ColorName");
+                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("ColorID"));
+                SimpleStringProperty name = new SimpleStringProperty(rs.getString("ColorName"));
                 
-                materialColors.add(color);
+                SimpleTableObject sto = new SimpleTableObject(id, name);
+                materialColors.add(sto);
                 
             }
 
@@ -724,13 +798,13 @@ public class Material {
     return materialColors;
     }
     
-    public static List<Integer> getMaterialWeights(User user) {
+    public static List<SimpleTableObject> getMaterialWeights(User user) {
         
         //Create list
-        List<Integer> materialWeights = new ArrayList<>();
+        List<SimpleTableObject> materialWeights = new ArrayList<>();
         
         //Create query
-        String query = "SELECT WeightValue FROM MaterialWeights ORDER BY WeightValue ASC";
+        String query = "SELECT WeightID, WeightValue FROM MaterialWeights ORDER BY WeightValue ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -767,9 +841,13 @@ public class Material {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                int weight = rs.getInt("WeightValue");
-                                
-                materialWeights.add(weight);
+                
+                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("WeightID"));
+                SimpleStringProperty name = new SimpleStringProperty(rs.getString("WeightValue"));
+                
+                SimpleTableObject sto = new SimpleTableObject(id, name); 
+                
+                materialWeights.add(sto);
                 
             }
 
@@ -801,13 +879,13 @@ public class Material {
     return materialWeights;
     }
     
-    public static List<Double> getMaterialDiameters(User user) {
+    public static List<SimpleTableObject> getMaterialDiameters(User user) {
         
         //Create list
-        List<Double> materialDiameters = new ArrayList<>();
+        List<SimpleTableObject> materialDiameters = new ArrayList<>();
         
         //Create query
-        String query = "SELECT DiameterValue FROM MaterialDiameters ORDER BY DiameterValue ASC";
+        String query = "SELECT DiameterID, DiameterValue FROM MaterialDiameters ORDER BY DiameterValue ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -845,9 +923,13 @@ public class Material {
             while(rs.next()){
                 
                 
-                double diameter = rs.getDouble("DiameterValue");
                 
-                materialDiameters.add(diameter);
+                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("DiameterID"));
+                SimpleStringProperty name = new SimpleStringProperty(rs.getString("DiameterValue"));
+                
+                SimpleTableObject sto = new SimpleTableObject(id, name); 
+                
+                materialDiameters.add(sto);
                 
             }
 
@@ -877,5 +959,14 @@ public class Material {
         }//end try
         
     return materialDiameters;
+    }
+    
+    public static void insertNewMaterial(Material newMaterial, User user){
+        
+        String updateQuery = "INSERT INTO Materials VALUES (null, " + newMaterial.getMaterial_id_manufacturer().get() + "," + newMaterial.getMaterial_id_materialType().get() + "," + newMaterial.getMaterial_id_color().get() + "," + newMaterial.getMaterial_id_weight().get()+ "," + newMaterial.getMaterial_price().get() + "," + newMaterial.getMaterial_shipping().get() + ",'" + newMaterial.getMaterial_purchaseDate().get() + "'," + newMaterial.getMaterial_id_seller().get() + ",'" + newMaterial.getMaterial_finished().get() + "'," + newMaterial.getMaterial_trash().get() + "," + newMaterial.getMaterial_id_diameter().get() + ",'" + newMaterial.getMaterial_comment().get() + "')";
+        System.out.println();
+        System.out.print(updateQuery);
+        MngApi.performUpdate(updateQuery, user);                
+        
     }
 }

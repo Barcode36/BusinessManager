@@ -147,7 +147,7 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <ComboBox fx:id="material_comboBox_type" prefHeight="25.0" prefWidth="150.0" promptText="Choose type..." GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <ComboBox fx:id="material_comboBox_type" prefHeight="25.0" prefWidth="296.0" promptText="Choose type..." GridPane.columnIndex="1" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="5.0" />
                </GridPane.margin></ComboBox>
