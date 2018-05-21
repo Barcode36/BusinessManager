@@ -417,4 +417,88 @@ public class Customer  implements Runnable {
         
         return ordersPrice;
     }
+    
+    public static List<SimpleTableObject> getCompanies(User user) {
+        
+        //Create list
+        List<SimpleTableObject> companies = new ArrayList<>();
+        
+        //Create query
+        String query = "SELECT * FROM Companies ORDER BY CompanyID ASC";
+
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            
+            if(conn.isValid(10) == false) {
+                MngApi obj = new MngApi();
+                obj.alertConnectionLost();
+            }
+            
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+                
+                
+                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("CompanyID"));
+                SimpleStringProperty name = new SimpleStringProperty(rs.getString("CompanyName"));
+                
+                SimpleTableObject sto = new SimpleTableObject(id, name); 
+                
+                companies.add(sto);
+                
+            }
+
+            rs.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+    return companies;
+    }
+    
+    
 }

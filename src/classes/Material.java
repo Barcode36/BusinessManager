@@ -16,9 +16,6 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.ListView;
 
 /**
  *
@@ -966,9 +963,7 @@ public class Material {
     
     public static void insertNewMaterial(Material newMaterial, User user){
         
-        String updateQuery = "INSERT INTO Materials VALUES (null, " + newMaterial.getMaterial_id_manufacturer().get() + "," + newMaterial.getMaterial_id_materialType().get() + "," + newMaterial.getMaterial_id_color().get() + "," + newMaterial.getMaterial_id_weight().get()+ "," + newMaterial.getMaterial_price().get() + "," + newMaterial.getMaterial_shipping().get() + ",'" + newMaterial.getMaterial_purchaseDate().get() + "'," + newMaterial.getMaterial_id_seller().get() + ",'" + newMaterial.getMaterial_finished().get() + "'," + newMaterial.getMaterial_trash().get() + "," + newMaterial.getMaterial_id_diameter().get() + ",'" + newMaterial.getMaterial_comment().get() + "')";
-        System.out.println();
-        System.out.print(updateQuery);
+        String updateQuery = "INSERT INTO Materials VALUES (null, " + newMaterial.getMaterial_id_manufacturer().get() + "," + newMaterial.getMaterial_id_materialType().get() + "," + newMaterial.getMaterial_id_color().get() + "," + newMaterial.getMaterial_id_weight().get()+ "," + newMaterial.getMaterial_price().get() + "," + newMaterial.getMaterial_shipping().get() + ",'" + newMaterial.getMaterial_purchaseDate().get() + "'," + newMaterial.getMaterial_id_seller().get() + ",'" + newMaterial.getMaterial_finished().get() + "'," + newMaterial.getMaterial_trash().get() + "," + newMaterial.getMaterial_id_diameter().get() + ",'" + newMaterial.getMaterial_comment().get() + "')";        
         MngApi.performUpdate(updateQuery, user);                
         
     }
