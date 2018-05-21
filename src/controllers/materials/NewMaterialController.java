@@ -32,6 +32,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 
 /**
  * FXML Controller class
@@ -138,120 +139,92 @@ public class NewMaterialController implements Initializable {
         
         ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(user));
         
-        material_comboBox_type.getItems().addAll(types);
-        material_comboBox_type.setCellFactory((ListView<SimpleTableObject> param) -> {
-            final ListCell<SimpleTableObject> cell = new ListCell<SimpleTableObject>() {                
-                @Override
-                public void updateItem(SimpleTableObject item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (item != null) {
-                        
-                        setText(item.getName().get());
-                        
-                    }
-                    else {
-                        setText(null);
-                    }
-                }
-            };
-            return cell;
+        material_comboBox_type.setItems(types);
+        material_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
+      
         
         
         material_comboBox_color.getItems().addAll(colors);
-        material_comboBox_color.setCellFactory((ListView<SimpleTableObject> param) -> {
-            final ListCell<SimpleTableObject> cell = new ListCell<SimpleTableObject>() {                
-                @Override
-                public void updateItem(SimpleTableObject item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (item != null) {
-                        
-                        setText(item.getName().get());
-                        
-                    }
-                    else {
-                        setText(null);
-                    }
-                }
-            };
-            return cell;
+        material_comboBox_color.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
         
         material_comboBox_diameter.getItems().addAll(diameters);
-        material_comboBox_diameter.setCellFactory((ListView<SimpleTableObject> param) -> {
-            final ListCell<SimpleTableObject> cell = new ListCell<SimpleTableObject>() {                
-                @Override
-                public void updateItem(SimpleTableObject item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (item != null) {
-                        
-                        setText(item.getName().get());
-                        
-                    }
-                    else {
-                        setText(null);
-                    }
-                }
-            };
-            return cell;
+        material_comboBox_diameter.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
         
         material_comboBox_weight.getItems().addAll(weights);
-        material_comboBox_weight.setCellFactory((ListView<SimpleTableObject> param) -> {
-            final ListCell<SimpleTableObject> cell = new ListCell<SimpleTableObject>() {                
-                @Override
-                public void updateItem(SimpleTableObject item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (item != null) {
-                        
-                        setText(item.getName().get());
-                        
-                    }
-                    else {
-                        setText(null);
-                    }
-                }
-            };
-            return cell;
+        material_comboBox_weight.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
         
         material_comboBox_manufacturer.getItems().addAll(manufacturers);
-        material_comboBox_manufacturer.setCellFactory((ListView<SimpleTableObject> param) -> {
-            final ListCell<SimpleTableObject> cell = new ListCell<SimpleTableObject>() {                
-                @Override
-                public void updateItem(SimpleTableObject item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (item != null) {
-                        
-                        setText(item.getName().get());
-                        
-                    }
-                    else {
-                        setText(null);
-                    }
-                }
-            };
-            return cell;
+        material_comboBox_manufacturer.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
         
         material_comboBox_distributor.getItems().addAll(distributors);
-        material_comboBox_distributor.setCellFactory((ListView<SimpleTableObject> param) -> {
-            final ListCell<SimpleTableObject> cell = new ListCell<SimpleTableObject>() {                
-                @Override
-                public void updateItem(SimpleTableObject item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (item != null) {
-                        
-                        setText(item.getName().get());
-                        
-                    }
-                    else {
-                        setText(null);
-                    }
-                }
-            };
-            return cell;
+        material_comboBox_distributor.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
+        
+        material_comboBox_diameter.setVisibleRowCount(5);
+        material_comboBox_weight.setVisibleRowCount(5);
+        material_comboBox_type.setVisibleRowCount(5);
+        material_comboBox_color.setVisibleRowCount(5);
+        material_comboBox_manufacturer.setVisibleRowCount(5);
+        material_comboBox_distributor.setVisibleRowCount(5);
         
     }    
 

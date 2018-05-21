@@ -164,6 +164,9 @@ public class Object {
             }
 
             rs.close();
+        } catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
         } catch (SQLNonTransientConnectionException se) {
             MngApi obj = new MngApi();
             obj.alertConnectionLost();

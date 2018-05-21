@@ -151,7 +151,10 @@ public class Cost {
             }
 
             rs.close();
-        } catch (SQLNonTransientConnectionException se) {
+        }catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        }catch (SQLNonTransientConnectionException se) {
             MngApi obj = new MngApi();
             obj.alertConnectionLost();
         } catch (SQLException se) {

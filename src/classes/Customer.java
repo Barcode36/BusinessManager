@@ -5,11 +5,10 @@
  */
 package classes;
 
-import java.io.IOException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
@@ -19,16 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 /**
  *
@@ -269,6 +258,9 @@ public class Customer  implements Runnable {
             }
 
             rs.close();
+        } catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
         } catch (SQLNonTransientConnectionException se) {            
             MngApi obj = new MngApi();
             obj.alertConnectionLost();
