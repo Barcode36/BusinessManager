@@ -103,13 +103,14 @@ public class MngApi {
         return newTime;
     }
     
-    public static SimpleIntegerProperty convertToMinutes(String[] time){
-        SimpleIntegerProperty newTime;
+    public static int convertToMinutes(String time){
         
-        int hours = Integer.parseInt(time[0]);
-        int minutes = Integer.parseInt(time[1]);
+        int newTime = 0;
         
-        newTime = new SimpleIntegerProperty(hours + minutes);
+        int hours = Integer.parseInt(time.split(",")[0]);
+        int minutes = Integer.parseInt(time.split(",")[1]);
+        
+        newTime = hours*60 + minutes;
         
         return newTime;
     }

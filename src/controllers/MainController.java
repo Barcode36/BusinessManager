@@ -120,7 +120,7 @@ public class MainController implements Initializable {
     private TableView<Object> tv_objects;
     
     @FXML
-    private TableColumn<Object, String> object_col_name, object_col_stlLink, object_col_buildTime_formated;
+    private TableColumn<Object, String> object_col_name, object_col_stlLink, object_col_buildTime_formated, object_col_comment;
     
     @FXML
     private TableColumn<Object, Integer> object_col_id, object_col_soldCount;
@@ -263,6 +263,8 @@ public class MainController implements Initializable {
             
         }
     });//end new cost button  setOnAction
+    
+    
     
     /*
     *
@@ -570,6 +572,7 @@ public class MainController implements Initializable {
         object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
         object_col_stlLink.setCellValueFactory((param) -> {return param.getValue().getObject_stlLink();});           
         object_col_buildTime_formated.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
+        object_col_comment.setCellValueFactory((param) -> {return param.getValue().getObject_comment();});
         
         object_col_id.setCellValueFactory((param) -> {return param.getValue().getObject_id().asObject();});        
         object_col_soldCount.setCellValueFactory((param) -> {return param.getValue().getObject_SoldCount().asObject();});
@@ -607,7 +610,11 @@ public class MainController implements Initializable {
         return task_refreshCostsTable;
         }
     };
-    
+
+    public Service<Void> getService_refreshObjects() {
+        return service_refreshObjects;
+    }
+        
     /*
     *
     *

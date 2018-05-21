@@ -23,14 +23,15 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class Object {
     
-    private SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated;
+    private SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
     private SimpleIntegerProperty object_id, object_buildTime, object_SoldCount;
     private SimpleDoubleProperty object_supportWeight, object_weight;
 
-    public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_SoldCount, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight) {
+    public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleStringProperty object_comment, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_SoldCount, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight) {
         this.object_name = object_name;
         this.object_stlLink = object_stlLink;
         this.object_buildTime_formated = object_buildTime_formated;
+        this.object_comment = object_comment;
         this.object_id = object_id;
         this.object_buildTime = object_buildTime;
         this.object_SoldCount = object_SoldCount;
@@ -102,6 +103,14 @@ public class Object {
         this.object_weight = object_weight;
     }
 
+    public SimpleStringProperty getObject_comment() {
+        return object_comment;
+    }
+
+    public void setObject_comment(SimpleStringProperty object_comment) {
+        this.object_comment = object_comment;
+    }
+
     
     
     public static List<Object> getObjects(User user){
@@ -141,12 +150,13 @@ public class Object {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-               SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated;
+               SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
                SimpleIntegerProperty object_id, object_buildTime, object_soldCount;
                SimpleDoubleProperty object_supportWeight, object_weight;
                
                object_name = new SimpleStringProperty(rs.getString("ObjectName"));
                object_stlLink = new SimpleStringProperty(rs.getString("StlLink"));
+               object_comment = new SimpleStringProperty(rs.getString("Comment"));
                
                object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
                object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
@@ -157,8 +167,7 @@ public class Object {
                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
                object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
                
-               Object object = new Object(object_name, object_stlLink, object_buildTime_formated,object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight);
-                
+               Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight);                       
                 
                objectList.add(object);
             }
@@ -258,6 +267,13 @@ public class Object {
         }//end try
         
         return soldCount;  
+        
+    }
+    
+    public static void insertNewObject(classes.Object obj, User user){
+        
+        String updateQuery = "INSERT INTO Objects VALUES (null,'" + obj.getObject_name().get() + "'," + obj.getObject_weight().get() + "," + obj.getObject_supportWeight().get() + ",1," + obj.getObject_buildTime().get() + ",'" + obj.getObject_stlLink().get() + "','" + obj.getObject_comment().get()+ "')";
+        MngApi.performUpdate(updateQuery, user);
         
     }
     

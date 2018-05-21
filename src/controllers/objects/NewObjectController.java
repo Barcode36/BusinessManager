@@ -44,7 +44,62 @@ public class NewObjectController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        
+        object_btn_create.setOnAction((event) -> {            
+            boolean isEmpty = MngApi.isTextFieldEmpty(object_txtField_name, object_txtField_weight, object_txtField_supportWeight, object_txtField_hours, object_txtField_minutes, object_txtField_stlLink, object_txtField_comment);
+            
+            if (isEmpty == true){
+                object_label_info.setText("Fields cannot be empty.");
+                object_label_info.setTextFill(Color.web("#ff0000"));
+                return;
+            }
+            
+            if (Integer.parseInt(object_txtField_minutes.getText()) > 59){
+                object_label_info.setText("Max value allowed is 59.");
+                object_label_info.setTextFill(Color.web("#ff0000"));
+                return;
+            }
+            
+            classes.Object newObject;
+            
+            try {
+                
+                SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
+                SimpleIntegerProperty object_id, object_buildTime, object_soldCount;
+                SimpleDoubleProperty object_supportWeight, object_weight;
+               
+                object_name = new SimpleStringProperty(object_txtField_name.getText());
+                object_stlLink = new SimpleStringProperty(object_txtField_stlLink.getText());
+                object_comment = new SimpleStringProperty(object_txtField_comment.getText());
+                
+                object_id = new SimpleIntegerProperty(getObject_label_id_value());
+
+            
+                object_buildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(object_txtField_hours.getText() + "," + object_txtField_minutes.getText()));
+                    object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+               
+                object_soldCount = new SimpleIntegerProperty(0);
+               
+                object_supportWeight = new SimpleDoubleProperty(Double.parseDouble(object_txtField_supportWeight.getText()));
+                object_weight = new SimpleDoubleProperty(Double.parseDouble(object_txtField_weight.getText()));
+            
+                newObject = new classes.Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight);
+            
+                classes.Object.insertNewObject(newObject, user);
+                
+                MngApi.closeWindow(object_btn_create);            
+                mainController.runService(mainController.getService_refreshObjects());
+            
+            } catch (NumberFormatException e) {
+                object_label_info.setText("Wrong number format, please check your fields.");
+                object_label_info.setTextFill(Color.web("#ff0000"));
+            }
+            
+        });
+        
+        object_btn_cancel.setOnAction((event) -> {
+            MngApi.closeWindow(object_btn_cancel);
+        });
     }    
     
     public void setUser(User user) {

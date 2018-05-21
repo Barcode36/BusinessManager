@@ -393,6 +393,7 @@
                               <TableColumn fx:id="object_col_supportWeight" prefWidth="125.0" text="Support Weight" />
                               <TableColumn fx:id="object_col_buildTime_formated" prefWidth="100.0" text="Build Time" />
                               <TableColumn fx:id="object_col_stlLink" prefWidth="200.0" text="Stl Link" />
+                              <TableColumn fx:id="object_col_comment" prefWidth="200.0" text="Comment" />
                            </columns>
                         </TableView>
                      </center>
