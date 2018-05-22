@@ -315,8 +315,8 @@
                               <TableColumn fx:id="order_col_totalCosts" prefWidth="100.0" text="Costs" />
                               <TableColumn fx:id="order_col_totalWeight" prefWidth="100.0" text="Weight" />
                               <TableColumn fx:id="order_col_totalBuildTime_formated" prefWidth="100.0" text="Build Time" />
-                              <TableColumn fx:id="order_col_dueDate" prefWidth="100.0" text="Due Date" />
                               <TableColumn fx:id="order_col_dateCreated" prefWidth="100.0" text="Date Created" />
+                              <TableColumn fx:id="order_col_dueDate" prefWidth="100.0" text="Due Date" />
                               <TableColumn fx:id="order_col_status" minWidth="0.0" prefWidth="100.0" text="Status" />
                               <TableColumn fx:id="order_col_comment" prefWidth="200.0" text="Comment" />
                           </columns>
