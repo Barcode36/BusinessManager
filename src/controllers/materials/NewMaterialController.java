@@ -5,10 +5,8 @@
  */
 package controllers.materials;
 
-import classes.Cost;
+
 import classes.Material;
-import static classes.Material.getMaterialSoldFor;
-import static classes.Material.getMaterialUsed;
 import classes.MngApi;
 import classes.SimpleTableObject;
 import classes.User;
@@ -27,11 +25,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 /**
@@ -122,8 +117,7 @@ public class NewMaterialController implements Initializable {
             
         });
         
-        material_btn_cancel.setOnAction((event) -> {
-            System.out.print(material_comboBox_color.getSelectionModel().getSelectedItem());
+        material_btn_cancel.setOnAction((event) -> {            
             MngApi.closeWindow(material_btn_cancel);
         });
     }    

@@ -22,7 +22,6 @@ import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

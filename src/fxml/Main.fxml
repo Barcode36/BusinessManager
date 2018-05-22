@@ -331,7 +331,7 @@
                      <right>
                         <VBox spacing="10.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button mnemonicParsing="false" prefWidth="105.0" text="New Customer" />
+                              <Button fx:id="customer_btn_new" mnemonicParsing="false" prefWidth="105.0" text="New Customer" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Edit Customer" />
                               <Button layoutX="10.0" layoutY="35.0" mnemonicParsing="false" prefWidth="105.0" text="Delete Customer" />
                               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="105.0" text="Filters: Inactive" />
@@ -363,12 +363,12 @@
                             <TableColumn fx:id="customer_col_id" prefWidth="100.0" text="Customer ID" />
                             <TableColumn fx:id="customer_col_lastName" prefWidth="100.0" text="Last Name" />
                               <TableColumn fx:id="customer_col_firstName" prefWidth="100.0" text="First Name" />
-                              <TableColumn fx:id="customer_col_orderCount" prefWidth="100.0" text="Order Count" />
-                              <TableColumn fx:id="customer_col_ordersPrice" prefWidth="100.0" text="Orders Price" />
-                              <TableColumn fx:id="customer_col_mail" prefWidth="125.0" text="Mail" />
+                              <TableColumn fx:id="customer_col_orderCount" prefWidth="76.0" text="Order Count" />
+                              <TableColumn fx:id="customer_col_ordersPrice" prefWidth="73.0" text="Orders Price" />
+                              <TableColumn fx:id="customer_col_mail" prefWidth="176.0" text="Mail" />
                               <TableColumn fx:id="customer_col_phone" prefWidth="100.0" text="Phone" />
-                              <TableColumn fx:id="customer_col_address" prefWidth="135.0" text="Address" />
-                              <TableColumn fx:id="customer_col_city" prefWidth="110.0" text="City" />
+                              <TableColumn fx:id="customer_col_address" prefWidth="155.0" text="Address" />
+                              <TableColumn fx:id="customer_col_city" prefWidth="90.0" text="City" />
                               <TableColumn fx:id="customer_col_zipCode" prefWidth="100.0" text="ZIP Code" />
                               <TableColumn fx:id="customer_col_country" prefWidth="100.0" text="Country" />
                               <TableColumn fx:id="customer_col_company" prefWidth="125.0" text="Company" />

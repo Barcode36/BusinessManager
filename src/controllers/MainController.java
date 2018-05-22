@@ -13,6 +13,7 @@ import classes.MngApi;
 import classes.Object;
 import classes.Order;
 import classes.User;
+import controllers.customers.NewCustomerController;
 import controllers.materials.NewMaterialController;
 import controllers.objects.NewObjectController;
 import java.io.IOException;
@@ -104,6 +105,9 @@ public class MainController implements Initializable {
     
     @FXML
     private TableColumn<Customer, Double> customer_col_ordersPrice;
+    
+    @FXML
+    private Button customer_btn_new;
     
     /*
     *
@@ -225,6 +229,36 @@ public class MainController implements Initializable {
             }
         });
     
+    customer_btn_new.setOnAction((event) -> {
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/customers/NewCustomer.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewCustomerController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("New Customer");
+//            stage.setMinHeight(400);
+//            stage.setMinWidth(440);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setCustomer_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Customers"));
+            ctrl.setComboBoxes();
+            stage.show();
+            MngApi.setActualDate(ctrl.getCustomer_datePicker_dateCreated());
+            stage.setAlwaysOnTop(true);
+            
+        }catch (IOException e){
+            
+        }
+    });//end new cost button  setOnAction
+    
     /*****************************          INITIALIZE OBJECTS TAB          *****************************/
     
     tab_objects.setOnSelectionChanged(new EventHandler<Event>() {
@@ -262,7 +296,7 @@ public class MainController implements Initializable {
         }catch (IOException e){
             
         }
-    });//end new cost button  setOnAction
+    });//end new object button  setOnAction
     
     
     
@@ -555,6 +589,12 @@ public class MainController implements Initializable {
         return task_refreshCostsTable;
         }
     };
+
+    public Service<Void> getService_refreshCustomers() {
+        return service_refreshCustomers;
+    }
+    
+    
     /*
     *
     *

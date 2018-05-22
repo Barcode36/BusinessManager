@@ -141,7 +141,7 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <DatePicker fx:id="object_datePicker_dateCreated" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="12">
+            <DatePicker fx:id="customer_datePicker_dateCreated" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="12">
                <GridPane.margin>
                   <Insets left="5.0" right="200.0" />
                </GridPane.margin>
@@ -211,7 +211,7 @@
                   <Insets right="5.0" />
                </GridPane.margin>
             </Label>
-            <ComboBox fx:id="customer_comboBox_Country" prefWidth="180.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
+            <ComboBox fx:id="customer_comboBox_country" prefWidth="180.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
