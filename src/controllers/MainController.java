@@ -16,6 +16,7 @@ import classes.User;
 import controllers.customers.NewCustomerController;
 import controllers.materials.NewMaterialController;
 import controllers.objects.NewObjectController;
+import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -210,6 +211,32 @@ public class MainController implements Initializable {
         });
         
         btn_newOrder.setOnAction((event) -> {
+            
+            try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Orders/NewOrder.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewOrderController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("New Customer");
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();            
+            
+            //passing credentials to main controller
+//            ctrl.setUser(user);
+//            ctrl.setMainController(this);
+//            ctrl.setCustomer_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Customers"));
+//            ctrl.setComboBoxes();
+            stage.show();
+//            MngApi.setActualDate(ctrl.getCustomer_datePicker_dateCreated());
+            stage.setAlwaysOnTop(true);
+            
+        }catch (IOException e){
+            
+        }
+            
         });
     /*
     *

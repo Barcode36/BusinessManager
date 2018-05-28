@@ -52,7 +52,7 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <Label text="100001" GridPane.rowIndex="2">
+            <Label fx:id="order_label_id" text="100001" GridPane.rowIndex="2">
                <font>
                   <Font name="System Bold" size="18.0" />
                </font>
@@ -74,7 +74,7 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <TextField editable="false" prefHeight="25.0" prefWidth="316.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+            <TextField fx:id="order_txtField_customer" editable="false" prefHeight="25.0" prefWidth="316.0" GridPane.columnSpan="2" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="75.0" right="60.0" />
                </GridPane.margin>
@@ -85,34 +85,34 @@
                   <Insets left="5.0" />
                </padding>
             </TextField>
-            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="Select" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+            <Button fx:id="order_btn_selectCustomer" mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="Select" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="5.0" />
                </GridPane.margin>
             </Button>
-            <TableView prefHeight="130.0" prefWidth="590.0" GridPane.columnSpan="5" GridPane.rowIndex="4" GridPane.rowSpan="3">
+            <TableView fx:id="tv_selectedObjects" prefHeight="130.0" prefWidth="590.0" GridPane.columnSpan="5" GridPane.rowIndex="4" GridPane.rowSpan="3">
               <columns>
-                <TableColumn prefWidth="64.0" text="Object ID" />
-                <TableColumn prefWidth="200.0" text="Object Name" />
-                  <TableColumn prefWidth="53.0" text="Weight" />
-                  <TableColumn prefWidth="97.0" text="Support Weight" />
-                  <TableColumn prefWidth="73.0" text="Build Time" />
-                  <TableColumn prefWidth="60.0" text="Quantity" />
-                  <TableColumn prefWidth="71.0" text="Material ID" />
-                  <TableColumn prefWidth="86.0" text="Material Type" />
-                  <TableColumn prefWidth="155.0" text="Material Color" />
-                  <TableColumn prefWidth="84.0" text="Object Price" />
+                <TableColumn fx:id="newOrder_col_objectID" prefWidth="64.0" text="Object ID" />
+                <TableColumn fx:id="newOrder_col_objectName" prefWidth="200.0" text="Object Name" />
+                  <TableColumn fx:id="newOrder_col_weight" prefWidth="53.0" text="Weight" />
+                  <TableColumn fx:id="newOrder_col_supportWeight" prefWidth="97.0" text="Support Weight" />
+                  <TableColumn fx:id="newOrder_col_buldTime" prefWidth="73.0" text="Build Time" />
+                  <TableColumn fx:id="newOrder_col_quantity" prefWidth="60.0" text="Quantity" />
+                  <TableColumn fx:id="newOrder_col_materialID" prefWidth="71.0" text="Material ID" />
+                  <TableColumn fx:id="newOrder_col_materialType" prefWidth="86.0" text="Material Type" />
+                  <TableColumn fx:id="newOrder_col_materialColor" prefWidth="155.0" text="Material Color" />
+                  <TableColumn fx:id="newOrder_col_objectPrice" prefWidth="84.0" text="Price" />
               </columns>
                <GridPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </GridPane.margin>
             </TableView>
-            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="Add Object" GridPane.rowIndex="7">
+            <Button fx:id="newOrder_btn_addObject" mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="Add Object" GridPane.rowIndex="7">
                <GridPane.margin>
                   <Insets left="5.0" />
                </GridPane.margin>
             </Button>
-            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="Remove Selected" GridPane.columnSpan="2" GridPane.rowIndex="7">
+            <Button fx:id="newOrder_btn_removeSelected" mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="Remove Selected" GridPane.columnSpan="2" GridPane.rowIndex="7">
                <GridPane.margin>
                   <Insets left="130.0" />
                </GridPane.margin>
@@ -141,8 +141,8 @@
                   <Insets right="5.0" />
                </GridPane.margin>
             </Label>
-            <DatePicker prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <DatePicker prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
+            <DatePicker fx:id="order_datePicker_dateCreated" prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <DatePicker fx:id="order_datePicker_dueDate" prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
@@ -173,7 +173,7 @@
                   <Insets left="45.0" right="80.0" />
                </GridPane.margin>
             </TextField>
-            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="143.0" text="Calculate Objects Prices" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="9">
+            <Button fx:id="newOrder_btn_calculatePrices" mnemonicParsing="false" prefHeight="25.0" prefWidth="143.0" text="Calculate Objects Prices" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="9">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
@@ -199,8 +199,8 @@
                   <Font size="12.0" />
                </font>
             </RadioButton>
-            <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="140.0" text="Create" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
-            <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="140.0" text="Cancel" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
+            <Button fx:id="newOrder_btn_createNewOrder" mnemonicParsing="false" prefHeight="46.0" prefWidth="140.0" text="Create" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
+            <Button fx:id="newOrder_btn_cancel" mnemonicParsing="false" prefHeight="46.0" prefWidth="140.0" text="Cancel" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
             <Label text="Summary" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="7">
                <font>
                   <Font name="System Bold" size="14.0" />
