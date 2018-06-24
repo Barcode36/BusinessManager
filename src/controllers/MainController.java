@@ -218,20 +218,16 @@ public class MainController implements Initializable {
             NewOrderController ctrl = fxmlLoader.getController();
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("New Customer");
+            stage.setTitle("New Order");
            
             stage.setScene(new Scene(root1));
             stage.setResizable(false);
             stage.centerOnScreen();            
             
-            //passing credentials to main controller
-//            ctrl.setUser(user);
-//            ctrl.setMainController(this);
-//            ctrl.setCustomer_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Customers"));
-//            ctrl.setComboBoxes();
             stage.show();
-//            MngApi.setActualDate(ctrl.getCustomer_datePicker_dateCreated());
             stage.setAlwaysOnTop(true);
+            
+            ctrl.setOrder_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Orders"));
             
         }catch (IOException e){
             

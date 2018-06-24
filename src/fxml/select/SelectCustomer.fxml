@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="476.0" prefWidth="930.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="controllers.select.SelectCustomerController">
+   <children>
+      <TableView fx:id="tv_customers" layoutX="-14.0" prefHeight="476.0" prefWidth="930.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <columns>
+          <TableColumn prefWidth="75.0" text="Customer ID" />
+            <TableColumn prefWidth="75.0" text="Last Name" />
+          <TableColumn prefWidth="75.0" text="First Name" />
+            <TableColumn prefWidth="75.0" text="Company" />
+            <TableColumn prefWidth="75.0" text="Mail" />
+            <TableColumn prefWidth="75.0" text="Phone" />
+            <TableColumn prefWidth="75.0" text="Address" />
+            <TableColumn prefWidth="75.0" text="City" />
+            <TableColumn prefWidth="75.0" text="Zip Code" />
+            <TableColumn prefWidth="75.0" text="Country" />
+            <TableColumn prefWidth="75.0" text="Date Created" />
+            <TableColumn prefWidth="75.0" text="Comment" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

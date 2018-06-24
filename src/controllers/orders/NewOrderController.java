@@ -55,7 +55,17 @@ public class NewOrderController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        
+        btn_selectCustomer.setOnAction((event) -> {
+            
+            
+            
+        });
+        
     }    
+    
+    public void setOrder_label_id_value(int id) {
+        this.label_orderID.setText(String.valueOf(id));        
+    }
     
 }
