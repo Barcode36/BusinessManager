@@ -212,7 +212,7 @@ public class MainController implements Initializable {
         
         btn_newOrder.setOnAction((event) -> {
             
-            try{            
+            try {            
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Orders/NewOrder.fxml"));            
             Parent root1 = fxmlLoader.load();
             NewOrderController ctrl = fxmlLoader.getController();
@@ -228,6 +228,9 @@ public class MainController implements Initializable {
             stage.setAlwaysOnTop(true);
             
             ctrl.setOrder_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Orders"));
+            ctrl.setUser(user);            
+            ctrl.setMainController(this);
+            
             
         }catch (IOException e){
             

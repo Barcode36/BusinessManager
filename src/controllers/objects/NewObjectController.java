@@ -5,12 +5,10 @@
  */
 package controllers.objects;
 
-import classes.Cost;
 import classes.MngApi;
 import classes.User;
 import controllers.MainController;
 import java.net.URL;
-import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -18,7 +16,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -76,7 +73,7 @@ public class NewObjectController implements Initializable {
 
             
                 object_buildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(object_txtField_hours.getText() + "," + object_txtField_minutes.getText()));
-                    object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+                object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
                
                 object_soldCount = new SimpleIntegerProperty(0);
                
