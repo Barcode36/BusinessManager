@@ -21,7 +21,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
 /**
  * FXML Controller class
@@ -31,8 +30,6 @@ import javafx.stage.Stage;
 public class SelectCustomerController implements Initializable {
 
     private User user;
-    
-    private MainController mainController;
     
     private NewOrderController newOrderController;
     
@@ -84,12 +81,8 @@ public class SelectCustomerController implements Initializable {
     
     public void setUser(User user) {
         this.user = user;
-    }
+    }    
     
-    public void setMainController(MainController mainController) {
-        this.mainController = mainController;
-    }
-
     public void displayCustomers() {        
         
         //Create list of orders
@@ -126,8 +119,6 @@ public class SelectCustomerController implements Initializable {
 
     public void setNewOrderController(NewOrderController newOrderController) {
         this.newOrderController = newOrderController;
-    }
-    
-    
+    }    
     
 }

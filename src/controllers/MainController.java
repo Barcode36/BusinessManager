@@ -19,6 +19,7 @@ import controllers.objects.NewObjectController;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -225,9 +226,11 @@ public class MainController implements Initializable {
             stage.centerOnScreen();            
             
             stage.show();
-            stage.setAlwaysOnTop(true);
+            //stage.setAlwaysOnTop(true);
             
             ctrl.setOrder_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Orders"));
+            ctrl.getDatePicker_dateCreated().setValue(LocalDate.now());
+            ctrl.getDatePicker_dueDate().setValue(LocalDate.now());
             ctrl.setUser(user);            
             ctrl.setMainController(this);
             
@@ -278,7 +281,7 @@ public class MainController implements Initializable {
             ctrl.setComboBoxes();
             stage.show();
             MngApi.setActualDate(ctrl.getCustomer_datePicker_dateCreated());
-            stage.setAlwaysOnTop(true);
+            //stage.setAlwaysOnTop(true);
             
         }catch (IOException e){
             
@@ -317,7 +320,7 @@ public class MainController implements Initializable {
             ctrl.setMainController(this);
             ctrl.setObject_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Objects"));
             stage.show();  
-            stage.setAlwaysOnTop(true);
+            //stage.setAlwaysOnTop(true);
             
         }catch (IOException e){
             
