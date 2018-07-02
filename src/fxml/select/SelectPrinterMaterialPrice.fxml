@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
@@ -11,13 +12,13 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane id="AnchorPane" prefHeight="313.0" prefWidth="427.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.1" fx:controller="controllers.select.SelectPrinterMaterialPriceController">
+<AnchorPane id="AnchorPane" prefHeight="313.0" prefWidth="427.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.select.SelectPrinterMaterialPriceController">
    <children>
       <GridPane layoutX="211.0" layoutY="168.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="219.0" minWidth="10.0" prefWidth="139.0" />
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="327.0" minWidth="10.0" prefWidth="288.0" />
+            <ColumnConstraints />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints maxHeight="85.0" minHeight="10.0" prefHeight="82.0" vgrow="SOMETIMES" />
@@ -71,16 +72,6 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <TextField fx:id="txtField_printer" prefHeight="25.0" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="2">
-               <GridPane.margin>
-                  <Insets left="150.0" right="100.0" />
-               </GridPane.margin>
-            </TextField>
-            <TextField fx:id="txtField_material" prefHeight="25.0" GridPane.columnSpan="3" GridPane.rowIndex="3">
-               <GridPane.margin>
-                  <Insets left="150.0" right="100.0" />
-               </GridPane.margin>
-            </TextField>
             <TextField fx:id="txtField_price" prefHeight="25.0" GridPane.columnSpan="3" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets left="150.0" right="200.0" />
@@ -96,17 +87,7 @@
                   <Insets left="150.0" />
                </GridPane.margin>
             </Spinner>
-            <Button fx:id="btn_cancell" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
-            <Button fx:id="btn_selectPrinter" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Select" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
-               <GridPane.margin>
-                  <Insets right="10.0" />
-               </GridPane.margin>
-            </Button>
-            <Button fx:id="btn_selectMaterial" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Select" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
-               <GridPane.margin>
-                  <Insets right="10.0" />
-               </GridPane.margin>
-            </Button>
+            <Button fx:id="btn_cancel" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
             <Label text="€" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets left="95.0" />
@@ -115,6 +96,21 @@
                   <Font size="14.0" />
                </font>
             </Label>
+            <ComboBox fx:id="comboBox_printer" prefHeight="25.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin>
+            </ComboBox>
+            <TextField fx:id="txtField_material" maxHeight="25.0" maxWidth="177.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin>
+            </TextField>
+            <Button fx:id="btn_selectMaterial" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Assign" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin>
+            </Button>
          </children>
       </GridPane>
    </children>

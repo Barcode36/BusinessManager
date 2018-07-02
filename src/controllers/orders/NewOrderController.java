@@ -6,14 +6,12 @@
 package controllers.orders;
 
 import classes.Customer;
-import classes.MngApi;
-import classes.Object;
-import classes.Order;
 import classes.OrderItem;
 import classes.User;
 import controllers.MainController;
 import controllers.select.SelectCustomerController;
 import controllers.select.SelectObjectController;
+import controllers.select.SelectPrinterMaterialPriceController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -141,10 +139,10 @@ public class NewOrderController implements Initializable {
                     try {            
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/select/SelectPrinterMaterialPrice.fxml"));            
                         Parent root1 = fxmlLoader.load();
-                        SelectObjectController ctrl = fxmlLoader.getController();
+                        SelectPrinterMaterialPriceController ctrl = fxmlLoader.getController();
                         Stage stage = new Stage();
                         stage.initModality(Modality.APPLICATION_MODAL);
-                        stage.setTitle("Select Objects");
+                        stage.setTitle("Assign Additional Information");
            
                         stage.setScene(new Scene(root1));
                         stage.setResizable(false);
@@ -153,10 +151,10 @@ public class NewOrderController implements Initializable {
                         stage.show();
                         //stage.setAlwaysOnTop(true);            
                         ctrl.setUser(user);            
-                        ctrl.setNewOrderController(this);
-                        ctrl.getTv_objects().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);            
-            
-                        ctrl.displayObjects();
+                        ctrl.setNewOrderController(this);                                  
+                        
+                        ctrl.setSelectedItem(tv_selectedObjects.getSelectionModel().getSelectedItem());
+                        ctrl.setElementValues();
                     }catch (IOException e){
             
                     }
