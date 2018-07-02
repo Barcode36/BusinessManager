@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="313.0" prefWidth="427.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.1" fx:controller="controllers.select.SelectPrinterMaterialPriceController">
+   <children>
+      <GridPane layoutX="211.0" layoutY="168.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="219.0" minWidth="10.0" prefWidth="139.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="327.0" minWidth="10.0" prefWidth="288.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="85.0" minHeight="10.0" prefHeight="82.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="47.0" minHeight="10.0" prefHeight="23.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label fx:id="label_editedObject" text="12 Eiffel Tower" textAlignment="CENTER" wrapText="true" GridPane.columnSpan="3" GridPane.halignment="CENTER">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Label text="Quantity:" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label text="Printer:" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label text="Material:" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Label text="Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <TextField fx:id="txtField_printer" prefHeight="25.0" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets left="150.0" right="100.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="txtField_material" prefHeight="25.0" GridPane.columnSpan="3" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets left="150.0" right="100.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="txtField_price" prefHeight="25.0" GridPane.columnSpan="3" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets left="150.0" right="200.0" />
+               </GridPane.margin>
+            </TextField>
+            <Button fx:id="btn_assign" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Assign" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="5">
+               <GridPane.margin>
+                  <Insets left="100.0" />
+               </GridPane.margin>
+            </Button>
+            <Spinner fx:id="spinner_quantity" editable="true" prefHeight="25.0" prefWidth="63.0" GridPane.columnSpan="3" GridPane.halignment="LEFT" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets left="150.0" />
+               </GridPane.margin>
+            </Spinner>
+            <Button fx:id="btn_cancell" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+            <Button fx:id="btn_selectPrinter" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Select" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin>
+            </Button>
+            <Button fx:id="btn_selectMaterial" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Select" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin>
+            </Button>
+            <Label text="€" GridPane.columnIndex="1" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets left="95.0" />
+               </GridPane.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+         </children>
+      </GridPane>
+   </children>
+</AnchorPane>

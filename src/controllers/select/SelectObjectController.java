@@ -8,9 +8,14 @@ package controllers.select;
 import classes.MngApi;
 import classes.User;
 import classes.Object;
+import classes.OrderItem;
 import controllers.orders.NewOrderController;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -32,7 +37,6 @@ public class SelectObjectController implements Initializable {
     
     private NewOrderController newOrderController;
     
-    private ObservableList<classes.Object> selectedObjects;
     
     @FXML
     private TableView<classes.Object> tv_objects;
@@ -60,23 +64,21 @@ public class SelectObjectController implements Initializable {
             TableRow<Object> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    //selectedObjects = FXCollections.observableArrayList(tv_objects.getSelectionModel().getSelectedItem());
-                    System.out.print(tv_objects.getSelectionModel().getSelectedItems().get(0).getObject_name().get());
-                    newOrderController.addSelectedObjects(tv_objects.getSelectionModel().getSelectedItems());
+                    ObservableList<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());
+                    //newOrderController.addSelectedObjects(selectedObjects);
+                    newOrderController.getSelectedObjects().addAll(selectedObjects);
                     newOrderController.setSelectedObjects();
                     MngApi.closeWindow(btn_close);
                 }
             });
-            return row ;
+            return row;
         });
         
         btn_select.setOnAction((event) -> {
-            
-            //selectedObjects = FXCollections.observableArrayList(tv_objects.getSelectionModel().getSelectedItems());            
-            newOrderController.addSelectedObjects(tv_objects.getSelectionModel().getSelectedItems());
+            List<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());                    
+            newOrderController.getSelectedObjects().addAll(selectedObjects);
             newOrderController.setSelectedObjects();
-            MngApi.closeWindow(btn_select);
-            
+            MngApi.closeWindow(btn_close);
         });
         
         btn_close.setOnAction((event) -> {
@@ -85,7 +87,52 @@ public class SelectObjectController implements Initializable {
             
         });
     }    
-
+    
+    private ObservableList<OrderItem> generateOrderItems(ObservableList<Object> selectedObjects){
+        
+        //Create list of orders
+        ObservableList<OrderItem> orderItems = FXCollections.observableArrayList();
+        
+        classes.Object listObject;
+        
+        int i = 0;
+        
+        while (selectedObjects.get(i) != null){
+            
+            listObject = selectedObjects.get(i);
+            
+            SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
+            SimpleIntegerProperty object_id, object_buildTime, quantity, printer_id, material_id;
+            SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
+            
+            object_name = listObject.getObject_name();
+            object_buildTime_formated = listObject.getObject_buildTime_formated();            
+            printer_name = new SimpleStringProperty(" ");
+            material_type = new SimpleStringProperty(" ");
+            material_color = new SimpleStringProperty(" ");
+            
+            object_id = listObject.getObject_id();
+            object_buildTime = listObject.getObject_buildTime();
+            quantity = new SimpleIntegerProperty();
+            printer_id = new SimpleIntegerProperty();
+            material_id = new SimpleIntegerProperty();
+            
+            
+            object_supportWeight = listObject.getObject_supportWeight();
+            object_weight = listObject.getObject_weight();
+            price = new SimpleDoubleProperty();
+            costs = new SimpleDoubleProperty();
+            
+            OrderItem orderItem = new OrderItem(object_name, object_buildTime_formated, printer_name, material_type, material_color, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
+            
+            orderItems.add(orderItem);
+            
+            i++;
+        }
+        
+        return orderItems;
+    }
+    
     public void displayObjects(){
         
         //Create list of orders

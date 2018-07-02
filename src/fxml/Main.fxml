@@ -1,15 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.paint.*?>
-<?import javafx.scene.effect.*?>
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="882.0" prefWidth="1058.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="882.0" prefWidth="1557.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <top>
       <VBox BorderPane.alignment="CENTER">
          <children>
@@ -309,7 +322,8 @@
                         <TableView fx:id="tv_orders" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                           <columns>
                             <TableColumn fx:id="order_col_orderId" prefWidth="100.0" text="Order ID" />
-                            <TableColumn fx:id="order_col_customer" prefWidth="150.0" text="Customer" />
+                            <TableColumn fx:id="order_col_customerID" prefWidth="84.0" text="Customer ID" />
+                            <TableColumn fx:id="order_col_customer" prefWidth="166.0" text="Customer" />
                               <TableColumn fx:id="order_col_totalQuantity" prefWidth="100.0" text="Quantity" />
                               <TableColumn fx:id="order_col_totalPrice" prefWidth="100.0" text="Price" />
                               <TableColumn fx:id="order_col_totalCosts" prefWidth="100.0" text="Costs" />

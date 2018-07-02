@@ -77,7 +77,7 @@ public class MainController implements Initializable {
     private TableColumn<Order, String> order_col_customer, order_col_status, order_col_comment, order_col_dateCreated, order_col_dueDate, order_col_totalBuildTime_formated;
     
     @FXML
-    private TableColumn<Order, Integer> order_col_orderId, order_col_totalQuantity;
+    private TableColumn<Order, Integer> order_col_customerID, order_col_orderId, order_col_totalQuantity;
     
     @FXML
     private TableColumn<Order, Double> order_col_totalCosts, order_col_totalPrice, order_col_totalWeight;     
@@ -499,6 +499,7 @@ public class MainController implements Initializable {
         //Integers
         order_col_orderId.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_id().asObject());        
         order_col_totalQuantity.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_quantity().asObject());
+        order_col_customerID.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_customerID().asObject());
         
         //Doubles
         order_col_totalCosts.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_costs().asObject());
@@ -515,6 +516,7 @@ public class MainController implements Initializable {
         order_col_orderId.setStyle("-fx-alignment: CENTER;");
         order_col_totalBuildTime_formated.setStyle("-fx-alignment: CENTER;");
         order_col_totalQuantity.setStyle("-fx-alignment: CENTER;");
+        order_col_customerID.setStyle("-fx-alignment: CENTER;");
         
         order_col_totalCosts.setStyle("-fx-alignment: CENTER;");
         order_col_totalPrice.setStyle("-fx-alignment: CENTER;");

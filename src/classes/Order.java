@@ -24,10 +24,10 @@ import javafx.beans.property.SimpleStringProperty;
 public class Order {
     
     private SimpleStringProperty order_customer, order_status, order_comment, order_dateCreated, order_dueDate, order_buildTime_formated;    
-    private SimpleIntegerProperty order_id, order_quantity, order_buildTime;
+    private SimpleIntegerProperty order_id, order_customerID, order_quantity, order_buildTime;
     private SimpleDoubleProperty order_costs, order_price, order_weighht;
 
-    public Order(SimpleStringProperty order_customer, SimpleStringProperty order_status, SimpleStringProperty order_comment, SimpleStringProperty order_dateCreated, SimpleStringProperty order_dueDate, SimpleStringProperty order_buildTime_formated, SimpleIntegerProperty order_id, SimpleIntegerProperty order_quantity, SimpleIntegerProperty order_buildTime, SimpleDoubleProperty order_costs, SimpleDoubleProperty order_price, SimpleDoubleProperty order_weighht) {
+    public Order(SimpleIntegerProperty order_customerID, SimpleStringProperty order_customer, SimpleStringProperty order_status, SimpleStringProperty order_comment, SimpleStringProperty order_dateCreated, SimpleStringProperty order_dueDate, SimpleStringProperty order_buildTime_formated, SimpleIntegerProperty order_id, SimpleIntegerProperty order_quantity, SimpleIntegerProperty order_buildTime, SimpleDoubleProperty order_costs, SimpleDoubleProperty order_price, SimpleDoubleProperty order_weighht) {
         this.order_customer = order_customer;
         this.order_status = order_status;
         this.order_comment = order_comment;
@@ -40,6 +40,7 @@ public class Order {
         this.order_costs = order_costs;
         this.order_price = order_price;
         this.order_weighht = order_weighht;
+        this.order_customerID = order_customerID;
     }
 
     public SimpleStringProperty getOrder_customer() {
@@ -138,6 +139,14 @@ public class Order {
         this.order_weighht = order_weighht;
     }
 
+    public SimpleIntegerProperty getOrder_customerID() {
+        return order_customerID;
+    }
+
+    public void setOrder_customerID(SimpleIntegerProperty order_customerID) {
+        this.order_customerID = order_customerID;
+    }
+
     
     
     public static List<Order> getOrders(User user) {
@@ -146,7 +155,7 @@ public class Order {
         List<Order> orderList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Orders.OrderID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID";
+        String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID";
                 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -179,7 +188,7 @@ public class Order {
             while(rs.next()){
                 
                 SimpleStringProperty customer, status, comment, dateCreated, dueDate, buildTime_formated;    
-                SimpleIntegerProperty id, totalQuantity, totalBuildTime;
+                SimpleIntegerProperty id, customer_id, totalQuantity, totalBuildTime;
                 SimpleDoubleProperty totalCosts, totalPrice, totalWeighht;
                 
                 customer = new SimpleStringProperty(rs.getString("Customer"));
@@ -189,16 +198,17 @@ public class Order {
                 dueDate = new SimpleStringProperty(rs.getString("DateCreated"));
                 
                 id = new SimpleIntegerProperty(rs.getInt("OrderID"));
+                customer_id = new SimpleIntegerProperty(rs.getInt("CustomerID"));
                 
                 totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(id, user));
                 totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
-                    buildTime_formated = MngApi.convertToHours(totalBuildTime.get());
+                buildTime_formated = MngApi.convertToHours(totalBuildTime.get());
                 
                 totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
                 totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
                 totalWeighht = new SimpleDoubleProperty(getTotalWeight(id, user));
                 
-                Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeighht);
+                Order order = new Order(customer_id, customer, status, comment, dateCreated, dueDate, buildTime_formated, id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeighht);
                 
                 orderList.add(order);
             }

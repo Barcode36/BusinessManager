@@ -9,6 +9,7 @@ import classes.Customer;
 import classes.MngApi;
 import classes.Object;
 import classes.Order;
+import classes.OrderItem;
 import classes.User;
 import controllers.MainController;
 import controllers.select.SelectCustomerController;
@@ -29,6 +30,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -47,7 +49,7 @@ public class NewOrderController implements Initializable {
     
     private Customer selectedCustomer;
     
-    private ObservableList<classes.Object> selectedObjects;
+    private ObservableList<OrderItem> selectedObjects = FXCollections.observableArrayList();
     
     
     @FXML
@@ -66,16 +68,16 @@ public class NewOrderController implements Initializable {
     private DatePicker datePicker_dateCreated, datePicker_dueDate;
     
     @FXML
-    private TableView<classes.Object> tv_selectedObjects;
+    private TableView<OrderItem> tv_selectedObjects;
     
     @FXML
-    private TableColumn<Order, Integer> col_objectID, col_quantity, col_buldTime, col_materialID;
+    private TableColumn<OrderItem, Integer> col_objectID, col_quantity,col_printerID, col_materialID;
     
     @FXML
-    private TableColumn<Order, String> col_objectName, col_printer, col_materialType, col_materialColor;
+    private TableColumn<OrderItem, String> col_objectName, col_printer, col_materialType, col_materialColor, col_buildTime_formatted;
     
     @FXML
-    private TableColumn<Order, Double> col_weight, col_supportWeight, col_objectPrice,col_objectCosts;
+    private TableColumn<OrderItem, Double> col_weight, col_supportWeight, col_objectPrice,col_objectCosts;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -96,7 +98,7 @@ public class NewOrderController implements Initializable {
             
             stage.show();
             //stage.setAlwaysOnTop(true);            
-            ctrl.setUser(user);            
+            ctrl.setUser(user);
             ctrl.setNewOrderController(this);
             
             ctrl.displayCustomers();
@@ -132,47 +134,87 @@ public class NewOrderController implements Initializable {
             
         });
         
+        tv_selectedObjects.setRowFactory( tv -> {
+            TableRow<OrderItem> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                    try {            
+                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/select/SelectPrinterMaterialPrice.fxml"));            
+                        Parent root1 = fxmlLoader.load();
+                        SelectObjectController ctrl = fxmlLoader.getController();
+                        Stage stage = new Stage();
+                        stage.initModality(Modality.APPLICATION_MODAL);
+                        stage.setTitle("Select Objects");
+           
+                        stage.setScene(new Scene(root1));
+                        stage.setResizable(false);
+                        stage.centerOnScreen();            
+            
+                        stage.show();
+                        //stage.setAlwaysOnTop(true);            
+                        ctrl.setUser(user);            
+                        ctrl.setNewOrderController(this);
+                        ctrl.getTv_objects().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);            
+            
+                        ctrl.displayObjects();
+                    }catch (IOException e){
+            
+                    }
+                }
+            });
+            return row;
+        });
+        
     }    
 
     public void setSelectedObjects() {
         
-        //Create list of orders
-        ObservableList<classes.Object> objectList = FXCollections.observableArrayList(classes.Object.getObjects(user));
+        col_objectName.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
+        col_buildTime_formatted.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
+        col_materialColor.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
+        col_materialType.setCellValueFactory((param) -> {return param.getValue().getMaterial_type();});
+        col_printer.setCellValueFactory((param) -> {return param.getValue().getPrinter_name();});
         
-        object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
-        object_col_buildTime_formated.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
-        object_col_comment.setCellValueFactory((param) -> {return param.getValue().getObject_comment();});
+        col_materialID.setCellValueFactory((param) -> {return param.getValue().getMaterial_id().asObject();});        
+        col_objectID.setCellValueFactory((param) -> {return param.getValue().getObject_id().asObject();});
+        col_printerID.setCellValueFactory((param) -> {return param.getValue().getPrinter_id().asObject();});
+        col_quantity.setCellValueFactory((param) -> {return param.getValue().getQunatity().asObject();});
         
-        object_col_id.setCellValueFactory((param) -> {return param.getValue().getObject_id().asObject();});        
-        object_col_soldCount.setCellValueFactory((param) -> {return param.getValue().getObject_SoldCount().asObject();});
         
-        object_col_weight.setCellValueFactory((param) -> {return param.getValue().getObject_weight().asObject();});
-        object_col_supportWeight.setCellValueFactory((param) -> {return param.getValue().getObject_supportWeight().asObject();});
+        col_weight.setCellValueFactory((param) -> {return param.getValue().getObject_weight().asObject();});
+        col_supportWeight.setCellValueFactory((param) -> {return param.getValue().getObject_supportWeight().asObject();});
+        col_objectCosts.setCellValueFactory((param) -> {return param.getValue().getCosts().asObject();});
+        col_objectPrice.setCellValueFactory((param) -> {return param.getValue().getPrice().asObject();});
+        
         
         //Centering content
-        object_col_name.setStyle("-fx-alignment: CENTER;");
-
+        col_objectName.setStyle("-fx-alignment: CENTER;");
+        col_buildTime_formatted.setStyle("-fx-alignment: CENTER;");
+        col_materialColor.setStyle("-fx-alignment: CENTER;");
+        col_materialType.setStyle("-fx-alignment: CENTER;");
+        col_printer.setStyle("-fx-alignment: CENTER;");
         
-        object_col_id.setStyle("-fx-alignment: CENTER;");
-        object_col_buildTime_formated.setStyle("-fx-alignment: CENTER;");
-        object_col_soldCount.setStyle("-fx-alignment: CENTER;");
+        col_materialID.setStyle("-fx-alignment: CENTER;");
+        col_objectID.setStyle("-fx-alignment: CENTER;");
+        col_printerID.setStyle("-fx-alignment: CENTER;");
+        col_quantity.setStyle("-fx-alignment: CENTER;");
         
-        object_col_weight.setStyle("-fx-alignment: CENTER;");
-        object_col_supportWeight.setStyle("-fx-alignment: CENTER;");
         
-        tv_objects.setItems(objectList);
-        
+        col_weight.setStyle("-fx-alignment: CENTER;");
+        col_supportWeight.setStyle("-fx-alignment: CENTER;");
+        col_objectCosts.setStyle("-fx-alignment: CENTER;");
+        col_objectPrice.setStyle("-fx-alignment: CENTER;");       
         
         tv_selectedObjects.setItems(selectedObjects);
     }
 
-    public ObservableList<Object> getSelectedObjects() {
+    public ObservableList<OrderItem> getSelectedObjects() {
         return selectedObjects;
     }
     
-    public void addSelectedObjects(ObservableList<Object> objects){
-        objects.get(0).getObject_name().get();
-        selectedObjects.addAll(objects);
+    public void addSelectedObjects(ObservableList<OrderItem> selectedObjects){
+        
+        this.selectedObjects.addAll(selectedObjects);
     }
     
     public void setSelectedCustomer(Customer selectedCustomer) {
