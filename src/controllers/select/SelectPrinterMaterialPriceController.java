@@ -13,6 +13,7 @@ import classes.SimpleTableObject;
 import classes.User;
 import controllers.MainController;
 import controllers.orders.NewOrderController;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -29,13 +30,18 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 /**
  * FXML Controller class
@@ -71,7 +77,33 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        
+        btn_selectMaterial.setOnAction((event) -> {
+            
+            try {            
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/select/SelectCustomer.fxml"));            
+                Parent root1 = fxmlLoader.load();
+                SelectCustomerController ctrl = fxmlLoader.getController();
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setTitle("Select Customer");
+           
+                stage.setScene(new Scene(root1));
+                stage.setResizable(false);
+                stage.centerOnScreen();            
+            
+                stage.show();
+                //stage.setAlwaysOnTop(true);            
+                ctrl.setUser(user);
+                ctrl.setNewOrderController(this);
+            
+                ctrl.displayCustomers();
+            }catch (IOException e){
+            
+            }
+            
+        });
+        
     }    
     
     public void setElementValues(){
