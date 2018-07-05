@@ -153,11 +153,12 @@ public class NewOrderController implements Initializable {
                         ctrl.setUser(user);            
                         ctrl.setNewOrderController(this);                                  
                         
-                        ctrl.setSelectedItem(tv_selectedObjects.getSelectionModel().getSelectedItem());
+                        ctrl.setSelectedObject(tv_selectedObjects.getSelectionModel().getSelectedItem());
                         ctrl.setElementValues();
                     }catch (IOException e){
             
                     }
+                      
                 }
             });
             return row;
@@ -213,6 +214,10 @@ public class NewOrderController implements Initializable {
     public void addSelectedObjects(ObservableList<OrderItem> selectedObjects){
         
         this.selectedObjects.addAll(selectedObjects);
+    }
+    
+    public void refreshSelectedObjects(){
+        tv_selectedObjects.refresh();
     }
     
     public void setSelectedCustomer(Customer selectedCustomer) {

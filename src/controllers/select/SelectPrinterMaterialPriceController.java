@@ -5,11 +5,11 @@
  */
 package controllers.select;
 
-import classes.Cost;
-import classes.Customer;
+
+import classes.Material;
 import classes.MngApi;
 import classes.OrderItem;
-import classes.SimpleTableObject;
+
 import classes.User;
 import controllers.MainController;
 import controllers.orders.NewOrderController;
@@ -23,6 +23,7 @@ import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -37,9 +38,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -56,24 +56,21 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     private NewOrderController newOrderController;
     
-    private OrderItem selectedItem;
+    private OrderItem selectedObject;
     
-    @FXML
-    private Spinner<Integer> spinner_quantity;
     
     @FXML
     private ComboBox<String> comboBox_printer;
     
     @FXML
-    private TextField txtField_material, txtField_price;
+    private TextField txtField_material, txtField_price, txtField_quantity, txtField_costs;
     
     @FXML
     private Button btn_selectMaterial, btn_assign, btn_cancel;
     
     @FXML
-    private Label label_editedObject;
-    
-    
+    private Label label_editedObject, label_info;
+   
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -81,12 +78,12 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         btn_selectMaterial.setOnAction((event) -> {
             
             try {            
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/select/SelectCustomer.fxml"));            
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/select/SelectMaterial.fxml"));            
                 Parent root1 = fxmlLoader.load();
-                SelectCustomerController ctrl = fxmlLoader.getController();
+                SelectMaterialController ctrl = fxmlLoader.getController();
                 Stage stage = new Stage();
                 stage.initModality(Modality.APPLICATION_MODAL);
-                stage.setTitle("Select Customer");
+                stage.setTitle("Select Material");
            
                 stage.setScene(new Scene(root1));
                 stage.setResizable(false);
@@ -95,31 +92,104 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 stage.show();
                 //stage.setAlwaysOnTop(true);            
                 ctrl.setUser(user);
-                ctrl.setNewOrderController(this);
+                ctrl.setSelectPrinterMaterialPriceController(this);
             
-                ctrl.displayCustomers();
+                ctrl.displayMaterials();
             }catch (IOException e){
             
             }
             
         });
         
+        btn_assign.setOnAction((event) -> {
+            
+            boolean isEmpty = MngApi.isTextFieldEmpty(txtField_price, txtField_quantity, txtField_material);
+            
+            if (isEmpty == true){
+                label_info.setText("Fields cannot be empty.");
+                label_info.setTextFill(Color.web("#ff0000"));
+                return;
+            }
+            try {
+                
+                int quantity = Integer.parseInt(txtField_quantity.getText());
+            
+                String[] printer = comboBox_printer.getValue().split(";");
+                    String printer_id = printer[0];
+                        int printerID = Integer.parseInt(printer_id);
+                    String printer_name = printer[1];
+            
+                String[] material = txtField_material.getText().split(";");
+                    String material_id = material[0];
+                        int materialID = Integer.parseInt(material_id);                
+                    String material_type = material[1] + " " + material[2];
+                    String material_color = material[3];
+                
+                double price = Double.parseDouble(txtField_price.getText());
+                double costs = Double.parseDouble(txtField_costs.getText());
+                
+                selectedObject.setQunatity(new SimpleIntegerProperty(quantity));
+                selectedObject.setPrinter_id(new SimpleIntegerProperty(printerID));
+                selectedObject.setPrinter_name(new SimpleStringProperty(printer_name));
+                selectedObject.setMaterial_id(new SimpleIntegerProperty(materialID));
+                selectedObject.setMaterial_type(new SimpleStringProperty(material_type));
+                selectedObject.setMaterial_color(new SimpleStringProperty(material_color));
+                selectedObject.setPrice(new SimpleDoubleProperty(price));
+                selectedObject.setCosts(new SimpleDoubleProperty(costs));
+                
+                newOrderController.setSelectedObjects();
+                newOrderController.refreshSelectedObjects();
+                MngApi.closeWindow(btn_assign);
+            
+            } catch (NumberFormatException e) {
+                System.out.print(txtField_costs.getText() + "\n");
+                System.out.print(txtField_material.getText() + "\n");
+                System.out.print(txtField_price.getText() + "\n");
+                System.out.print(txtField_quantity.getText() + "\n");
+                label_info.setText("Wrong number format, please check your fields.");
+                label_info.setTextFill(Color.web("#ff0000"));
+                e.printStackTrace();
+            }
+        });
+        
+        btn_cancel.setOnAction((event) -> {
+            MngApi.closeWindow(btn_cancel);
+        });
     }    
     
     public void setElementValues(){
         
-        //setting up spinner
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1);        
-        spinner_quantity.setValueFactory(valueFactory);
-        
-        label_editedObject.setText(selectedItem.getObject_id().get() + "; " + selectedItem.getObject_name().get());
+        label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());
         
         ObservableList<String> printers = FXCollections.observableArrayList(getPrinters(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setValue(printers.get(0));
     }
+    
+    public void setCosts(Material material){
+        
+        double costs, price_per_gram, total_weight, material_price, material_shipping, material_weight;
+        int quantity = Integer.parseInt(txtField_quantity.getText());
+        
+        material_price = material.getMaterial_price().get();
+        material_shipping = material.getMaterial_shipping().get();
+        material_weight = material.getMaterial_weight().get();
+        
+        price_per_gram = (material_price+material_shipping)/material_weight;
+        
+        total_weight = selectedObject.getObject_weight().get() + selectedObject.getObject_supportWeight().get();
+        
+        costs = price_per_gram*total_weight*quantity;
+        
+        txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
+        
+    }
 
+    public TextField getTxtField_quantity() {
+        return txtField_quantity;
+    }
+    
     public void setUser(User user) {
         this.user = user;
     }
@@ -132,8 +202,18 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         this.newOrderController = newOrderController;
     }
 
-    public void setSelectedItem(OrderItem selectedItem) {
-        this.selectedItem = selectedItem;
+    public void setSelectedObject(OrderItem selectedObject) {
+        this.selectedObject = selectedObject;
+    }
+    
+    public void setMaterial(Material material){
+        
+        int id = material.getMaterial_id().get();
+        String type = material.getMaterial_manufacturer().get() + " " + material.getMaterial_type().get();
+        String manufacturer = material.getMaterial_manufacturer().get();
+        String color = material.getMaterial_color().get();
+        
+        txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);
     }
     
     private static List<String> getPrinters(User user) {
@@ -179,7 +259,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
                 name = new SimpleStringProperty(rs.getString("PrinterName"));
                 
-                String printer = id.get() + " " + name.get();
+                String printer = id.get() + ";" + name.get();
                 
                 allPrinters.add(printer);
             }

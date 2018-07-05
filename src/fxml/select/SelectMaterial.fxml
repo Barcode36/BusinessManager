@@ -1,25 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="controllers.select.SelectMaterialController">
+<AnchorPane id="AnchorPane" prefHeight="495.0" prefWidth="1088.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.select.SelectMaterialController">
    <children>
       <BorderPane layoutX="169.0" layoutY="100.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <center>
-            <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-              <columns>
-                <TableColumn prefWidth="75.0" text="C1" />
-                <TableColumn prefWidth="75.0" text="C2" />
-              </columns>
-            </TableView>
-         </center>
          <bottom>
-            <GridPane BorderPane.alignment="CENTER">
+            <GridPane prefHeight="43.0" prefWidth="1068.0" BorderPane.alignment="CENTER">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -29,11 +22,57 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Select" />
-                  <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Cancel" GridPane.columnIndex="1" />
+                  <Button fx:id="btn_select" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Select" GridPane.columnSpan="2" GridPane.halignment="CENTER" />
+                  <Button fx:id="btn_cancel" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Cancel" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" />
                </children>
             </GridPane>
          </bottom>
+         <top>
+            <GridPane BorderPane.alignment="CENTER">
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label prefHeight="25.0" text="Search:" GridPane.columnIndex="3" GridPane.halignment="RIGHT">
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="txtField_search" prefHeight="25.0" GridPane.columnIndex="4">
+                     <GridPane.margin>
+                        <Insets bottom="1.0" right="5.0" />
+                     </GridPane.margin>
+                  </TextField>
+               </children>
+            </GridPane>
+         </top>
+         <center>
+            <TableView fx:id="tv_materials" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <columns>
+                  <TableColumn fx:id="material_col_id" prefWidth="90.0" text="Material ID" />
+                  <TableColumn fx:id="material_col_manufacturer" prefWidth="125.0" text="Manufacturer" />
+                  <TableColumn fx:id="material_col_type" prefWidth="50.0" text="Type" />
+                  <TableColumn fx:id="material_col_color" minWidth="7.0" prefWidth="140.0" text="Color" />
+                  <TableColumn fx:id="material_col_weight" text="Weight (g)" />
+                  <TableColumn fx:id="material_col_diameter" prefWidth="101.0" text="Diameter (mm)" />
+                  <TableColumn fx:id="material_col_price" prefWidth="89.0" text="Price" />
+                  <TableColumn fx:id="material_col_shipping" prefWidth="89.0" text="Shipping" />
+                  <TableColumn fx:id="material_col_used" minWidth="7.0" text="Used (%)" />
+                  <TableColumn fx:id="material_col_distributor" prefWidth="140.0" text="Distributor" />
+                  <TableColumn fx:id="material_col_purchaseDate" minWidth="7.0" prefWidth="100.0" text="Purchase Date" />
+               </columns>
+            </TableView>
+         </center>
       </BorderPane>
    </children>
 </AnchorPane>
