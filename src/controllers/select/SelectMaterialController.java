@@ -69,19 +69,15 @@ public class SelectMaterialController implements Initializable {
             TableRow<Material> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    selectPrinterMaterialPriceController.setMaterial(tv_materials.getSelectionModel().getSelectedItem());
-                    MngApi.closeWindow(btn_select);
-                    TextField quantity = selectPrinterMaterialPriceController.getTxtField_quantity();
-                    if(MngApi.isTextFieldEmpty(quantity) || !MngApi.isNumber(quantity.getText()))quantity.setText("1");
-                    selectPrinterMaterialPriceController.setCosts(tv_materials.getSelectionModel().getSelectedItem());
+                    selectPrinterMaterialPriceController.setMaterialTxtField(tv_materials.getSelectionModel().getSelectedItem());                    
+                    MngApi.closeWindow(btn_select);                   
                 }
             });
             return row;
         });
         
         btn_select.setOnAction((event) -> {            
-            selectPrinterMaterialPriceController.setMaterial(tv_materials.getSelectionModel().getSelectedItem());   
-            selectPrinterMaterialPriceController.setCosts(tv_materials.getSelectionModel().getSelectedItem());
+            selectPrinterMaterialPriceController.setMaterialTxtField(tv_materials.getSelectionModel().getSelectedItem());
             MngApi.closeWindow(btn_select);            
         });
     }    

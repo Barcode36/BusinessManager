@@ -93,7 +93,7 @@
             </Button>
            
             <Button fx:id="btn_cancel" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-            <Label text="€" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <Label text="\$" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets left="65.0" />
                </GridPane.margin>
@@ -132,7 +132,7 @@
                   <Insets left="135.0" right="95.0" />
                </GridPane.margin>
             </TextField>
-            <Label text="€" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
+            <Label text="\$" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
                <font>
                   <Font size="14.0" />
                </font>

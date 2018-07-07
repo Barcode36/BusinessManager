@@ -133,12 +133,12 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <Label text="€" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <Label text="\$" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets left="65.0" />
                </GridPane.margin>
             </Label>
-            <Label text="€" GridPane.columnIndex="1" GridPane.rowIndex="6">
+            <Label text="\$" GridPane.columnIndex="1" GridPane.rowIndex="6">
                <GridPane.margin>
                   <Insets left="65.0" />
                </GridPane.margin>

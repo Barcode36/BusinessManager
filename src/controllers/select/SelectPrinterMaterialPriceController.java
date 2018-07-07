@@ -58,6 +58,8 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     private OrderItem selectedObject;
     
+    private Material material;
+    
     
     @FXML
     private ComboBox<String> comboBox_printer;
@@ -74,6 +76,18 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {
+            
+           setCosts();
+           
+        });
+        
+        txtField_material.textProperty().addListener((observable, oldValue, newValue) -> {
+            
+           setCosts();
+           
+        });
         
         btn_selectMaterial.setOnAction((event) -> {
             
@@ -108,9 +122,9 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             if (isEmpty == true){
                 label_info.setText("Fields cannot be empty.");
                 label_info.setTextFill(Color.web("#ff0000"));
-                return;
-            }
-            try {
+                
+            } else {
+                try {
                 
                 int quantity = Integer.parseInt(txtField_quantity.getText());
             
@@ -141,15 +155,13 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 newOrderController.refreshSelectedObjects();
                 MngApi.closeWindow(btn_assign);
             
-            } catch (NumberFormatException e) {
-                System.out.print(txtField_costs.getText() + "\n");
-                System.out.print(txtField_material.getText() + "\n");
-                System.out.print(txtField_price.getText() + "\n");
-                System.out.print(txtField_quantity.getText() + "\n");
+            } catch (NumberFormatException e) {                
                 label_info.setText("Wrong number format, please check your fields.");
                 label_info.setTextFill(Color.web("#ff0000"));
-                e.printStackTrace();
+                //e.printStackTrace();
             }
+            }
+            
         });
         
         btn_cancel.setOnAction((event) -> {
@@ -167,25 +179,46 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         comboBox_printer.setValue(printers.get(0));
     }
     
-    public void setCosts(Material material){
+    public void setCosts(){
         
-        double costs, price_per_gram, total_weight, material_price, material_shipping, material_weight;
-        int quantity = Integer.parseInt(txtField_quantity.getText());
+        if (MngApi.isTextFieldEmpty(txtField_quantity)){
+                
+            txtField_quantity.setText("1");
+                
+        } else {
+                
+            if(MngApi.isTextFieldEmpty(txtField_material)){
+                //return;
+            } else {                    
+                
+                double costs, price_per_gram, total_weight, material_price, material_shipping, material_weight;
+                
+                try{
+                    int quantity = Integer.parseInt(txtField_quantity.getText());
         
-        material_price = material.getMaterial_price().get();
-        material_shipping = material.getMaterial_shipping().get();
-        material_weight = material.getMaterial_weight().get();
+                    material_price = material.getMaterial_price().get();
+                    material_shipping = material.getMaterial_shipping().get();
+                    material_weight = material.getMaterial_weight().get();
         
-        price_per_gram = (material_price+material_shipping)/material_weight;
+                    price_per_gram = (material_price+material_shipping)/material_weight;
         
-        total_weight = selectedObject.getObject_weight().get() + selectedObject.getObject_supportWeight().get();
+                    total_weight = selectedObject.getObject_weight().get() + selectedObject.getObject_supportWeight().get();
+                    
+                    costs = price_per_gram*total_weight*quantity;
         
-        costs = price_per_gram*total_weight*quantity;
-        
-        txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
+                    txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
+                } catch (NumberFormatException e){
+                    label_info.setText("Wrong number format, please check your fields.");
+                    label_info.setTextFill(Color.web("#ff0000"));
+                    //e.printStackTrace();
+                }
+                    
+            }                
+        }
         
     }
-
+    
+    
     public TextField getTxtField_quantity() {
         return txtField_quantity;
     }
@@ -205,13 +238,15 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     public void setSelectedObject(OrderItem selectedObject) {
         this.selectedObject = selectedObject;
     }
+
     
-    public void setMaterial(Material material){
+    public void setMaterialTxtField(Material material){
+        this.material = material;
         
-        int id = material.getMaterial_id().get();
-        String type = material.getMaterial_manufacturer().get() + " " + material.getMaterial_type().get();
-        String manufacturer = material.getMaterial_manufacturer().get();
-        String color = material.getMaterial_color().get();
+        int id = this.material.getMaterial_id().get();
+        String type = this.material.getMaterial_manufacturer().get() + " " + this.material.getMaterial_type().get();
+        String manufacturer = this.material.getMaterial_manufacturer().get();
+        String color = this.material.getMaterial_color().get();
         
         txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);
     }

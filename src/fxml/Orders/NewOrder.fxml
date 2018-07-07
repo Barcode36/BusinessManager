@@ -252,7 +252,7 @@
                   <Insets right="10.0" />
                </GridPane.margin>
             </Label>
-            <Label text="(0€/h)" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="9">
+            <Label text="(0$/h)" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="9">
                <font>
                   <Font size="14.0" />
                </font>
@@ -292,7 +292,7 @@
                   <Insets />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_weight" text="9999.9 g" GridPane.columnIndex="3" GridPane.rowIndex="8">
+            <Label fx:id="label_weight" text="0 g" GridPane.columnIndex="3" GridPane.rowIndex="8">
                <font>
                   <Font size="14.0" />
                </font>
@@ -300,7 +300,7 @@
                   <Insets />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_quantity" text="999" GridPane.columnIndex="3" GridPane.rowIndex="11">
+            <Label fx:id="label_quantity" text="0" GridPane.columnIndex="3" GridPane.rowIndex="11">
                <font>
                   <Font size="14.0" />
                </font>
@@ -308,7 +308,7 @@
                   <Insets />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_weightSum" text="9999.9 g" GridPane.columnIndex="3" GridPane.rowIndex="10">
+            <Label fx:id="label_weightSum" text="0 g" GridPane.columnIndex="3" GridPane.rowIndex="10">
                <font>
                   <Font size="14.0" />
                </font>
@@ -316,7 +316,7 @@
                   <Insets />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_supportWeight" text="9999.9 g" GridPane.columnIndex="3" GridPane.rowIndex="9">
+            <Label fx:id="label_supportWeight" text="0 g" GridPane.columnIndex="3" GridPane.rowIndex="9">
                <font>
                   <Font size="14.0" />
                </font>
@@ -324,7 +324,7 @@
                   <Insets />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_price" text="9999.99 €" GridPane.columnIndex="4" GridPane.rowIndex="9">
+            <Label fx:id="label_price" text="0 $ " GridPane.columnIndex="4" GridPane.rowIndex="9">
                <font>
                   <Font size="14.0" />
                </font>
@@ -332,7 +332,7 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_buildTime" text="999h 59m" GridPane.columnIndex="4" GridPane.rowIndex="8">
+            <Label fx:id="label_buildTime" text="0h 0m" GridPane.columnIndex="4" GridPane.rowIndex="8">
                <font>
                   <Font size="14.0" />
                </font>
@@ -340,7 +340,7 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_costs" text="9999.99 €" GridPane.columnIndex="4" GridPane.rowIndex="10">
+            <Label fx:id="label_costs" text="0 $ " GridPane.columnIndex="4" GridPane.rowIndex="10">
                <font>
                   <Font size="14.0" />
                </font>
@@ -348,7 +348,7 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <Label fx:id="label_profit" text="9999.99 €" GridPane.columnIndex="4" GridPane.rowIndex="11">
+            <Label fx:id="label_profit" text="0 $ " GridPane.columnIndex="4" GridPane.rowIndex="11">
                <font>
                   <Font size="14.0" />
                </font>
