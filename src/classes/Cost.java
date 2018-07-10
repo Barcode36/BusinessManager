@@ -16,7 +16,7 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.stage.Stage;
+
 
 /**
  *
@@ -24,16 +24,18 @@ import javafx.stage.Stage;
  */
 public class Cost {
     
-    SimpleIntegerProperty cost_id, cost_quantity;
-    SimpleStringProperty cost_name, cost_purchaseDate, cost_comment;
-    SimpleDoubleProperty cost_shipping, cost_price;
+    private SimpleIntegerProperty cost_id, cost_quantity, cost_printerID;
+    private SimpleStringProperty cost_name, cost_purchaseDate, cost_comment, cost_printer;
+    private SimpleDoubleProperty cost_shipping, cost_price;
 
-    public Cost(SimpleIntegerProperty cost_id, SimpleIntegerProperty cost_quantity, SimpleStringProperty cost_name, SimpleStringProperty cost_purchaseDate, SimpleStringProperty cost_comment, SimpleDoubleProperty cost_shipping, SimpleDoubleProperty cost_price) {
+    public Cost(SimpleIntegerProperty cost_id, SimpleIntegerProperty cost_quantity, SimpleIntegerProperty cost_printerID, SimpleStringProperty cost_name, SimpleStringProperty cost_purchaseDate, SimpleStringProperty cost_comment, SimpleStringProperty cost_printer, SimpleDoubleProperty cost_shipping, SimpleDoubleProperty cost_price) {
         this.cost_id = cost_id;
         this.cost_quantity = cost_quantity;
+        this.cost_printerID = cost_printerID;
         this.cost_name = cost_name;
         this.cost_purchaseDate = cost_purchaseDate;
         this.cost_comment = cost_comment;
+        this.cost_printer = cost_printer;
         this.cost_shipping = cost_shipping;
         this.cost_price = cost_price;
     }
@@ -52,6 +54,14 @@ public class Cost {
 
     public void setCost_quantity(SimpleIntegerProperty cost_quantity) {
         this.cost_quantity = cost_quantity;
+    }
+
+    public SimpleIntegerProperty getCost_printerID() {
+        return cost_printerID;
+    }
+
+    public void setCost_printerID(SimpleIntegerProperty cost_printerID) {
+        this.cost_printerID = cost_printerID;
     }
 
     public SimpleStringProperty getCost_name() {
@@ -78,6 +88,14 @@ public class Cost {
         this.cost_comment = cost_comment;
     }
 
+    public SimpleStringProperty getCost_printer() {
+        return cost_printer;
+    }
+
+    public void setCost_printer(SimpleStringProperty cost_printer) {
+        this.cost_printer = cost_printer;
+    }
+
     public SimpleDoubleProperty getCost_shipping() {
         return cost_shipping;
     }
@@ -93,6 +111,8 @@ public class Cost {
     public void setCost_price(SimpleDoubleProperty cost_price) {
         this.cost_price = cost_price;
     }
+
+    
     
     public static List<Cost> getCosts(User user) {
         
@@ -100,7 +120,7 @@ public class Cost {
         List<Cost> allCostsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT * FROM Costs ORDER BY CostID ASC";
+        String query = "SELECT Costs.CostID, Costs.CostName, Costs.CostQuantity, Costs.CostShipping, Costs.PurchaseDate, Costs.Comment, Costs.CostPrice, Costs.PrinterID, Printers.PrinterName FROM Costs JOIN Printers ON Costs.PrinterID = Printers.PrinterID ORDER BY Costs.CostID ASC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -131,21 +151,23 @@ public class Cost {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                SimpleIntegerProperty cost_id, cost_quantity;
-                SimpleStringProperty cost_name, cost_purchaseDate, cost_comment;
+                SimpleIntegerProperty cost_id, cost_quantity, cost_printerID;
+                SimpleStringProperty cost_name, cost_purchaseDate, cost_comment, cost_printer;
                 SimpleDoubleProperty cost_shipping, cost_price;
                 
                 cost_id = new SimpleIntegerProperty(rs.getInt("CostID"));
                 cost_quantity = new SimpleIntegerProperty(rs.getInt("CostQuantity"));
+                cost_printerID = new SimpleIntegerProperty(rs.getInt("PrinterID"));
                 
                 cost_name = new SimpleStringProperty(rs.getString("CostName"));
                 cost_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
                 cost_comment = new SimpleStringProperty(rs.getString("Comment"));
+                cost_printer = new SimpleStringProperty(rs.getString("PrinterName"));
                 
                 cost_shipping = new SimpleDoubleProperty(rs.getDouble("CostShipping"));
                 cost_price = new SimpleDoubleProperty(rs.getDouble("CostPrice"));
                 
-                Cost cost = new Cost(cost_id, cost_quantity, cost_name, cost_purchaseDate, cost_comment, cost_shipping, cost_price);
+                Cost cost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_printer, cost_shipping, cost_price);
                 
                 allCostsList.add(cost);
             }

@@ -179,10 +179,10 @@ public class MainController implements Initializable {
     private TableView<Cost> tv_costs;
     
     @FXML
-    private TableColumn<Cost, Integer> cost_col_id, cost_col_quantity;
+    private TableColumn<Cost, Integer> cost_col_id, cost_col_quantity, cost_col_printerID;
     
     @FXML
-    private TableColumn<Cost, String> cost_col_name, cost_col_purchaseDate, cost_col_comment;
+    private TableColumn<Cost, String> cost_col_name, cost_col_purchaseDate, cost_col_comment,cost_col_printer;
     
     @FXML
     private TableColumn<Cost, Double> cost_col_price, cost_col_shipping;
@@ -226,7 +226,6 @@ public class MainController implements Initializable {
             stage.centerOnScreen();            
             
             stage.show();
-            //stage.setAlwaysOnTop(true);
             
             ctrl.setOrder_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Orders"));
             ctrl.getDatePicker_dateCreated().setValue(LocalDate.now());
@@ -781,9 +780,11 @@ public class MainController implements Initializable {
         cost_col_comment.setCellValueFactory((param) -> {return param.getValue().getCost_comment();});
         cost_col_name.setCellValueFactory((param) -> {return param.getValue().getCost_name();});           
         cost_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getCost_purchaseDate();});
+        cost_col_printer.setCellValueFactory((param) -> {return param.getValue().getCost_printer();});
         
         cost_col_id.setCellValueFactory((param) -> {return param.getValue().getCost_id().asObject();});        
         cost_col_quantity.setCellValueFactory((param) -> {return param.getValue().getCost_quantity().asObject();});
+        cost_col_printerID.setCellValueFactory((param) -> {return param.getValue().getCost_printerID().asObject();});
         
         cost_col_price.setCellValueFactory((param) -> {return param.getValue().getCost_price().asObject();});
         cost_col_shipping.setCellValueFactory((param) -> {return param.getValue().getCost_shipping().asObject();});
@@ -792,10 +793,12 @@ public class MainController implements Initializable {
         cost_col_comment.setStyle("-fx-alignment: CENTER;");
         cost_col_name.setStyle("-fx-alignment: CENTER;");
         cost_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
+        cost_col_printer.setStyle("-fx-alignment: CENTER;");
         
         cost_col_id.setStyle("-fx-alignment: CENTER;");
         cost_col_quantity.setStyle("-fx-alignment: CENTER;");
-                
+        cost_col_printerID.setStyle("-fx-alignment: CENTER;");
+        
         cost_col_price.setStyle("-fx-alignment: CENTER;");
         cost_col_shipping.setStyle("-fx-alignment: CENTER;");
         

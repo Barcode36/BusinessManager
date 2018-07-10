@@ -6,6 +6,7 @@
 package controllers.orders;
 
 import classes.Customer;
+import classes.MngApi;
 import classes.OrderItem;
 import classes.User;
 import controllers.MainController;
@@ -14,6 +15,8 @@ import controllers.select.SelectObjectController;
 import controllers.select.SelectPrinterMaterialPriceController;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -143,7 +146,7 @@ public class NewOrderController implements Initializable {
                         Stage stage = new Stage();
                         stage.initModality(Modality.APPLICATION_MODAL);
                         stage.setTitle("Assign Additional Information");
-           
+                        
                         stage.setScene(new Scene(root1));
                         stage.setResizable(false);
                         stage.centerOnScreen();            
@@ -164,8 +167,64 @@ public class NewOrderController implements Initializable {
             return row;
         });
         
+        btn_removeSelected.setOnAction((event) -> {
+            
+            selectedObjects.removeAll(tv_selectedObjects.getSelectionModel().getSelectedItems());
+            refreshSelectedObjects();
+            
+        });
+        
     }    
-
+    
+    public void calcualteSummary(){
+        
+        double summary_weight = 0, summary_supportWeight = 0, summary_weightSum = 0, summary_price = 0, summary_costs = 0, summary_profit = 0;
+        int summary_quantity = 0, summary_buildTime = 0;
+        
+        double weight = 0, supportWeight = 0, weightSum = 0, price = 0, costs = 0, profit = 0;
+        int quantity = 0, buildTime = 0;
+        
+        for (int i = 0; i < selectedObjects.size(); i++) {
+            if(selectedObjects.get(i).getQunatity().get() != 0){
+                
+                quantity = selectedObjects.get(i).getQunatity().get();
+            
+                weight = quantity*selectedObjects.get(i).getObject_weight().get();
+                supportWeight = quantity*selectedObjects.get(i).getObject_supportWeight().get();
+                weightSum = weight + supportWeight;
+                buildTime = quantity*selectedObjects.get(i).getObject_buildTime().get();
+            
+                price = selectedObjects.get(i).getPrice().get();
+                costs = selectedObjects.get(i).getCosts().get();
+                profit = price - costs;
+            
+                summary_quantity += quantity;
+            
+                summary_supportWeight += supportWeight;
+                summary_weight += weight;
+                summary_buildTime += buildTime;
+                summary_price += price;
+                summary_costs += costs;
+            }
+            
+            
+            
+        }
+        
+        summary_weightSum = summary_weight + summary_supportWeight;
+        summary_profit = summary_price - summary_costs;
+        
+        label_weight.setText(String.format(Locale.UK, "%.2f g", summary_weight));
+        label_supportWeight.setText(String.format(Locale.UK, "%.2f g", summary_supportWeight));
+        label_weightSum.setText(String.format(Locale.UK, "%.2f g", summary_weightSum));        
+        label_quantity.setText(String.format(Locale.UK, "%d", summary_quantity));        
+            String summary_buildTime_formatted = MngApi.convertToHours(summary_buildTime).get();
+        label_buildTime.setText(String.format("%s", summary_buildTime_formatted));
+        label_price.setText(String.format(Locale.UK, "%.2f $", summary_price));
+        label_costs.setText(String.format(Locale.UK, "%.2f $", summary_costs));
+        label_profit.setText(String.format(Locale.UK, "%.2f $", summary_profit));
+    }
+    
     public void setSelectedObjects() {
         
         col_objectName.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
@@ -211,13 +270,14 @@ public class NewOrderController implements Initializable {
         return selectedObjects;
     }
     
-    public void addSelectedObjects(ObservableList<OrderItem> selectedObjects){
-        
-        this.selectedObjects.addAll(selectedObjects);
-    }
+//    public void addSelectedObjects(ObservableList<OrderItem> selectedObjects){
+//        
+//        this.selectedObjects.addAll(selectedObjects);
+//    }
     
-    public void refreshSelectedObjects(){
+    public void refreshSelectedObjects(){        
         tv_selectedObjects.refresh();
+        calcualteSummary();
     }
     
     public void setSelectedCustomer(Customer selectedCustomer) {
@@ -225,14 +285,6 @@ public class NewOrderController implements Initializable {
         txtField_customer.setText(selectedCustomer.getCustomer_id().get() + ";" + selectedCustomer.getCustomer_lastName().get() + ";" + selectedCustomer.getCustomer_firstName().get());
     }
 
-    public DatePicker getDatePicker_dateCreated() {
-        return datePicker_dateCreated;
-    }
-
-    public DatePicker getDatePicker_dueDate() {
-        return datePicker_dueDate;
-    }    
-    
     public void setUser(User user) {
         this.user = user;
     }
@@ -242,9 +294,15 @@ public class NewOrderController implements Initializable {
     }
     
     public void setOrder_label_id_value(int id) {
-        this.label_orderID.setText(String.valueOf(id));        
+        this.label_orderID.setText(String.valueOf(id));
+        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
     
-    
-    
+    public DatePicker getDatePicker_dateCreated() {
+        return datePicker_dateCreated;
+    }
+
+    public DatePicker getDatePicker_dueDate() {
+        return datePicker_dueDate;
+    } 
 }

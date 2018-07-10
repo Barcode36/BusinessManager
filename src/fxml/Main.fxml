@@ -568,8 +568,10 @@
                               <TableColumn fx:id="cost_col_quantity" prefWidth="81.0" text="Quantity" />
                               <TableColumn fx:id="cost_col_price" prefWidth="96.0" text="Price" />
                               <TableColumn fx:id="cost_col_shipping" prefWidth="224.0" text="Shipping" />
-                              <TableColumn fx:id="cost_col_purchaseDate" prefWidth="115.0" text="Purchase Date" />
-                              <TableColumn fx:id="cost_col_comment" prefWidth="224.0" text="Comment" />
+                              <TableColumn fx:id="cost_col_printerID" prefWidth="72.0" text="Printer ID" />
+                              <TableColumn fx:id="cost_col_printer" prefWidth="201.0" text="Printer" />
+                              <TableColumn fx:id="cost_col_purchaseDate" prefWidth="104.0" text="Purchase Date" />
+                              <TableColumn fx:id="cost_col_comment" prefWidth="238.0" text="Comment" />
                            </columns>
                         </TableView>
                      </center>

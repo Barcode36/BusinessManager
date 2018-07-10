@@ -905,6 +905,112 @@ public class Material {
     return materialColors;
     }
     
+     public static Material getMaterialByID(User user, SimpleIntegerProperty material_id) {
+        
+        Material material = null;
+        
+        //Create query
+        String query = "SELECT Materials.Comment, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID WHERE MaterialID="+ material_id.get() + " ORDER BY Materials.MaterialID DESC";
+
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            
+            if(conn.isValid(10) == false) {
+                MngApi obj = new MngApi();
+                obj.alertConnectionLost();
+            }
+            
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+                SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
+                SimpleIntegerProperty material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
+                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
+                
+                material_color = new SimpleStringProperty(rs.getString("Color"));
+                material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
+                material_type = new SimpleStringProperty(rs.getString("MaterialType"));
+                material_finished = new SimpleStringProperty(rs.getString("Finished"));
+                material_distributor = new SimpleStringProperty(rs.getString("Seller"));
+                material_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
+                material_comment = new SimpleStringProperty(rs.getString("Comment"));                
+                                
+                material_weight = new SimpleIntegerProperty(rs.getInt("WeightValue"));
+                material_id_manufacturer = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
+                material_id_materialType = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
+                material_id_color = new SimpleIntegerProperty(rs.getInt("ColorID"));
+                material_id_weight = new SimpleIntegerProperty(rs.getInt("WeightID"));
+                material_id_seller = new SimpleIntegerProperty(rs.getInt("SellerID"));
+                material_id_diameter = new SimpleIntegerProperty(rs.getInt("DiameterID"));
+                
+                material_diameter = new SimpleDoubleProperty(rs.getDouble("DiameterValue"));
+                material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
+                material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
+                
+                material_used = new SimpleDoubleProperty(getMaterialUsed(user, material_id));
+                material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
+                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
+                material_profit = new SimpleDoubleProperty(material_soldFor.get() - material_price.get());
+                
+                material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit);
+                
+            }
+
+            rs.close();
+        }catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+    return material;
+    }
+    
     public static List<SimpleTableObject> getMaterialWeights(User user) {
         
         //Create list

@@ -7,6 +7,8 @@ package controllers.costs;
 
 import classes.Cost;
 import classes.MngApi;
+import classes.Printer;
+import classes.SimpleTableObject;
 import classes.User;
 import controllers.MainController;
 import java.net.URL;
@@ -15,9 +17,12 @@ import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -46,6 +51,9 @@ public class NewCostController implements Initializable {
     @FXML
     private Button cost_btn_create, cost_btn_cancel;
     
+    @FXML
+    private ComboBox<String> comboBox_printer;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         cost_btn_create.setOnAction((event) -> {
@@ -57,8 +65,8 @@ public class NewCostController implements Initializable {
                 return;
             }
             
-            SimpleIntegerProperty cost_id, cost_quantity;
-            SimpleStringProperty cost_name, cost_purchaseDate, cost_comment;
+            SimpleIntegerProperty cost_id, cost_quantity, cost_printerID;
+            SimpleStringProperty cost_name, cost_purchaseDate, cost_comment, cost_printer;
             SimpleDoubleProperty cost_shipping, cost_price;
             
             Cost newCost;
@@ -67,6 +75,11 @@ public class NewCostController implements Initializable {
             cost_id = new SimpleIntegerProperty(getCost_label_id_value());
             cost_quantity = new SimpleIntegerProperty(Integer.parseInt(cost_txtField_quantity.getText()));
             
+            String[] printer = comboBox_printer.getValue().split(";");
+            
+            cost_printerID = new SimpleIntegerProperty(Integer.parseInt(printer[0]));
+            cost_printer = new SimpleStringProperty(printer[1]);
+            
             cost_name = new SimpleStringProperty(cost_txtField_name.getText());            
             cost_purchaseDate = new SimpleStringProperty(cost_datePicker_purchaseDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
             cost_comment = new SimpleStringProperty(cost_txtField_comment.getText());
@@ -74,7 +87,7 @@ public class NewCostController implements Initializable {
             cost_price = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_price.getText()));
             cost_shipping = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_shipping.getText()));
             
-            newCost = new Cost(cost_id, cost_quantity, cost_name, cost_purchaseDate, cost_comment, cost_shipping, cost_price);
+            newCost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_printer, cost_shipping, cost_price);
             
             Cost.insertNewCost(newCost, user);
             
@@ -104,7 +117,12 @@ public class NewCostController implements Initializable {
     }
     
     public void setCost_label_id_value(int id) {
-        this.cost_label_id.setText(String.valueOf(id));        
+        this.cost_label_id.setText(String.valueOf(id));
+
+        ObservableList<String> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
+        comboBox_printer.setItems(printers);
+        comboBox_printer.setVisibleRowCount(7);
+        comboBox_printer.setValue(printers.get(0));        
     }
     
     public int getCost_label_id_value(){

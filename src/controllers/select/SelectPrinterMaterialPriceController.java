@@ -11,7 +11,6 @@ import classes.MngApi;
 import classes.OrderItem;
 
 import classes.User;
-import controllers.MainController;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
@@ -52,8 +51,6 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     private User user;
     
-    private MainController mainController;
-    
     private NewOrderController newOrderController;
     
     private OrderItem selectedObject;
@@ -65,7 +62,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     private ComboBox<String> comboBox_printer;
     
     @FXML
-    private TextField txtField_material, txtField_price, txtField_quantity, txtField_costs;
+    private TextField txtField_material, txtField_price, txtField_quantity, txtField_costs, txtField_weight, txtField_supportWeight, txtField_hours, txtField_minutes;
     
     @FXML
     private Button btn_selectMaterial, btn_assign, btn_cancel;
@@ -76,6 +73,8 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        
         
         txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {
             
@@ -117,32 +116,48 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         
         btn_assign.setOnAction((event) -> {
             
-            boolean isEmpty = MngApi.isTextFieldEmpty(txtField_price, txtField_quantity, txtField_material);
+            boolean isEmpty = MngApi.isTextFieldEmpty(txtField_price, txtField_quantity, txtField_material, txtField_weight, txtField_supportWeight, txtField_hours, txtField_minutes);
+            boolean isZero = false;
             
-            if (isEmpty == true){
-                label_info.setText("Fields cannot be empty.");
+            if(Integer.parseInt(txtField_quantity.getText()) <= 0 || Double.parseDouble(txtField_weight.getText()) <= 0 || Integer.parseInt(txtField_hours.getText()) <= 0 || Integer.parseInt(txtField_minutes.getText()) <= 0)isZero = true;            
+            
+            if (isEmpty == true || isZero == true){
+                label_info.setText("Fields cannot be empty or negative/non-zero values.");
                 label_info.setTextFill(Color.web("#ff0000"));
                 
             } else {
                 try {
                 
-                int quantity = Integer.parseInt(txtField_quantity.getText());
-            
+                int quantity, buildTime;
+                double weight, supportWeight;
+                
+                quantity = Integer.parseInt(txtField_quantity.getText());
+                
+                weight = Double.parseDouble(txtField_weight.getText());
+                supportWeight = Double.parseDouble(txtField_supportWeight.getText());
+                
+                String buildTime_formatted = txtField_hours.getText() + "," + txtField_minutes.getText();
+                    buildTime = MngApi.convertToMinutes(buildTime_formatted);
+                
                 String[] printer = comboBox_printer.getValue().split(";");
                     String printer_id = printer[0];
                         int printerID = Integer.parseInt(printer_id);
                     String printer_name = printer[1];
             
-                String[] material = txtField_material.getText().split(";");
-                    String material_id = material[0];
+                String[] material2 = txtField_material.getText().split(";");
+                    String material_id = material2[0];
                         int materialID = Integer.parseInt(material_id);                
-                    String material_type = material[1] + " " + material[2];
-                    String material_color = material[3];
+                    String material_type = material2[1] + " " + material2[2];
+                    String material_color = material2[3];
                 
+                    
                 double price = Double.parseDouble(txtField_price.getText());
                 double costs = Double.parseDouble(txtField_costs.getText());
                 
                 selectedObject.setQunatity(new SimpleIntegerProperty(quantity));
+                selectedObject.setObject_weight(new SimpleDoubleProperty(weight));
+                selectedObject.setObject_supportWeight(new SimpleDoubleProperty(supportWeight));
+                selectedObject.setObject_buildTime(new SimpleIntegerProperty(buildTime));
                 selectedObject.setPrinter_id(new SimpleIntegerProperty(printerID));
                 selectedObject.setPrinter_name(new SimpleStringProperty(printer_name));
                 selectedObject.setMaterial_id(new SimpleIntegerProperty(materialID));
@@ -159,6 +174,9 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 label_info.setText("Wrong number format, please check your fields.");
                 label_info.setTextFill(Color.web("#ff0000"));
                 //e.printStackTrace();
+            } catch (ArithmeticException e){
+                label_info.setText("Enter some positive, non-zero value!");
+                label_info.setTextFill(Color.web("#ff0000"));
             }
             }
             
@@ -172,18 +190,29 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     public void setElementValues(){
         
         label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());
+        txtField_quantity.setText(String.valueOf(selectedObject.getQunatity().get()));
+        txtField_weight.setText(String.valueOf(selectedObject.getObject_weight().get()));
+        txtField_supportWeight.setText(String.valueOf(selectedObject.getObject_supportWeight().get()));
+                
+        String[] buildTime_formatted = selectedObject.getObject_buildTime_formated().get().split(" ");
+        txtField_hours.setText(String.format(Locale.UK, "%s", buildTime_formatted[0].replaceAll("[^\\d.]", "")));
+        txtField_minutes.setText(String.format(Locale.UK, "%s", buildTime_formatted[1].replaceAll("[^\\d.]", "")));
         
         ObservableList<String> printers = FXCollections.observableArrayList(getPrinters(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setValue(printers.get(0));
+        
+        if(selectedObject.getMaterial_id().get() != 0)setMaterialTxtField(Material.getMaterialByID(user, selectedObject.getMaterial_id()));
+        txtField_price.setText(String.format(Locale.UK, "%.2f", selectedObject.getPrice().get()));
+        txtField_costs.setText(String.format(Locale.UK, "%.2f", selectedObject.getCosts().get()));
     }
     
     public void setCosts(){
         
         if (MngApi.isTextFieldEmpty(txtField_quantity)){
                 
-            txtField_quantity.setText("1");
+            //txtField_quantity.setText("1");            
                 
         } else {
                 
@@ -226,11 +255,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     public void setUser(User user) {
         this.user = user;
     }
-
-    public void setMainController(MainController mainController) {
-        this.mainController = mainController;
-    }
-
+    
     public void setNewOrderController(NewOrderController newOrderController) {
         this.newOrderController = newOrderController;
     }

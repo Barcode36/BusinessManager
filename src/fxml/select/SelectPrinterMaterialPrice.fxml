@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="313.0" prefWidth="427.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.select.SelectPrinterMaterialPriceController">
+<AnchorPane id="AnchorPane" prefHeight="408.0" prefWidth="427.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.select.SelectPrinterMaterialPriceController">
    <children>
       <GridPane prefHeight="313.0" prefWidth="427.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <columnConstraints>
@@ -32,6 +32,9 @@
             <RowConstraints maxHeight="85.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
           <RowConstraints maxHeight="146.0" minHeight="10.0" prefHeight="41.0" vgrow="SOMETIMES" />
           <RowConstraints maxHeight="116.0" minHeight="10.0" prefHeight="39.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="111.0" minHeight="10.0" prefHeight="41.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="111.0" minHeight="10.0" prefHeight="41.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="111.0" minHeight="10.0" prefHeight="41.0" vgrow="SOMETIMES" />
           <RowConstraints maxHeight="111.0" minHeight="10.0" prefHeight="41.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="102.0" minHeight="10.0" prefHeight="45.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="97.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
@@ -57,7 +60,7 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <Label text="Printer:" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+            <Label text="Printer:" GridPane.halignment="RIGHT" GridPane.rowIndex="6">
                <GridPane.margin>
                   <Insets right="5.0" />
                </GridPane.margin>
@@ -65,7 +68,7 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <Label text="Material:" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+            <Label text="Material:" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
                <GridPane.margin>
                   <Insets right="5.0" />
                </GridPane.margin>
@@ -73,7 +76,7 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <Label text="Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
+            <Label text="Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="8">
                <GridPane.margin>
                   <Insets right="5.0" />
                </GridPane.margin>
@@ -81,19 +84,19 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <TextField fx:id="txtField_price" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <TextField fx:id="txtField_price" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
                <GridPane.margin>
                   <Insets right="230.0" />
                </GridPane.margin>
             </TextField>
-            <Button fx:id="btn_assign" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Assign" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="6">
+            <Button fx:id="btn_assign" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Assign" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="9">
                <GridPane.margin>
                   <Insets left="100.0" />
                </GridPane.margin>
             </Button>
            
-            <Button fx:id="btn_cancel" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-            <Label text="\$" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <Button fx:id="btn_cancel" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="9" />
+            <Label text="\$" GridPane.columnIndex="1" GridPane.rowIndex="8">
                <GridPane.margin>
                   <Insets left="65.0" />
                </GridPane.margin>
@@ -102,12 +105,12 @@
                </font>
             </Label>
             
-            <TextField fx:id="txtField_material" editable="false" maxHeight="25.0" maxWidth="177.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <TextField fx:id="txtField_material" editable="false" maxHeight="25.0" maxWidth="177.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
             </TextField>
-            <Button fx:id="btn_selectMaterial" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Select" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+            <Button fx:id="btn_selectMaterial" mnemonicParsing="false" prefHeight="25.0" prefWidth="85.0" text="Select" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
                <GridPane.margin>
                   <Insets right="10.0" />
                </GridPane.margin>
@@ -117,9 +120,9 @@
                   <Insets right="230.0" />
                </GridPane.margin>
             </TextField>
-            <ComboBox fx:id="comboBox_printer" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <ComboBox fx:id="comboBox_printer" prefHeight="25.0" prefWidth="177.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
             <Label fx:id="label_info" text="Fill the fields." GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-            <Label text="Costs:" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5">
+            <Label text="Costs:" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="8">
                <font>
                   <Font size="14.0" />
                </font>
@@ -127,17 +130,93 @@
                   <Insets right="70.0" />
                </GridPane.margin>
             </Label>
-            <TextField fx:id="txtField_costs" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <TextField fx:id="txtField_costs" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
                <GridPane.margin>
                   <Insets left="135.0" right="95.0" />
                </GridPane.margin>
             </TextField>
-            <Label text="\$" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
+            <Label text="\$" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="8">
                <font>
                   <Font size="14.0" />
                </font>
                <GridPane.margin>
                   <Insets right="80.0" />
+               </GridPane.margin>
+            </Label>
+            <Label text="Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="3">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+            </Label>
+            <Label text="Support Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+            </Label>
+            <TextField fx:id="txtField_weight" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets right="230.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="txtField_supportWeight" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+               <GridPane.margin>
+                  <Insets right="230.0" />
+               </GridPane.margin>
+            </TextField>
+            <Label text="Build Time:" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+            </Label>
+            <TextField fx:id="txtField_hours" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+               <GridPane.margin>
+                  <Insets right="250.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="txtField_minutes" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+               <GridPane.margin>
+                  <Insets left="60.0" right="200.0" />
+               </GridPane.margin>
+            </TextField>
+            <Label text="h" GridPane.columnIndex="1" GridPane.rowIndex="5">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets left="45.0" />
+               </GridPane.margin>
+            </Label>
+            <Label text="m" GridPane.columnIndex="1" GridPane.rowIndex="5">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets left="95.0" />
+               </GridPane.margin>
+            </Label>
+            <Label text="g" GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets left="65.0" />
+               </GridPane.margin>
+            </Label>
+            <Label text="g" GridPane.columnIndex="1" GridPane.rowIndex="4">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets left="65.0" />
                </GridPane.margin>
             </Label>
          </children>
