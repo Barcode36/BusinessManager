@@ -232,7 +232,7 @@ public class MainController implements Initializable {
             ctrl.getDatePicker_dueDate().setValue(LocalDate.now());
             ctrl.setUser(user);            
             ctrl.setMainController(this);
-            
+            ctrl.setFields();            
             
         }catch (IOException e){
             
@@ -265,13 +265,10 @@ public class MainController implements Initializable {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("New Customer");
-//            stage.setMinHeight(400);
-//            stage.setMinWidth(440);
-           
+
             stage.setScene(new Scene(root1));
             stage.setResizable(false);
             stage.centerOnScreen();
-            
             
             //passing credentials to main controller
             ctrl.setUser(user);

@@ -15,9 +15,9 @@ import controllers.select.SelectObjectController;
 import controllers.select.SelectPrinterMaterialPriceController;
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -34,6 +34,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -52,12 +54,13 @@ public class NewOrderController implements Initializable {
     
     private ObservableList<OrderItem> selectedObjects = FXCollections.observableArrayList();
     
+    final ToggleGroup soldGroup = new ToggleGroup();
     
     @FXML
-    private Label label_orderID, label_weight, label_supportWeight, label_weightSum, label_quantity, label_buildTime, label_price, label_costs, label_profit;
+    private Label label_info, label_orderID, label_weight, label_supportWeight, label_weightSum, label_quantity, label_buildTime, label_price, label_costs, label_profit;
     
     @FXML
-    private TextField txtField_customer, txtField_comment, txtField_price;
+    private TextField txtField_customer, txtField_pricePerHour, txtField_comment;
     
     @FXML
     private Button btn_selectCustomer, btn_addObject, btn_removeSelected, btn_calculatePrices, btn_create, btn_cancel;
@@ -174,6 +177,24 @@ public class NewOrderController implements Initializable {
             
         });
         
+        btn_calculatePrices.setOnAction((event) -> {
+            
+            if(txtField_pricePerHour.getText() == null)txtField_pricePerHour.setText("2");
+            calculatePrices();
+            
+        });
+        
+        btn_create.setOnAction((event) -> {
+            
+            
+            
+        });
+        
+        btn_cancel.setOnAction((event) -> {
+            
+            MngApi.closeWindow(btn_cancel);
+            
+        });
     }    
     
     public void calcualteSummary(){
@@ -225,6 +246,37 @@ public class NewOrderController implements Initializable {
         label_profit.setText(String.format(Locale.UK, "%.2f $", summary_profit));
     }
     
+    public void calculatePrices(){
+        
+        try{
+            
+            double pricePerHour = Double.parseDouble(txtField_pricePerHour.getText());
+            double pricePerMinute = pricePerHour/60;
+            
+            for (int i = 0; i < selectedObjects.size(); i++) {
+                
+                OrderItem item = selectedObjects.get(i);
+                
+                int buildTime = item.getObject_buildTime().get();
+                int quantity = item.getQunatity().get();
+                
+                double finalPrice = buildTime*quantity*pricePerMinute;
+                
+                item.setPrice(new SimpleDoubleProperty(MngApi.round(finalPrice, 2)));
+            }
+            
+            refreshSelectedObjects();
+            
+        } catch (NumberFormatException e){
+            
+            label_info.setText("Price per hour has bad format.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            
+        }
+        
+        
+    }
+    
     public void setSelectedObjects() {
         
         col_objectName.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
@@ -268,13 +320,8 @@ public class NewOrderController implements Initializable {
 
     public ObservableList<OrderItem> getSelectedObjects() {
         return selectedObjects;
-    }
-    
-//    public void addSelectedObjects(ObservableList<OrderItem> selectedObjects){
-//        
-//        this.selectedObjects.addAll(selectedObjects);
-//    }
-    
+    }    
+
     public void refreshSelectedObjects(){        
         tv_selectedObjects.refresh();
         calcualteSummary();
@@ -290,7 +337,15 @@ public class NewOrderController implements Initializable {
     }
     
     public void setMainController(MainController mainController) {
-        this.mainController = mainController;
+        this.mainController = mainController;        
+    }
+    
+    public void setFields(){
+        
+        radioBtn_NotSold.setToggleGroup(soldGroup);
+        radioBtn_Sold.setToggleGroup(soldGroup);
+        radioBtn_Sold.setSelected(true);
+        
     }
     
     public void setOrder_label_id_value(int id) {
