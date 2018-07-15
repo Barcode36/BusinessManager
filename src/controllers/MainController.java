@@ -227,12 +227,9 @@ public class MainController implements Initializable {
             
             stage.show();
             
-            ctrl.setOrder_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Orders"));
-            ctrl.getDatePicker_dateCreated().setValue(LocalDate.now());
-            ctrl.getDatePicker_dueDate().setValue(LocalDate.now());
             ctrl.setUser(user);            
             ctrl.setMainController(this);
-            ctrl.setFields();            
+            ctrl.setNewOrderFields();            
             
         }catch (IOException e){
             
@@ -542,7 +539,9 @@ public class MainController implements Initializable {
         return service_refreshOrders;
     }
     
-    
+    public Order getSelectedOrder(){
+        return tv_orders.getSelectionModel().getSelectedItem();
+    }
     /*
     *
     *

@@ -236,6 +236,64 @@ public class MngApi {
         }//end try
     }
     
+    public static void performMultipleUpdates(ObservableList<String> updateQueries, User user){
+        
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            if(conn.isValid(15) == false) {
+                System.out.print("Connection Lost");
+            }
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            for (int i = 0; i < updateQueries.size(); i++) {
+                stmt.executeUpdate(updateQueries.get(i));
+            }
+            
+                       
+            
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+    }
+    
     //diplays connetion lost dialog window
     public void alertConnectionLost(){
         try{            

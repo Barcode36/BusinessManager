@@ -7,6 +7,7 @@ package controllers.orders;
 
 import classes.Customer;
 import classes.MngApi;
+import classes.Order;
 import classes.OrderItem;
 import classes.User;
 import controllers.MainController;
@@ -15,9 +16,13 @@ import controllers.select.SelectObjectController;
 import controllers.select.SelectPrinterMaterialPriceController;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -54,7 +59,8 @@ public class NewOrderController implements Initializable {
     
     private ObservableList<OrderItem> selectedObjects = FXCollections.observableArrayList();
     
-    final ToggleGroup soldGroup = new ToggleGroup();
+    @FXML
+    private ToggleGroup toggleGroup_status = new ToggleGroup();
     
     @FXML
     private Label label_info, label_orderID, label_weight, label_supportWeight, label_weightSum, label_quantity, label_buildTime, label_price, label_costs, label_profit;
@@ -172,6 +178,11 @@ public class NewOrderController implements Initializable {
         
         btn_removeSelected.setOnAction((event) -> {
             
+            if(tv_selectedObjects.getSelectionModel().getSelectedItems() == null){
+                label_info.setText("Select an item.");
+                label_info.setTextFill(Color.web("#ff0000"));
+                return;
+            }
             selectedObjects.removeAll(tv_selectedObjects.getSelectionModel().getSelectedItems());
             refreshSelectedObjects();
             
@@ -179,21 +190,82 @@ public class NewOrderController implements Initializable {
         
         btn_calculatePrices.setOnAction((event) -> {
             
-            if(txtField_pricePerHour.getText() == null)txtField_pricePerHour.setText("2");
+            if(txtField_pricePerHour.getText() == null)txtField_pricePerHour.setText("2.5");
             calculatePrices();
             
         });
         
-        btn_create.setOnAction((event) -> {
+        btn_create.setOnAction((event) -> {            
+            try{
+                if(tv_selectedObjects.getItems().get(0) == null) throw new NullPointerException();
+                //preparing order
+                Order newOrder;            
+                SimpleIntegerProperty order_id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
             
+                SimpleStringProperty status, comment, dateCreated, dueDate;    
+                SimpleIntegerProperty id, customer_id, totalQuantity;
+                SimpleDoubleProperty totalPrice;
             
+                RadioButton soldStatus = (RadioButton)toggleGroup_status.getSelectedToggle();            
+                status = new SimpleStringProperty(soldStatus.getText());
             
+                comment = new SimpleStringProperty(txtField_comment.getText());
+                dateCreated = new SimpleStringProperty(datePicker_dateCreated.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                dueDate = new SimpleStringProperty(datePicker_dueDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            
+                id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
+                customer_id = selectedCustomer.getCustomer_id();
+                totalQuantity = new SimpleIntegerProperty(Integer.parseInt(label_quantity.getText()));
+            
+                String[] totalPriceFormatted = label_price.getText().split(" ");
+                totalPrice = new SimpleDoubleProperty(Double.parseDouble(totalPriceFormatted[0]));
+            
+                newOrder = new Order(customer_id, null, status, comment, dateCreated, dueDate, null, id, totalQuantity, null, null, totalPrice, null);
+            
+                //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
+                //They are basicaly mulitple insert querries in a row separated by ";"
+                ObservableList<String> updateQueries = FXCollections.observableArrayList();
+            
+                for (int i = 0; i < selectedObjects.size(); i++) {
+                
+                    OrderItem obj = selectedObjects.get(i);
+                    obj.setOrder_id(order_id);
+                
+                    SimpleIntegerProperty object_id, buildTime, quantity, printer_id, material_id;
+                    SimpleDoubleProperty supportWeight, weight, price;            
+                
+                
+                    object_id = obj.getObject_id();
+                    buildTime = obj.getObject_buildTime();
+                    quantity = obj.getQuantity();
+                    printer_id = obj.getPrinter_id();
+                    material_id = obj.getMaterial_id();
+                
+                    supportWeight = obj.getObject_supportWeight();
+                    weight = obj.getObject_weight();
+                    price = obj.getPrice();
+                
+                    updateQueries.add(OrderItem.generateUpdateQuery(obj));
+                }
+            
+                Order.insertNewOrder(newOrder, user);
+                OrderItem.insertMultipleOrderItems(updateQueries, user);
+            
+                MngApi.closeWindow(btn_create);
+                
+            } catch (NumberFormatException e) {                
+                label_info.setText("Wrong number format, please check your fields.");
+                label_info.setTextFill(Color.web("#ff0000"));
+                //e.printStackTrace();
+            } catch (NullPointerException e) {                
+                label_info.setText("Insert some objects first.");
+                label_info.setTextFill(Color.web("#ff0000"));
+                //e.printStackTrace();
+            }
         });
         
-        btn_cancel.setOnAction((event) -> {
-            
-            MngApi.closeWindow(btn_cancel);
-            
+        btn_cancel.setOnAction((event) -> {            
+            MngApi.closeWindow(btn_cancel);            
         });
     }    
     
@@ -206,18 +278,18 @@ public class NewOrderController implements Initializable {
         int quantity = 0, buildTime = 0;
         
         for (int i = 0; i < selectedObjects.size(); i++) {
-            if(selectedObjects.get(i).getQunatity().get() != 0){
+            if(selectedObjects.get(i).getQuantity().get() != 0){
                 
-                quantity = selectedObjects.get(i).getQunatity().get();
+                quantity = selectedObjects.get(i).getQuantity().get();
             
                 weight = quantity*selectedObjects.get(i).getObject_weight().get();
                 supportWeight = quantity*selectedObjects.get(i).getObject_supportWeight().get();
-                weightSum = weight + supportWeight;
+                //weightSum = weight + supportWeight;
                 buildTime = quantity*selectedObjects.get(i).getObject_buildTime().get();
             
                 price = selectedObjects.get(i).getPrice().get();
                 costs = selectedObjects.get(i).getCosts().get();
-                profit = price - costs;
+                //profit = price - costs;
             
                 summary_quantity += quantity;
             
@@ -258,7 +330,7 @@ public class NewOrderController implements Initializable {
                 OrderItem item = selectedObjects.get(i);
                 
                 int buildTime = item.getObject_buildTime().get();
-                int quantity = item.getQunatity().get();
+                int quantity = item.getQuantity().get();
                 
                 double finalPrice = buildTime*quantity*pricePerMinute;
                 
@@ -288,7 +360,7 @@ public class NewOrderController implements Initializable {
         col_materialID.setCellValueFactory((param) -> {return param.getValue().getMaterial_id().asObject();});        
         col_objectID.setCellValueFactory((param) -> {return param.getValue().getObject_id().asObject();});
         col_printerID.setCellValueFactory((param) -> {return param.getValue().getPrinter_id().asObject();});
-        col_quantity.setCellValueFactory((param) -> {return param.getValue().getQunatity().asObject();});
+        col_quantity.setCellValueFactory((param) -> {return param.getValue().getQuantity().asObject();});
         
         
         col_weight.setCellValueFactory((param) -> {return param.getValue().getObject_weight().asObject();});
@@ -326,6 +398,12 @@ public class NewOrderController implements Initializable {
         tv_selectedObjects.refresh();
         calcualteSummary();
     }
+
+    public Button getBtn_create() {
+        return btn_create;
+    }
+    
+    
     
     public void setSelectedCustomer(Customer selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
@@ -340,24 +418,32 @@ public class NewOrderController implements Initializable {
         this.mainController = mainController;        
     }
     
-    public void setFields(){
+    public void setNewOrderFields(){
         
-        radioBtn_NotSold.setToggleGroup(soldGroup);
-        radioBtn_Sold.setToggleGroup(soldGroup);
-        radioBtn_Sold.setSelected(true);
+        label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(user, "Orders")));
+        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        
+        txtField_pricePerHour.setText("2.5");
+        
+        datePicker_dateCreated.setValue(LocalDate.now());
+        datePicker_dueDate.setValue(LocalDate.now());
+        
+    }
+        
+//    public void setNewOrder_label_id_value(int id) {
+//        this.label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(user, "Orders")));
+//        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+//    }
+    
+    public void setSelectedOrderField(Order order){
+        
+        label_orderID.setText(String.valueOf(order.getOrder_id().get()));
         
     }
     
-    public void setOrder_label_id_value(int id) {
-        this.label_orderID.setText(String.valueOf(id));
+    public void setSelectedOrder_label_id_value(Order order) {
+        this.label_orderID.setText(String.valueOf(order.getOrder_id().get()));
         tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
     
-    public DatePicker getDatePicker_dateCreated() {
-        return datePicker_dateCreated;
-    }
-
-    public DatePicker getDatePicker_dueDate() {
-        return datePicker_dueDate;
-    } 
 }

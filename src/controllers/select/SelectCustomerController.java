@@ -8,7 +8,6 @@ package controllers.select;
 import classes.Customer;
 import classes.MngApi;
 import classes.User;
-import controllers.MainController;
 import controllers.orders.NewOrderController;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -66,6 +65,7 @@ public class SelectCustomerController implements Initializable {
             
             Customer selectedCustomer = tv_customers.getSelectionModel().getSelectedItem();
             newOrderController.setSelectedCustomer(selectedCustomer);
+            newOrderController.getBtn_create().setDisable(false);
             MngApi.closeWindow(btn_select);
             
         });

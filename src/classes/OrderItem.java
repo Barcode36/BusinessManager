@@ -8,6 +8,7 @@ package classes;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -16,18 +17,19 @@ import javafx.beans.property.SimpleStringProperty;
 public class OrderItem {
     
     private SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
-    private SimpleIntegerProperty object_id, object_buildTime, quantity, printer_id, material_id;
+    private SimpleIntegerProperty order_id, object_id, object_buildTime, quantity, printer_id, material_id;
     private SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
 
-    public OrderItem(SimpleStringProperty object_name, SimpleStringProperty object_buildTime_formated, SimpleStringProperty printer_name, SimpleStringProperty material_type, SimpleStringProperty material_color, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty qunatity, SimpleIntegerProperty printer_id, SimpleIntegerProperty material_id, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty price, SimpleDoubleProperty costs) {
+    public OrderItem(SimpleStringProperty object_name, SimpleStringProperty object_buildTime_formated, SimpleStringProperty printer_name, SimpleStringProperty material_type, SimpleStringProperty material_color, SimpleIntegerProperty order_id, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty quantity, SimpleIntegerProperty printer_id, SimpleIntegerProperty material_id, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty price, SimpleDoubleProperty costs) {
         this.object_name = object_name;
         this.object_buildTime_formated = object_buildTime_formated;
         this.printer_name = printer_name;
         this.material_type = material_type;
         this.material_color = material_color;
+        this.order_id = order_id;
         this.object_id = object_id;
         this.object_buildTime = object_buildTime;
-        this.quantity = qunatity;
+        this.quantity = quantity;
         this.printer_id = printer_id;
         this.material_id = material_id;
         this.object_supportWeight = object_supportWeight;
@@ -36,6 +38,22 @@ public class OrderItem {
         this.costs = costs;
     }
 
+    public SimpleIntegerProperty getOrder_id() {
+        return order_id;
+    }
+
+    public void setOrder_id(SimpleIntegerProperty order_id) {
+        this.order_id = order_id;
+    }
+
+//    public SimpleIntegerProperty getQuantity() {
+//        return quantity;
+//    }
+//
+//    public void setQuantity(SimpleIntegerProperty quantity) {
+//        this.quantity = quantity;
+//    }
+    
     public SimpleStringProperty getObject_name() {
         return object_name;
     }
@@ -92,11 +110,11 @@ public class OrderItem {
         this.object_buildTime = object_buildTime;
     }
 
-    public SimpleIntegerProperty getQunatity() {
+    public SimpleIntegerProperty getQuantity() {
         return quantity;
     }
 
-    public void setQunatity(SimpleIntegerProperty qunatity) {
+    public void setQuantity(SimpleIntegerProperty qunatity) {
         this.quantity = qunatity;
     }
 
@@ -148,5 +166,17 @@ public class OrderItem {
         this.costs = costs;
     }
 
-
+    public static void insertNewOrderItem(OrderItem orderItem, User user){        
+        String updateQuery = "INSERT INTO OrderItems VALUES (null," + orderItem.getOrder_id().get() + "," + orderItem.getObject_id().get() + "," + orderItem.getMaterial_id().get() + "," + orderItem.getObject_weight().get() + "," + orderItem.getObject_supportWeight().get() + "," + orderItem.getObject_buildTime().get() + "," + orderItem.getPrice().get() + "," + orderItem.getPrinter_id().get() + ")";
+        MngApi.performUpdate(updateQuery, user);        
+    }
+    
+    public static String generateUpdateQuery(OrderItem orderItem){
+        return "INSERT INTO OrderItems VALUES (null," + orderItem.getOrder_id().get() + "," + orderItem.getObject_id().get() + "," + orderItem.getMaterial_id().get() + "," + orderItem.getObject_weight().get() + "," + orderItem.getObject_supportWeight().get() + "," + orderItem.getObject_buildTime().get() + "," + orderItem.getPrice().get() + "," + orderItem.getQuantity().get() + "," + orderItem.getPrinter_id().get() + ")";        
+    }
+    
+    public static void insertMultipleOrderItems(ObservableList<String> updateQueries, User user){
+        MngApi.performMultipleUpdates(updateQueries, user);
+    }
+    
  }

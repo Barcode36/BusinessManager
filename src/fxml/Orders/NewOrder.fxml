@@ -174,9 +174,9 @@
                   <Insets left="75.0" />
                </GridPane.margin>
             </TextField>
-            <Button fx:id="btn_calculatePrices" mnemonicParsing="false" prefHeight="25.0" prefWidth="143.0" text="Calculate Objects Prices" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="9">
+            <Button fx:id="btn_calculatePrices" mnemonicParsing="false" prefHeight="25.0" prefWidth="140.0" text="Calculate Objects Prices" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="9">
                <GridPane.margin>
-                  <Insets />
+                  <Insets left="5.0" />
                </GridPane.margin>
             </Button>
             <Label text="Sold Status:" GridPane.rowIndex="10" GridPane.rowSpan="2" GridPane.valignment="CENTER">
@@ -187,20 +187,23 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </Label>
-            <RadioButton fx:id="radioBtn_Sold" mnemonicParsing="false" text="Sold" GridPane.halignment="CENTER" GridPane.rowIndex="10" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+            <RadioButton fx:id="radioBtn_Sold" mnemonicParsing="false" selected="true" text="Sold" GridPane.halignment="CENTER" GridPane.rowIndex="10" GridPane.rowSpan="2" GridPane.valignment="CENTER">
                <GridPane.margin>
                   <Insets left="50.0" />
                </GridPane.margin>
                <font>
                   <Font size="12.0" />
                </font>
+               <toggleGroup>
+                  <ToggleGroup fx:id="toggleGroup_status" />
+               </toggleGroup>
             </RadioButton>
-            <RadioButton fx:id="radioBtn_NotSold" mnemonicParsing="false" text="Not  Sold" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+            <RadioButton fx:id="radioBtn_NotSold" mnemonicParsing="false" text="Not  Sold" toggleGroup="$toggleGroup_status" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.rowSpan="2" GridPane.valignment="CENTER">
                <font>
                   <Font size="12.0" />
                </font>
             </RadioButton>
-            <Button fx:id="btn_create" mnemonicParsing="false" prefHeight="46.0" prefWidth="140.0" text="Create" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
+            <Button fx:id="btn_create" disable="true" mnemonicParsing="false" prefHeight="46.0" prefWidth="140.0" text="Create" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
             <Button fx:id="btn_cancel" mnemonicParsing="false" prefHeight="46.0" prefWidth="140.0" text="Cancel" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
             <Label text="Summary" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="7">
                <font>

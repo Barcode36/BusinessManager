@@ -74,18 +74,20 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
+        txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {           
+            setCosts();           
+        });   
         
-        
-        txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {
-            
-           setCosts();
-           
+        txtField_weight.textProperty().addListener((observable, oldValue, newValue) -> {            
+           setCosts();           
         });
         
-        txtField_material.textProperty().addListener((observable, oldValue, newValue) -> {
-            
-           setCosts();
-           
+        txtField_supportWeight.textProperty().addListener((observable, oldValue, newValue) -> {            
+           setCosts();           
+        });
+        
+        txtField_material.textProperty().addListener((observable, oldValue, newValue) -> {            
+           setCosts();           
         });
         
         btn_selectMaterial.setOnAction((event) -> {
@@ -115,69 +117,69 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         });
         
         btn_assign.setOnAction((event) -> {
-            
-            boolean isEmpty = MngApi.isTextFieldEmpty(txtField_price, txtField_quantity, txtField_material, txtField_weight, txtField_supportWeight, txtField_hours, txtField_minutes);
-            boolean isZero = false;
-            
-            if(Integer.parseInt(txtField_quantity.getText()) <= 0 || Double.parseDouble(txtField_weight.getText()) <= 0 || Integer.parseInt(txtField_hours.getText()) <= 0 || Integer.parseInt(txtField_minutes.getText()) <= 0)isZero = true;            
-            
-            if (isEmpty == true || isZero == true){
-                label_info.setText("Fields cannot be empty or negative/non-zero values.");
-                label_info.setTextFill(Color.web("#ff0000"));
-                
-            } else {
-                try {
-                
+            try {
                 int quantity, buildTime;
                 double weight, supportWeight;
-                
-                quantity = Integer.parseInt(txtField_quantity.getText());
-                
-                weight = Double.parseDouble(txtField_weight.getText());
-                supportWeight = Double.parseDouble(txtField_supportWeight.getText());
-                
-                String buildTime_formatted = txtField_hours.getText() + "," + txtField_minutes.getText();
-                    buildTime = MngApi.convertToMinutes(buildTime_formatted);
-                
-                String[] printer = comboBox_printer.getValue().split(";");
-                    String printer_id = printer[0];
-                        int printerID = Integer.parseInt(printer_id);
-                    String printer_name = printer[1];
             
-                String[] material2 = txtField_material.getText().split(";");
-                    String material_id = material2[0];
-                        int materialID = Integer.parseInt(material_id);                
-                    String material_type = material2[1] + " " + material2[2];
-                    String material_color = material2[3];
+                double price, costs;
                 
+                boolean isEmpty = MngApi.isTextFieldEmpty(txtField_price, txtField_quantity, txtField_material, txtField_weight, txtField_supportWeight, txtField_hours, txtField_minutes);
+                boolean isZero = false;
+                
+                if(Integer.parseInt(txtField_quantity.getText()) <= 0 || Double.parseDouble(txtField_weight.getText()) <= 0 || (Integer.parseInt(txtField_hours.getText()) <= 0 && Integer.parseInt(txtField_minutes.getText()) <= 0))isZero = true;            
+            
+                if (isEmpty == true || isZero == true){
+                    label_info.setText("Fields cannot be empty or negative/non-zero values.");
+                    label_info.setTextFill(Color.web("#ff0000"));
+                
+                } else {
+                    quantity = Integer.parseInt(txtField_quantity.getText());
                     
-                double price = Double.parseDouble(txtField_price.getText());
-                double costs = Double.parseDouble(txtField_costs.getText());
+                    weight = Double.parseDouble(txtField_weight.getText());
+                    supportWeight = Double.parseDouble(txtField_supportWeight.getText());
                 
-                selectedObject.setQunatity(new SimpleIntegerProperty(quantity));
-                selectedObject.setObject_weight(new SimpleDoubleProperty(weight));
-                selectedObject.setObject_supportWeight(new SimpleDoubleProperty(supportWeight));
-                selectedObject.setObject_buildTime(new SimpleIntegerProperty(buildTime));
-                selectedObject.setPrinter_id(new SimpleIntegerProperty(printerID));
-                selectedObject.setPrinter_name(new SimpleStringProperty(printer_name));
-                selectedObject.setMaterial_id(new SimpleIntegerProperty(materialID));
-                selectedObject.setMaterial_type(new SimpleStringProperty(material_type));
-                selectedObject.setMaterial_color(new SimpleStringProperty(material_color));
-                selectedObject.setPrice(new SimpleDoubleProperty(price));
-                selectedObject.setCosts(new SimpleDoubleProperty(costs));
+                    String buildTime_formatted = txtField_hours.getText() + "," + txtField_minutes.getText();
+                        buildTime = MngApi.convertToMinutes(buildTime_formatted);
                 
-                newOrderController.setSelectedObjects();
-                newOrderController.refreshSelectedObjects();
-                MngApi.closeWindow(btn_assign);
+                    String[] printer = comboBox_printer.getValue().split(";");
+                        String printer_id = printer[0];
+                            int printerID = Integer.parseInt(printer_id);
+                        String printer_name = printer[1];
             
-            } catch (NumberFormatException e) {                
+                    String[] material2 = txtField_material.getText().split(";");
+                        String material_id = material2[0];
+                            int materialID = Integer.parseInt(material_id);                
+                        String material_type = material2[1] + " " + material2[2];
+                        String material_color = material2[3];
+                        
+                    price = Double.parseDouble(txtField_price.getText());
+                    costs = Double.parseDouble(txtField_costs.getText());       
+                     
+                    selectedObject.setQuantity(new SimpleIntegerProperty(quantity));
+                    selectedObject.setObject_weight(new SimpleDoubleProperty(weight));
+                    selectedObject.setObject_supportWeight(new SimpleDoubleProperty(supportWeight));
+                    selectedObject.setObject_buildTime(new SimpleIntegerProperty(buildTime));
+                    selectedObject.setObject_buildTime_formated(MngApi.convertToHours(buildTime));
+                    selectedObject.setPrinter_id(new SimpleIntegerProperty(printerID));
+                    selectedObject.setPrinter_name(new SimpleStringProperty(printer_name));
+                    selectedObject.setMaterial_id(new SimpleIntegerProperty(materialID));
+                    selectedObject.setMaterial_type(new SimpleStringProperty(material_type));
+                    selectedObject.setMaterial_color(new SimpleStringProperty(material_color));
+                    selectedObject.setPrice(new SimpleDoubleProperty(price));
+                    selectedObject.setCosts(new SimpleDoubleProperty(costs));
+                
+                    newOrderController.setSelectedObjects();
+                    newOrderController.refreshSelectedObjects();
+                    MngApi.closeWindow(btn_assign);
+                }
+            }
+            catch (NumberFormatException e) {                
                 label_info.setText("Wrong number format, please check your fields.");
                 label_info.setTextFill(Color.web("#ff0000"));
                 //e.printStackTrace();
             } catch (ArithmeticException e){
                 label_info.setText("Enter some positive, non-zero value!");
                 label_info.setTextFill(Color.web("#ff0000"));
-            }
             }
             
         });
@@ -189,8 +191,10 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     public void setElementValues(){
         
+        if(selectedObject.getQuantity().get() == 0)txtField_price.setText("1");
+        
         label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());
-        txtField_quantity.setText(String.valueOf(selectedObject.getQunatity().get()));
+        txtField_quantity.setText(String.valueOf(selectedObject.getQuantity().get()));
         txtField_weight.setText(String.valueOf(selectedObject.getObject_weight().get()));
         txtField_supportWeight.setText(String.valueOf(selectedObject.getObject_supportWeight().get()));
                 
@@ -218,11 +222,9 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 
             if(MngApi.isTextFieldEmpty(txtField_material)){
                 //return;
-            } else {                    
-                
-                double costs, price_per_gram, total_weight, material_price, material_shipping, material_weight;
-                
+            } else {   
                 try{
+                    double costs, price_per_gram, material_price, material_shipping, material_weight;
                     int quantity = Integer.parseInt(txtField_quantity.getText());
         
                     material_price = material.getMaterial_price().get();
@@ -231,7 +233,8 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         
                     price_per_gram = (material_price+material_shipping)/material_weight;
         
-                    total_weight = selectedObject.getObject_weight().get() + selectedObject.getObject_supportWeight().get();
+                    Double total_weight = Double.parseDouble(txtField_weight.getText()), total_supportWeight = Double.parseDouble(txtField_supportWeight.getText());
+                    total_weight = total_weight + total_supportWeight;
                     
                     costs = price_per_gram*total_weight*quantity;
         

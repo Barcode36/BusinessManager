@@ -565,5 +565,11 @@ public class Order {
         return totalWeight;
     }
     
+    public static void insertNewOrder(Order order, User user){
+        
+        String updateQuery = "INSERT INTO Orders VALUES (null," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "')";
+        MngApi.performUpdate(updateQuery, user);                
+        
+    }    
     
 }//class end

@@ -8,7 +8,6 @@ package controllers.costs;
 import classes.Cost;
 import classes.MngApi;
 import classes.Printer;
-import classes.SimpleTableObject;
 import classes.User;
 import controllers.MainController;
 import java.net.URL;
