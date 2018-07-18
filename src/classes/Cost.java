@@ -207,7 +207,7 @@ public class Cost {
     public static void insertNewCost(Cost newCost, User user){
         
         //Create query
-        String updateQuery = "INSERT INTO Costs VALUES (null, '" + newCost.getCost_name().get() + "', " + newCost.getCost_quantity().get() + ", " + newCost.getCost_shipping().get() + ", '" + newCost.getCost_purchaseDate().get() + "','" + newCost.getCost_comment().get() + " '," + newCost.getCost_price().get() + ")";
+        String updateQuery = "INSERT INTO Costs VALUES (null, '" + newCost.getCost_name().get() + "', " + newCost.getCost_quantity().get() + ", " + newCost.getCost_shipping().get() + ", '" + newCost.getCost_purchaseDate().get() + "','" + newCost.getCost_comment().get() + " '," + newCost.getCost_price().get() + ","+ newCost.getCost_printerID().get() + ")";
         MngApi.performUpdate(updateQuery, user);
 
     }
