@@ -407,8 +407,9 @@
                            <columns>
                               <TableColumn fx:id="object_col_id" prefWidth="100.0" text="Object ID" />
                               <TableColumn fx:id="object_col_name" prefWidth="130.0" text="Object Name" />
-                              <TableColumn fx:id="object_col_soldCount" prefWidth="75.0" text="Sold Count" />
-                              <TableColumn fx:id="object_col_weight" prefWidth="100.0" text="Object Weight" />
+                              <TableColumn fx:id="object_col_soldCount" prefWidth="100.0" text="Sold Count" />
+                              <TableColumn fx:id="object_col_soldPrice" prefWidth="100.0" text="Sold Price" />
+                              <TableColumn fx:id="object_col_weight" prefWidth="94.0" text="Object Weight" />
                               <TableColumn fx:id="object_col_supportWeight" prefWidth="125.0" text="Support Weight" />
                               <TableColumn fx:id="object_col_buildTime_formated" prefWidth="100.0" text="Build Time" />
                               <TableColumn fx:id="object_col_stlLink" prefWidth="200.0" text="Stl Link" />

@@ -43,7 +43,7 @@ public class NewObjectController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
         object_btn_create.setOnAction((event) -> {            
-            boolean isEmpty = MngApi.isTextFieldEmpty(object_txtField_name, object_txtField_weight, object_txtField_supportWeight, object_txtField_hours, object_txtField_minutes, object_txtField_stlLink, object_txtField_comment);
+            boolean isEmpty = MngApi.isTextFieldEmpty(object_txtField_name, object_txtField_weight, object_txtField_supportWeight, object_txtField_hours, object_txtField_minutes);
             
             if (isEmpty == true){
                 object_label_info.setText("Fields cannot be empty.");
@@ -80,7 +80,7 @@ public class NewObjectController implements Initializable {
                 object_supportWeight = new SimpleDoubleProperty(Double.parseDouble(object_txtField_supportWeight.getText()));
                 object_weight = new SimpleDoubleProperty(Double.parseDouble(object_txtField_weight.getText()));
             
-                newObject = new classes.Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight);
+                newObject = new classes.Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_weight);
             
                 classes.Object.insertNewObject(newObject, user);
                 

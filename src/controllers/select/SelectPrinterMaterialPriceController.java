@@ -74,8 +74,15 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {           
-            setCosts();           
+        txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {             
+            try{                
+                setTimeAndWeight(Integer.parseInt(newValue));
+                setCosts();            
+            } catch(NumberFormatException e){
+                label_info.setText("Enter some positive, non-zero numeric value!");
+                label_info.setTextFill(Color.web("#ff0000"));
+            }
+            
         });   
         
         txtField_weight.textProperty().addListener((observable, oldValue, newValue) -> {            
@@ -190,11 +197,10 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     }    
     
     public void setElementValues(){
-        
-        if(selectedObject.getQuantity().get() == 0)txtField_price.setText("1");
-        
-        label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());
+                
+        label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());        
         txtField_quantity.setText(String.valueOf(selectedObject.getQuantity().get()));
+        if(txtField_quantity.getText().equals("0"))txtField_price.setText("1");        
         txtField_weight.setText(String.valueOf(selectedObject.getObject_weight().get()));
         txtField_supportWeight.setText(String.valueOf(selectedObject.getObject_supportWeight().get()));
                 
@@ -212,7 +218,39 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         txtField_costs.setText(String.format(Locale.UK, "%.2f", selectedObject.getCosts().get()));
     }
     
-    public void setCosts(){
+    private void setTimeAndWeight(int quantity){
+        try{
+            
+            SimpleStringProperty time = MngApi.convertToHours(quantity*selectedObject.getObject_buildTime().get());
+        
+            String hours, minutes;
+        
+            hours = time.get().split(" ")[0];
+            minutes = time.get().split(" ")[1];
+        
+            hours = hours.replaceAll("\\D+","");
+            minutes = minutes.replaceAll("\\D+","");
+        
+            txtField_hours.setText(hours);
+            txtField_minutes.setText(minutes);
+        
+            double weight = quantity*selectedObject.getObject_weight().get();
+            double support_weight = quantity*selectedObject.getObject_supportWeight().get();
+        
+            txtField_weight.setText(String.valueOf(weight));
+            txtField_supportWeight.setText(String.valueOf(support_weight));
+            
+        } catch (NumberFormatException e){
+            
+            label_info.setText("Enter some positive, non-zero value!");
+            label_info.setTextFill(Color.web("#ff0000"));
+            
+        }
+        
+        
+    }
+    
+    private void setCosts(){
         
         if (MngApi.isTextFieldEmpty(txtField_quantity)){
                 
@@ -225,7 +263,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             } else {   
                 try{
                     double costs, price_per_gram, material_price, material_shipping, material_weight;
-                    int quantity = Integer.parseInt(txtField_quantity.getText());
+                    //int quantity = Integer.parseInt(txtField_quantity.getText());
         
                     material_price = material.getMaterial_price().get();
                     material_shipping = material.getMaterial_shipping().get();
@@ -236,7 +274,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                     Double total_weight = Double.parseDouble(txtField_weight.getText()), total_supportWeight = Double.parseDouble(txtField_supportWeight.getText());
                     total_weight = total_weight + total_supportWeight;
                     
-                    costs = price_per_gram*total_weight*quantity;
+                    costs = price_per_gram*total_weight;
         
                     txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
                 } catch (NumberFormatException e){

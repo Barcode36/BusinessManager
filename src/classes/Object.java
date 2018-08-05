@@ -25,9 +25,9 @@ public class Object {
     
     private SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
     private SimpleIntegerProperty object_id, object_buildTime, object_SoldCount;
-    private SimpleDoubleProperty object_supportWeight, object_weight;
+    private SimpleDoubleProperty object_supportWeight, object_weight, object_soldPrice;
 
-    public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleStringProperty object_comment, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_SoldCount, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight) {
+    public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleStringProperty object_comment, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_SoldCount, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty object_soldPrice) {
         this.object_name = object_name;
         this.object_stlLink = object_stlLink;
         this.object_buildTime_formated = object_buildTime_formated;
@@ -37,6 +37,7 @@ public class Object {
         this.object_SoldCount = object_SoldCount;
         this.object_supportWeight = object_supportWeight;
         this.object_weight = object_weight;
+        this.object_soldPrice = object_soldPrice;
     }
 
     public SimpleStringProperty getObject_name() {
@@ -61,6 +62,14 @@ public class Object {
 
     public void setObject_buildTime_formated(SimpleStringProperty object_buildTime_formated) {
         this.object_buildTime_formated = object_buildTime_formated;
+    }
+
+    public SimpleStringProperty getObject_comment() {
+        return object_comment;
+    }
+
+    public void setObject_comment(SimpleStringProperty object_comment) {
+        this.object_comment = object_comment;
     }
 
     public SimpleIntegerProperty getObject_id() {
@@ -103,13 +112,15 @@ public class Object {
         this.object_weight = object_weight;
     }
 
-    public SimpleStringProperty getObject_comment() {
-        return object_comment;
+    public SimpleDoubleProperty getObject_soldPrice() {
+        return object_soldPrice;
     }
 
-    public void setObject_comment(SimpleStringProperty object_comment) {
-        this.object_comment = object_comment;
+    public void setObject_soldPrice(SimpleDoubleProperty object_soldPrice) {
+        this.object_soldPrice = object_soldPrice;
     }
+
+    
 
     
     
@@ -152,7 +163,7 @@ public class Object {
                 
                SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
                SimpleIntegerProperty object_id, object_buildTime, object_soldCount;
-               SimpleDoubleProperty object_supportWeight, object_weight;
+               SimpleDoubleProperty object_supportWeight, object_weight, object_soldPrice;
                
                object_name = new SimpleStringProperty(rs.getString("ObjectName"));
                object_stlLink = new SimpleStringProperty(rs.getString("StlLink"));
@@ -160,15 +171,16 @@ public class Object {
                
                object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
                object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
-                    object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+               object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
                
-               object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));
+               object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));               
                
                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
                object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
+               object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, user));
                
-               Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight);                       
-                
+               Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice);                
+               
                objectList.add(object);
             }
 
@@ -267,6 +279,72 @@ public class Object {
         }//end try
         
         return soldCount;  
+        
+    }
+    
+    private static double getSoldPrice(SimpleIntegerProperty object_id, User user){
+        //Create list
+        double soldPrice = 0;
+        
+        //Create query
+        String query = "SELECT SUM(ItemPrice) AS 'SoldPrice' FROM OrderItems WHERE ObjectID=" + object_id.get();
+                
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+               soldPrice = rs.getInt("SoldPrice");
+                
+            }
+
+            rs.close();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+        return soldPrice;  
         
     }
     

@@ -155,7 +155,7 @@ public class Order {
         List<Order> orderList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID";
+        String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
                 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -434,7 +434,7 @@ public class Order {
                 se.printStackTrace();
             }
         }//end finally
-        return itemCosts;
+        return MngApi.round(itemCosts, 2);
     }
     
     private static double getTotalPrice(SimpleIntegerProperty order_id, User user) {

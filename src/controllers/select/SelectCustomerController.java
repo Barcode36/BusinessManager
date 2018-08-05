@@ -55,6 +55,7 @@ public class SelectCustomerController implements Initializable {
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
                     newOrderController.setSelectedCustomer(row.getItem());
+                    newOrderController.getBtn_create().setDisable(false);
                     MngApi.closeWindow(btn_close);
                 }
             });

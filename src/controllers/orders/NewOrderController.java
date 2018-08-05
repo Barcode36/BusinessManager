@@ -250,7 +250,8 @@ public class NewOrderController implements Initializable {
             
                 Order.insertNewOrder(newOrder, user);
                 OrderItem.insertMultipleOrderItems(updateQueries, user);
-            
+                mainController.refreshOrdersTable(user);
+                
                 MngApi.closeWindow(btn_create);
                 
             } catch (NumberFormatException e) {                
@@ -282,10 +283,10 @@ public class NewOrderController implements Initializable {
                 
                 quantity = selectedObjects.get(i).getQuantity().get();
             
-                weight = quantity*selectedObjects.get(i).getObject_weight().get();
+                weight = selectedObjects.get(i).getObject_weight().get();
                 supportWeight = quantity*selectedObjects.get(i).getObject_supportWeight().get();
                 //weightSum = weight + supportWeight;
-                buildTime = quantity*selectedObjects.get(i).getObject_buildTime().get();
+                buildTime = selectedObjects.get(i).getObject_buildTime().get();
             
                 price = selectedObjects.get(i).getPrice().get();
                 costs = selectedObjects.get(i).getCosts().get();

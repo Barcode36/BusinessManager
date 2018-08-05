@@ -19,7 +19,6 @@ import controllers.objects.NewObjectController;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -132,7 +131,7 @@ public class MainController implements Initializable {
     private TableColumn<Object, Integer> object_col_id, object_col_soldCount;
     
     @FXML
-    private TableColumn<Object, Double> object_col_weight, object_col_supportWeight;
+    private TableColumn<Object, Double> object_col_weight, object_col_supportWeight, object_col_soldPrice;
     
     @FXML
     private Button object_btn_new;
@@ -645,6 +644,7 @@ public class MainController implements Initializable {
         
         object_col_weight.setCellValueFactory((param) -> {return param.getValue().getObject_weight().asObject();});
         object_col_supportWeight.setCellValueFactory((param) -> {return param.getValue().getObject_supportWeight().asObject();});
+        object_col_soldPrice.setCellValueFactory((param) -> {return param.getValue().getObject_soldPrice().asObject();});
         
         //Centering content
         object_col_name.setStyle("-fx-alignment: CENTER;");
@@ -656,6 +656,7 @@ public class MainController implements Initializable {
         
         object_col_weight.setStyle("-fx-alignment: CENTER;");
         object_col_supportWeight.setStyle("-fx-alignment: CENTER;");
+        object_col_soldPrice.setStyle("-fx-alignment: CENTER;");
         
         tv_objects.setItems(objectList);
         

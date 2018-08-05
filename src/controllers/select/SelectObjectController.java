@@ -64,21 +64,23 @@ public class SelectObjectController implements Initializable {
             TableRow<Object> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    ObservableList<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());
-                    //newOrderController.addSelectedObjects(selectedObjects);
-                    newOrderController.getSelectedObjects().addAll(selectedObjects);
-                    newOrderController.setSelectedObjects();
-                    MngApi.closeWindow(btn_close);
+//                    ObservableList<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());                    
+//                    newOrderController.getSelectedObjects().addAll(selectedObjects);
+//                    newOrderController.setSelectedObjects();
+//                    MngApi.closeWindow(btn_close);
+                      addObjects();
+
                 }
             });
             return row;
         });
         
         btn_select.setOnAction((event) -> {
-            List<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());                    
-            newOrderController.getSelectedObjects().addAll(selectedObjects);
-            newOrderController.setSelectedObjects();
-            MngApi.closeWindow(btn_close);
+//            List<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());                    
+//            newOrderController.getSelectedObjects().addAll(selectedObjects);
+//            newOrderController.setSelectedObjects();
+//            MngApi.closeWindow(btn_close);
+              addObjects();
         });
         
         btn_close.setOnAction((event) -> {
@@ -87,6 +89,22 @@ public class SelectObjectController implements Initializable {
             
         });
     }    
+    
+    private void addObjects(){
+        
+        ObservableList<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());                    
+        
+        for (int i = 0; i < selectedObjects.size(); i++) {
+            
+            selectedObjects.get(i).setQuantity(new SimpleIntegerProperty(1));
+            
+        }
+        
+        newOrderController.getSelectedObjects().addAll(selectedObjects);
+        newOrderController.setSelectedObjects();
+        MngApi.closeWindow(btn_close);
+        
+    }
     
     private ObservableList<OrderItem> generateOrderItems(ObservableList<Object> selectedObjects){
         
