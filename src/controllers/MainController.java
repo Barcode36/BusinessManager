@@ -19,7 +19,9 @@ import controllers.objects.NewObjectController;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -32,6 +34,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -83,6 +86,9 @@ public class MainController implements Initializable {
     
     @FXML
     private Button btn_newOrder;
+    
+    @FXML
+    private Label label_SoldOrders, label_SoldCostPrice, label_OrderProfit, label_NotSoldOrders, label_NotSoldCostPrice, label_NotSoldOrderProfit;
     /*
     *
     *
@@ -473,6 +479,48 @@ public class MainController implements Initializable {
      * @param user      
      * *****************************/      
     
+    public void calculateOrderStatistics(){
+        
+        int size = tv_orders.getItems().size();
+        
+        int sold_orders, notSold_orders, total_ordes,selected_orders, total_itemsSold, selected_itemsSold, total_buildTime, selected_buildTime;        
+        double sold_price = 0, sold_costs = 0, notSold_price = 0, notSold_costs = 0, total_pricePerHour, selected_pricePerHour, total_weight, total_supportWeight, selected_weight, selected_supportWeight;
+        
+        //setting  statistics for sold and not sold orders
+        sold_orders = MngApi.performIntegerQuery("SELECT COUNT(OrderID) FROM Orders WHERE OrderStatus='Sold'", user);
+        //notSold_orders = MngApi.performIntegerQuery("SELECT COUNT(OrderID) FROM Orders WHERE OrderStatus='Not Sold'", user);
+        notSold_orders = size - sold_orders;
+        
+        for (int i = 0; i < tv_orders.getItems().size(); i++) {
+            Order order = tv_orders.getItems().get(i);
+            if (order.getOrder_status().get().equals("Sold")){
+                sold_costs = sold_costs + order.getOrder_costs().get();
+                sold_price = sold_price + order.getOrder_price().get();  
+            }  else {
+                notSold_costs = notSold_costs + order.getOrder_costs().get();
+                notSold_price = notSold_price + order.getOrder_price().get();  
+            }                    
+        }
+        
+        label_SoldOrders.setText(String.format(Locale.US, "Sold(%d)", sold_orders));
+        label_SoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", sold_price, sold_costs));
+        label_OrderProfit.setText(String.format(Locale.US, "%.2f $", sold_price - sold_costs));
+        
+        label_NotSoldOrders.setText(String.format(Locale.US, "Not Sold(%d)", notSold_orders));
+        label_NotSoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", notSold_price, notSold_costs));
+        label_NotSoldOrderProfit.setText(String.format(Locale.US, "%.2f $", notSold_price - notSold_costs));
+        
+        
+    }
+    
+    public void calculateSelectedOrdersStatistics(){
+        
+        int sold_orders, notSold_orders, total_ordes,selected_orders, total_itemsSold, selected_itemsSold, total_buildTime, selected_buildTime;        
+        double sold_price, sold_costs, notSold_price, notSold_costs, total_pricePerHour, selected_pricePerHour, total_weight, total_supportWeight, selected_weight, selected_supportWeight;
+        
+        
+    }
+    
     public void refreshOrdersTable(User user) {
         
         //Create list of orders
@@ -516,6 +564,7 @@ public class MainController implements Initializable {
         
         //set list to display in table
         tv_orders.setItems(orderList);
+        
     }
     
     // Create the service
@@ -527,6 +576,9 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     updateProgress(-1, 100);
                     refreshOrdersTable(user);
+                    Platform.runLater(() -> {
+                        calculateOrderStatistics();
+                    });
                     return null;
                 }        
             };
@@ -671,6 +723,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {            
                     updateProgress(-1, 100);
                     refreshObjectsTable(user);
+                    calculateOrderStatistics();
                     return null;
                 }        
             };

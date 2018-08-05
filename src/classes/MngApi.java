@@ -21,7 +21,10 @@ import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -347,6 +350,77 @@ public class MngApi {
         ListView<SimpleTableObject> listView = new ListView<>(observableList);
 
         return listView;
+    }
+    
+    //performs query which resul is integer and returns result
+    public static int performIntegerQuery(String query, User user){
+        int result = 0;
+        
+        //Create list
+        List<Object> objectList = new ArrayList<>();
+                
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+                result = rs.getInt(1);
+               
+            }
+
+            rs.close();
+        } catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+        return result;
     }
     
 }//end of class

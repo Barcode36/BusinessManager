@@ -474,7 +474,7 @@ public class Order {
             //rs.next() loads row            
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
-                totalprice = rs.getInt("SUM(ItemPrice)");                
+                totalprice = rs.getDouble("SUM(ItemPrice)");                
             }
 
             rs.close();

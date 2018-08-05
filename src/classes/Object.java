@@ -120,10 +120,6 @@ public class Object {
         this.object_soldPrice = object_soldPrice;
     }
 
-    
-
-    
-    
     public static List<Object> getObjects(User user){
         
         //Create list
