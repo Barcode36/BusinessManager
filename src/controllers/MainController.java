@@ -658,8 +658,11 @@ public class MainController implements Initializable {
             Task<Void> task_refreshCostsTable = new Task<Void>() {            
                 @Override
                 public Void call() throws Exception {
-                    updateProgress(-1, 100);
-                    refreshCustomersTable(user);                    
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);
+                        refreshCustomersTable(user);                    
+                    });                    
+                    
                     return null;
                 }        
             };
@@ -721,9 +724,14 @@ public class MainController implements Initializable {
             Task<Void> task_refreshCostsTable = new Task<Void>() {            
                 @Override
                 public Void call() throws Exception {            
-                    updateProgress(-1, 100);
-                    refreshObjectsTable(user);
-                    calculateOrderStatistics();
+                    
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);
+                        refreshObjectsTable(user);
+                        calculateOrderStatistics();
+                    });
+                    
+                    
                     return null;
                 }        
             };
@@ -799,8 +807,11 @@ public class MainController implements Initializable {
             Task<Void> task_refreshCostsTable = new Task<Void>() {            
                 @Override
                 public Void call() throws Exception {
-                    updateProgress(-1, 100);
-                    refreshMaterialsTable(user);
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);
+                        refreshMaterialsTable(user);
+                    });
+                    
                     return null;
                 }        
             };
@@ -862,9 +873,12 @@ public class MainController implements Initializable {
         protected Task<Void> createTask(){
             Task<Void> task_refreshCostsTable = new Task<Void>() {            
                 @Override
-                public Void call() throws Exception {            
-                    updateProgress(-1, 100);                 
-                    refreshCostsTable(user);                    
+                public Void call() throws Exception {
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);                 
+                        refreshCostsTable(user);                         
+                    });
+                                       
                     return null;
                 }        
             };

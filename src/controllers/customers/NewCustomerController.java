@@ -6,7 +6,6 @@
 package controllers.customers;
 
 import classes.Customer;
-import classes.Material;
 import classes.MngApi;
 import classes.SimpleTableObject;
 import classes.User;
@@ -59,7 +58,7 @@ public class NewCustomerController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
         customer_btn_create.setOnAction((event) -> {
-            boolean isEmpty = MngApi.isTextFieldEmpty(customer_txtField_firstName, customer_txtField_lastName, customer_txtField_phone, customer_txtField_mail, customer_txtField_address, customer_txtField_city, customer_txtField_zipCode, customer_txtField_comment);
+            boolean isEmpty = MngApi.isTextFieldEmpty(customer_txtField_firstName, customer_txtField_lastName);
             
             if (isEmpty == true || MngApi.isComboBoxEmpty(customer_comboBox_country, customer_comboBox_company)){
                 customer_label_info.setText("Fields cannot be empty.");
