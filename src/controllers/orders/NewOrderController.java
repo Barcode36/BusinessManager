@@ -250,7 +250,7 @@ public class NewOrderController implements Initializable {
             
                 Order.insertNewOrder(newOrder, user);
                 OrderItem.insertMultipleOrderItems(updateQueries, user);
-                mainController.refreshOrdersTable(user);
+                mainController.getService_refreshOrders();
                 
                 MngApi.closeWindow(btn_create);
                 
@@ -284,7 +284,7 @@ public class NewOrderController implements Initializable {
                 quantity = selectedObjects.get(i).getQuantity().get();
             
                 weight = selectedObjects.get(i).getObject_weight().get();
-                supportWeight = quantity*selectedObjects.get(i).getObject_supportWeight().get();
+                supportWeight = selectedObjects.get(i).getObject_supportWeight().get();
                 //weightSum = weight + supportWeight;
                 buildTime = selectedObjects.get(i).getObject_buildTime().get();
             
