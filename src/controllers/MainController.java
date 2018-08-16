@@ -40,6 +40,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -85,10 +86,10 @@ public class MainController implements Initializable {
     private TableColumn<Order, Double> order_col_totalCosts, order_col_totalPrice, order_col_totalWeight;     
     
     @FXML
-    private Button btn_newOrder;
+    private Button btn_newOrder, btn_editOrder;
     
     @FXML
-    private Label label_SoldOrders, label_SoldCostPrice, label_OrderProfit, label_NotSoldOrders, label_NotSoldCostPrice, label_NotSoldOrderProfit;
+    private Label label_SoldOrders, label_SoldCostPrice, label_OrderProfit, label_NotSoldOrders, label_NotSoldCostPrice, label_NotSoldOrderProfit, label_order_info;
     /*
     *
     *
@@ -241,6 +242,37 @@ public class MainController implements Initializable {
         }
             
         });
+        
+        btn_editOrder.setOnAction((event) -> {
+            
+            try {            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Orders/NewOrder.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewOrderController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("New Order");
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();            
+            
+            stage.show();
+            
+            ctrl.setUser(user);            
+            ctrl.setMainController(this);
+            ctrl.setUpdateOrderFields(tv_orders.getSelectionModel().getSelectedItem());            
+            
+        } catch (IOException e){
+            
+        } catch (NullPointerException e){
+            label_order_info.setText("Info: Select one order");
+            label_order_info.setTextFill(Color.web("#ff0000"));
+        }
+            
+        });
+        
+        
     /*
     *
     *

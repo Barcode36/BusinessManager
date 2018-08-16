@@ -59,6 +59,8 @@ public class NewOrderController implements Initializable {
     
     private ObservableList<OrderItem> selectedObjects = FXCollections.observableArrayList();
     
+    private String mode;
+    
     @FXML
     private ToggleGroup toggleGroup_status = new ToggleGroup();
     
@@ -196,72 +198,12 @@ public class NewOrderController implements Initializable {
         });
         
         btn_create.setOnAction((event) -> {            
-            try{
-                if(tv_selectedObjects.getItems().get(0) == null) throw new NullPointerException();
-                //preparing order
-                Order newOrder;            
-                SimpleIntegerProperty order_id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
-            
-                SimpleStringProperty status, comment, dateCreated, dueDate;    
-                SimpleIntegerProperty id, customer_id, totalQuantity;
-                SimpleDoubleProperty totalPrice;
-            
-                RadioButton soldStatus = (RadioButton)toggleGroup_status.getSelectedToggle();            
-                status = new SimpleStringProperty(soldStatus.getText());
-            
-                comment = new SimpleStringProperty(txtField_comment.getText());
-                dateCreated = new SimpleStringProperty(datePicker_dateCreated.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-                dueDate = new SimpleStringProperty(datePicker_dueDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            
-                id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
-                customer_id = selectedCustomer.getCustomer_id();
-                totalQuantity = new SimpleIntegerProperty(Integer.parseInt(label_quantity.getText()));
-            
-                String[] totalPriceFormatted = label_price.getText().split(" ");
-                totalPrice = new SimpleDoubleProperty(Double.parseDouble(totalPriceFormatted[0]));
-            
-                newOrder = new Order(customer_id, null, status, comment, dateCreated, dueDate, null, id, totalQuantity, null, null, totalPrice, null);
-            
-                //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
-                //They are basicaly mulitple insert querries in a row separated by ";"
-                ObservableList<String> updateQueries = FXCollections.observableArrayList();
-            
-                for (int i = 0; i < selectedObjects.size(); i++) {
-                
-                    OrderItem obj = selectedObjects.get(i);
-                    obj.setOrder_id(order_id);
-                
-                    SimpleIntegerProperty object_id, buildTime, quantity, printer_id, material_id;
-                    SimpleDoubleProperty supportWeight, weight, price;            
-                
-                
-                    object_id = obj.getObject_id();
-                    buildTime = obj.getObject_buildTime();
-                    quantity = obj.getQuantity();
-                    printer_id = obj.getPrinter_id();
-                    material_id = obj.getMaterial_id();
-                
-                    supportWeight = obj.getObject_supportWeight();
-                    weight = obj.getObject_weight();
-                    price = obj.getPrice();
-                
-                    updateQueries.add(OrderItem.generateUpdateQuery(obj));
-                }
-            
-                Order.insertNewOrder(newOrder, user);
-                OrderItem.insertMultipleOrderItems(updateQueries, user);
-                mainController.getService_refreshOrders();
-                
-                MngApi.closeWindow(btn_create);
-                
-            } catch (NumberFormatException e) {                
-                label_info.setText("Wrong number format, please check your fields.");
-                label_info.setTextFill(Color.web("#ff0000"));
-                //e.printStackTrace();
-            } catch (NullPointerException e) {                
-                label_info.setText("Insert some objects first.");
-                label_info.setTextFill(Color.web("#ff0000"));
-                //e.printStackTrace();
+            switch(mode){
+                case "create":
+                    createOrder();
+                    return;
+                case "edit":
+                    updateOrder();                    
             }
         });
         
@@ -404,7 +346,157 @@ public class NewOrderController implements Initializable {
         return btn_create;
     }
     
+    private void createOrder(){
+        try{
+            if(tv_selectedObjects.getItems().get(0) == null) throw new NullPointerException();
+            //preparing order
+            Order newOrder;            
+            SimpleIntegerProperty order_id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
+            
+            SimpleStringProperty status, comment, dateCreated, dueDate;    
+            SimpleIntegerProperty id, customer_id, totalQuantity;
+            SimpleDoubleProperty totalPrice;
+            
+            RadioButton soldStatus = (RadioButton)toggleGroup_status.getSelectedToggle();            
+            status = new SimpleStringProperty(soldStatus.getText());
+            
+            comment = new SimpleStringProperty(txtField_comment.getText());
+            dateCreated = new SimpleStringProperty(datePicker_dateCreated.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            dueDate = new SimpleStringProperty(datePicker_dueDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            
+            id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
+            customer_id = selectedCustomer.getCustomer_id();
+            totalQuantity = new SimpleIntegerProperty(Integer.parseInt(label_quantity.getText()));
+            
+            String[] totalPriceFormatted = label_price.getText().split(" ");
+            totalPrice = new SimpleDoubleProperty(Double.parseDouble(totalPriceFormatted[0]));
+            
+            newOrder = new Order(customer_id, null, status, comment, dateCreated, dueDate, null, id, totalQuantity, null, null, totalPrice, null);
+            
+            //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
+            //They are basicaly mulitple insert querries in a row separated by ";"
+            ObservableList<String> updateQueries = FXCollections.observableArrayList();
+            
+            for (int i = 0; i < selectedObjects.size(); i++) {
+                
+                OrderItem obj = selectedObjects.get(i);
+                obj.setOrder_id(order_id);
+                
+                SimpleIntegerProperty object_id, buildTime, quantity, printer_id, material_id;
+                SimpleDoubleProperty supportWeight, weight, price;            
+                
+                object_id = obj.getObject_id();
+                buildTime = obj.getObject_buildTime();
+                quantity = obj.getQuantity();
+                printer_id = obj.getPrinter_id();
+                material_id = obj.getMaterial_id();
+                
+                supportWeight = obj.getObject_supportWeight();
+                weight = obj.getObject_weight();
+                price = obj.getPrice();
+                
+                updateQueries.add(OrderItem.generateUpdateQuery(obj));
+            }
+                
+            if (tv_selectedObjects.getItems().isEmpty()){
+                label_info.setText("Cannot create an empty order.");
+                label_info.setTextFill(Color.web("#ff0000"));
+            } else {
+                Order.insertNewOrder(newOrder, user);
+                OrderItem.insertMultipleOrderItems(updateQueries, user);
+                //mainController.getService_refreshOrders();
+                mainController.runService(mainController.getService_refreshOrders());
+                
+                MngApi.closeWindow(btn_create);
+            }
+                
+                
+        } catch (NumberFormatException e) {                
+            label_info.setText("Wrong number format, please check your fields.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            //e.printStackTrace();
+        } catch (NullPointerException e) {                
+            label_info.setText("Insert some objects first.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            //e.printStackTrace();
+        }
+    }
     
+    private void updateOrder(){
+        try{
+            if(tv_selectedObjects.getItems().get(0) == null) throw new NullPointerException();
+            //preparing order
+            Order newOrder;            
+            SimpleIntegerProperty order_id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
+            
+            SimpleStringProperty status, comment, dateCreated, dueDate;    
+            SimpleIntegerProperty id, customer_id, totalQuantity;
+            SimpleDoubleProperty totalPrice;
+            
+            RadioButton soldStatus = (RadioButton)toggleGroup_status.getSelectedToggle();            
+            status = new SimpleStringProperty(soldStatus.getText());
+            
+            comment = new SimpleStringProperty(txtField_comment.getText());
+            dateCreated = new SimpleStringProperty(datePicker_dateCreated.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            dueDate = new SimpleStringProperty(datePicker_dueDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            
+            id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
+            customer_id = selectedCustomer.getCustomer_id();
+            totalQuantity = new SimpleIntegerProperty(Integer.parseInt(label_quantity.getText()));
+            
+            String[] totalPriceFormatted = label_price.getText().split(" ");
+            totalPrice = new SimpleDoubleProperty(Double.parseDouble(totalPriceFormatted[0]));
+            
+            newOrder = new Order(customer_id, null, status, comment, dateCreated, dueDate, null, id, totalQuantity, null, null, totalPrice, null);
+            
+            //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
+            //They are basicaly mulitple insert querries in a row separated by ";"
+            ObservableList<String> updateQueries = FXCollections.observableArrayList();
+            
+            for (int i = 0; i < selectedObjects.size(); i++) {
+                
+                OrderItem obj = selectedObjects.get(i);
+                obj.setOrder_id(order_id);
+                
+                SimpleIntegerProperty object_id, buildTime, quantity, printer_id, material_id;
+                SimpleDoubleProperty supportWeight, weight, price;            
+                
+                object_id = obj.getObject_id();
+                buildTime = obj.getObject_buildTime();
+                quantity = obj.getQuantity();
+                printer_id = obj.getPrinter_id();
+                material_id = obj.getMaterial_id();
+                
+                supportWeight = obj.getObject_supportWeight();
+                weight = obj.getObject_weight();
+                price = obj.getPrice();
+                
+                updateQueries.add(OrderItem.generateUpdateQuery(obj));
+            }
+                
+            if (tv_selectedObjects.getItems().isEmpty()){
+                label_info.setText("Cannot create an empty order.");
+                label_info.setTextFill(Color.web("#ff0000"));
+            } else {
+                Order.insertNewOrder(newOrder, user);
+                OrderItem.insertMultipleOrderItems(updateQueries, user);
+                //mainController.getService_refreshOrders();
+                mainController.runService(mainController.getService_refreshOrders());
+                
+                MngApi.closeWindow(btn_create);
+            }
+                
+                
+        } catch (NumberFormatException e) {                
+            label_info.setText("Wrong number format, please check your fields.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            //e.printStackTrace();
+        } catch (NullPointerException e) {                
+            label_info.setText("Insert some objects first.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            //e.printStackTrace();
+        }
+    }
     
     public void setSelectedCustomer(Customer selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
@@ -422,20 +514,20 @@ public class NewOrderController implements Initializable {
     public void setNewOrderFields(){
         
         label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(user, "Orders")));
-        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        
-        txtField_pricePerHour.setText("2.5");
-        
+        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);        
+        txtField_pricePerHour.setText("2.5");        
         datePicker_dateCreated.setValue(LocalDate.now());
         datePicker_dueDate.setValue(LocalDate.now());
+                
+    }        
+    
+    public void setUpdateOrderFields(Order order){
+        
+        label_orderID.setText(String.valueOf(order.getOrder_id().get()));
+        txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());
         
     }
-        
-//    public void setNewOrder_label_id_value(int id) {
-//        this.label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(user, "Orders")));
-//        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//    }
-    
+      
     public void setSelectedOrderField(Order order){
         
         label_orderID.setText(String.valueOf(order.getOrder_id().get()));
@@ -446,5 +538,5 @@ public class NewOrderController implements Initializable {
         this.label_orderID.setText(String.valueOf(order.getOrder_id().get()));
         tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
-    
+        
 }
