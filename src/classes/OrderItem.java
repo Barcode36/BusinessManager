@@ -5,6 +5,14 @@
  */
 package classes;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -46,14 +54,6 @@ public class OrderItem {
         this.order_id = order_id;
     }
 
-//    public SimpleIntegerProperty getQuantity() {
-//        return quantity;
-//    }
-//
-//    public void setQuantity(SimpleIntegerProperty quantity) {
-//        this.quantity = quantity;
-//    }
-    
     public SimpleStringProperty getObject_name() {
         return object_name;
     }
@@ -173,10 +173,102 @@ public class OrderItem {
     
     public static String generateUpdateQuery(OrderItem orderItem){
         return "INSERT INTO OrderItems VALUES (null," + orderItem.getOrder_id().get() + "," + orderItem.getObject_id().get() + "," + orderItem.getMaterial_id().get() + "," + orderItem.getObject_weight().get() + "," + orderItem.getObject_supportWeight().get() + "," + orderItem.getObject_buildTime().get() + "," + orderItem.getPrice().get() + "," + orderItem.getQuantity().get() + "," + orderItem.getPrinter_id().get() + ")";        
-    }
+    }    
     
     public static void insertMultipleOrderItems(ObservableList<String> updateQueries, User user){
         MngApi.performMultipleUpdates(updateQueries, user);
+    }
+    
+    public static ObservableList<OrderItem> getOrderItems(int order_id, User user){
+        
+        //Create list
+        List<OrderItem> itemList = new ArrayList<>();
+        
+        //Create query
+        String query = "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.ItemQuantity, Printers.PrinterID, Printers.PrinterName, OrderItems.ItemBuildTime, OrderItems.ItemMaterialID, MaterialTypes.MaterialType, MaterialColors.ColorName, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemPrice FROM OrderItems JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialTypes ON Materials.MaterialTypeID = MaterialTypes.MaterialTypeID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
+                
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+                SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
+                SimpleIntegerProperty object_id, object_buildTime, quantity, printer_id, material_id;
+                SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
+               
+                object_name = new SimpleStringProperty(rs.getString("ObjectName"));
+                object_stlLink = new SimpleStringProperty(rs.getString("StlLink"));
+                object_comment = new SimpleStringProperty(rs.getString("Comment"));
+               
+                object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
+                object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
+                object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+               
+                //object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));               
+               
+                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
+                object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
+                //object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, user));
+               
+                //Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice);                
+               
+                // objectList.add(object);
+            }
+
+            rs.close();
+        } catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+        return itemList; 
+        
     }
     
  }

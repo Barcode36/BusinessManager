@@ -36,6 +36,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -52,7 +53,7 @@ import javafx.stage.Stage;
 public class MainController implements Initializable {
     
     
-    /*****************************          GENERAL          *****************************/      
+    /*****************************          GENERAL - VARIABLES       *****************************/      
         
     private User user = null;    
     
@@ -61,6 +62,33 @@ public class MainController implements Initializable {
     
     @FXML
     private ProgressBar progressBar;
+    
+    
+    
+    /*****************************          GENERAL - METHODS         *****************************/          
+    public void setUser(User user){
+        this.user = user;        
+    }
+    
+    public void runService(Service service){
+            
+            service.start();
+            progressBar.progressProperty().bind(service.progressProperty());
+            
+            service.setOnSucceeded((event) -> {
+                service.reset();
+                progressBar.progressProperty().unbind();
+                progressBar.setProgress(1);                
+            });
+            
+            service.setOnFailed((event) -> {
+                service.reset();
+                progressBar.progressProperty().unbind();
+                progressBar.setProgress(-1);
+                service.start();                
+                System.out.print(service.getState().toString());
+            });
+    }
     /*
     *
     *
@@ -68,7 +96,7 @@ public class MainController implements Initializable {
     *
     *    
     */    
-    /*****************************          ORDERS TAB          *****************************/      
+    /*****************************          ORDERS TAB - VARIABLES          *****************************/      
     
     @FXML
     private Tab tab_orders;
@@ -83,13 +111,183 @@ public class MainController implements Initializable {
     private TableColumn<Order, Integer> order_col_customerID, order_col_orderId, order_col_totalQuantity;
     
     @FXML
-    private TableColumn<Order, Double> order_col_totalCosts, order_col_totalPrice, order_col_totalWeight;     
+    private TableColumn<Order, Double> order_col_totalCosts, order_col_totalPrice, order_col_totalWeight, order_col_totalSupportWeight;     
     
     @FXML
-    private Button btn_newOrder, btn_editOrder;
+    private Button btn_newOrder, btn_editOrder, btn_refresh_orders;
     
     @FXML
-    private Label label_SoldOrders, label_SoldCostPrice, label_OrderProfit, label_NotSoldOrders, label_NotSoldCostPrice, label_NotSoldOrderProfit, label_order_info;
+    private Label label_order_SoldOrders, label_order_SoldCostPrice, label_order_OrderProfit, label_order_NotSoldOrders, label_order_NotSoldCostPrice, label_order_NotSoldOrderProfit, label_order_info;
+    
+    @FXML
+    private Label label_order_totalOrders, label_order_TotalCostPrice, label_order_TotalPricePerHour, label_order_TotalWeight, label_order_TotalBuildTime, label_order_TotalItemsPrinted;
+            
+    @FXML
+    private Label label_order_SelectedCostsPrice, label_order_SelectedWeight, label_order_SelectedItemsPrinted, label_order_SelectedPricePerHour, label_order_SelectedBuildTime, label_order_SelectedOrders;
+    
+    /*****************************          ORDERS TAB - METHODS        *****************************/
+    
+    
+    
+    public void calculateOrderStatistics(){
+        
+        int sold_orders = 0, notSold_orders = 0, total_orders, total_itemsSold = 0, total_buildTime = 0;        
+        double sold_price = 0, sold_costs = 0, notSold_price = 0, notSold_costs = 0, total_costs = 0, total_price = 0, total_weight = 0, total_supportWeight = 0;
+        
+        //setting  statistics for sold and not sold orders        
+        //notSold_orders = MngApi.performIntegerQuery("SELECT COUNT(OrderID) FROM Orders WHERE OrderStatus='Not Sold'", user);
+        
+        
+        for (int i = 0; i < tv_orders.getItems().size(); i++) {
+            Order order = tv_orders.getItems().get(i);
+            if (order.getOrder_status().get().equals("Sold")){
+                sold_costs += order.getOrder_costs().get();
+                sold_price += order.getOrder_price().get();
+                sold_orders++;
+            }  else {
+                notSold_costs += order.getOrder_costs().get();
+                notSold_price += order.getOrder_price().get();
+                notSold_orders++;
+            }
+            
+            total_weight += order.getOrder_weighht().get();
+            total_supportWeight += order.getOrder_support_weight().get();
+            
+            total_buildTime += order.getOrder_buildTime().get();
+            
+            total_itemsSold += order.getOrder_quantity().get();
+        }
+        
+        label_order_SoldOrders.setText(String.format(Locale.US, "Sold(%d)", sold_orders));
+        label_order_SoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", sold_price, sold_costs));
+        label_order_OrderProfit.setText(String.format(Locale.US, "%.2f $", sold_price - sold_costs));
+        
+        label_order_NotSoldOrders.setText(String.format(Locale.US, "Not Sold(%d)", notSold_orders));
+        label_order_NotSoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", notSold_price, notSold_costs));
+        label_order_NotSoldOrderProfit.setText(String.format(Locale.US, "%.2f $", notSold_price - notSold_costs));
+        
+        total_costs = sold_costs + notSold_costs;
+        total_price = sold_price + notSold_price;
+        total_orders = sold_orders + notSold_orders;
+        
+        label_order_totalOrders.setText(String.format(Locale.US, "Total(%d)", total_orders));
+        label_order_TotalCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", total_price, total_costs));
+        label_order_TotalPricePerHour.setText(String.format(Locale.US, "%.2f$/h", total_price/total_buildTime*60));
+        if (total_weight >= 1000){
+            label_order_TotalWeight.setText(String.format(Locale.US, "%.2fkg/%.2fkg", total_weight/1000, total_supportWeight/1000));
+        } else {
+            label_order_TotalWeight.setText(String.format(Locale.US, "%.2fg/%.2fg", total_weight, total_supportWeight));
+        }        
+        label_order_TotalBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToHours(total_buildTime).get()));
+        label_order_TotalItemsPrinted.setText(String.valueOf(total_itemsSold));        
+    }
+    
+    public void calculateSelectedOrdersStatistics(ObservableList<Order> selectedOrders){
+               
+        int selected_orders, selected_itemsSold = 0, selected_buildTime = 0;        
+        double  selected_weight = 0, selected_supportWeight = 0, selected_price = 0, selected_cost = 0;
+        
+        //setting  statistics for sold and not sold orders
+        selected_orders = selectedOrders.size();
+                
+        for (int i = 0; i < selectedOrders.size(); i++) {
+            Order seleectedOrder = selectedOrders.get(i);
+            selected_price += seleectedOrder.getOrder_price().get();
+            selected_cost += seleectedOrder.getOrder_costs().get();
+            selected_buildTime += seleectedOrder.getOrder_buildTime().get();
+            selected_weight += seleectedOrder.getOrder_weighht().get();
+            selected_itemsSold += seleectedOrder.getOrder_quantity().get();
+        }
+        
+        label_order_SelectedOrders.setText(String.format(Locale.US, "Sold(%d)", selected_orders));
+        label_order_SelectedCostsPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", selected_price, selected_cost));
+        label_order_SelectedPricePerHour.setText(String.format(Locale.US, "%.2f$/h", selected_price/selected_buildTime*60));
+        if (selected_weight >= 1000) {
+            label_order_SelectedWeight.setText(String.format(Locale.US, "%.2fkg/%.2fkg", selected_weight/1000, selected_supportWeight/1000));
+        } else {
+            label_order_SelectedWeight.setText(String.format(Locale.US, "%.2fg/%.2fg", selected_weight, selected_supportWeight));
+        }
+        label_order_SelectedBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToHours(selected_buildTime).get()));
+        label_order_SelectedItemsPrinted.setText(String.valueOf(selected_itemsSold));        
+        
+    }
+    
+    public void refreshOrdersTable(User user) {
+        
+        //Create list of orders
+        ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
+        
+        //set cell value factory for columns by type
+        
+        //Strings
+        order_col_comment.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_comment());        
+        order_col_customer.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_customer());
+        order_col_dateCreated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dateCreated());
+        order_col_dueDate.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dueDate());
+        order_col_status.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_status());
+        order_col_totalBuildTime_formated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_buildTime_formated());
+        
+        //Integers
+        order_col_orderId.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_id().asObject());        
+        order_col_totalQuantity.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_quantity().asObject());
+        order_col_customerID.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_customerID().asObject());
+        
+        //Doubles
+        order_col_totalCosts.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_costs().asObject());
+        order_col_totalPrice.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_price().asObject());
+        order_col_totalWeight.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_weighht().asObject());
+        order_col_totalSupportWeight.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_support_weight().asObject());
+        
+        //centering content of columns
+        order_col_comment.setStyle("-fx-alignment: CENTER;");        
+        order_col_customer.setStyle("-fx-alignment: CENTER;");
+        order_col_dateCreated.setStyle("-fx-alignment: CENTER;");
+        order_col_dueDate.setStyle("-fx-alignment: CENTER;");
+        order_col_status.setStyle("-fx-alignment: CENTER;");
+        
+        order_col_orderId.setStyle("-fx-alignment: CENTER;");
+        order_col_totalBuildTime_formated.setStyle("-fx-alignment: CENTER;");
+        order_col_totalQuantity.setStyle("-fx-alignment: CENTER;");
+        order_col_customerID.setStyle("-fx-alignment: CENTER;");
+        
+        order_col_totalCosts.setStyle("-fx-alignment: CENTER;");
+        order_col_totalPrice.setStyle("-fx-alignment: CENTER;");
+        order_col_totalWeight.setStyle("-fx-alignment: CENTER;");
+        order_col_totalSupportWeight.setStyle("-fx-alignment: CENTER;");
+        
+        //set list to display in table
+        tv_orders.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        tv_orders.setItems(orderList);
+        
+    }
+    
+    // Create the service
+    private final Service<Void> service_refreshOrders = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    updateProgress(-1, 100);
+                    refreshOrdersTable(user);
+                    Platform.runLater(() -> {
+                        calculateOrderStatistics();
+                    });
+                    return null;
+                }        
+            };
+        return task_refreshCostsTable;
+        }
+    };
+
+    public Service<Void> getService_refreshOrders() {
+        return service_refreshOrders;
+    }
+    
+    public Order getSelectedOrder(){
+        return tv_orders.getSelectionModel().getSelectedItem();
+    }    
+    
     /*
     *
     *
@@ -97,7 +295,7 @@ public class MainController implements Initializable {
     *
     *    
     */
-    /*****************************          CUSTOMERS TAB          *****************************/
+    /*****************************          CUSTOMERS TAB - VARIABLES         *****************************/
     
     @FXML
     private Tab tab_customers;
@@ -117,6 +315,80 @@ public class MainController implements Initializable {
     @FXML
     private Button customer_btn_new;
     
+    
+    /*****************************          CUSTOMERS - METHODS         *****************************/
+    
+    public void refreshCustomersTable(User user) {
+        //Create list of orders
+        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(user));
+        
+        //set cell value factory for columns by type
+        // customer_col_company, customer_col_comment;
+        //Strings
+        customer_col_lastName.setCellValueFactory((param) -> {return param.getValue().getCustomer_lastName();});
+        customer_col_firstName.setCellValueFactory((param) -> {return param.getValue().getCustomer_firstName();});
+        customer_col_dateCreated.setCellValueFactory((param) -> {return param.getValue().getCustomer_dateCreated();});
+        customer_col_mail.setCellValueFactory((param) -> {return param.getValue().getCustomer_mail();});
+        customer_col_phone.setCellValueFactory((param) -> {return param.getValue().getCustomer_phone();});
+        customer_col_address.setCellValueFactory((param) -> {return param.getValue().getCustomer_address();});        
+        customer_col_city.setCellValueFactory((param) -> {return param.getValue().getCustomer_city();});
+        customer_col_zipCode.setCellValueFactory((param) -> {return param.getValue().getCustomer_zipCode();});
+        customer_col_country.setCellValueFactory((param) -> {return param.getValue().getCustomer_country();});
+        customer_col_company.setCellValueFactory((param) -> {return param.getValue().getCustomer_company();});
+        customer_col_comment.setCellValueFactory((param) -> {return param.getValue().getCustomer_comment();});
+        
+        //Integers
+        customer_col_id.setCellValueFactory((param) -> {return param.getValue().getCustomer_id().asObject();});
+        customer_col_orderCount.setCellValueFactory((param) -> {return param.getValue().getCustomer_orderCount().asObject();});
+        
+        //Doubles
+        customer_col_ordersPrice.setCellValueFactory((param) -> {return param.getValue().getCustomer_ordersPrice().asObject();});
+        
+        //centering content of columns
+        customer_col_lastName.setStyle("-fx-alignment: CENTER;");        
+        customer_col_firstName.setStyle("-fx-alignment: CENTER;");
+        customer_col_dateCreated.setStyle("-fx-alignment: CENTER;");
+        customer_col_mail.setStyle("-fx-alignment: CENTER;");
+        customer_col_phone.setStyle("-fx-alignment: CENTER;");
+        customer_col_address.setStyle("-fx-alignment: CENTER;");        
+        customer_col_city.setStyle("-fx-alignment: CENTER;");        
+        customer_col_zipCode.setStyle("-fx-alignment: CENTER;");
+        customer_col_country.setStyle("-fx-alignment: CENTER;");
+        customer_col_company.setStyle("-fx-alignment: CENTER;");
+        customer_col_comment.setStyle("-fx-alignment: CENTER;");
+        
+        customer_col_id.setStyle("-fx-alignment: CENTER;");
+        customer_col_orderCount.setStyle("-fx-alignment: CENTER;");
+        
+        customer_col_ordersPrice.setStyle("-fx-alignment: CENTER;");
+        
+        
+        //set list to display in table
+        tv_customers.setItems(customerList);
+    }
+    
+    // Create the service
+    private final Service<Void> service_refreshCustomers = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);
+                        refreshCustomersTable(user);                    
+                    });                    
+                    
+                    return null;
+                }        
+            };
+        return task_refreshCostsTable;
+        }
+    };
+
+    public Service<Void> getService_refreshCustomers() {
+        return service_refreshCustomers;
+    }
     /*
     *
     *
@@ -124,7 +396,7 @@ public class MainController implements Initializable {
     *
     *    
     */    
-    /*****************************          OBJECTS TAB          *****************************/
+    /*****************************          OBJECTS - VARIABLES        *****************************/
     @FXML
     private Tab tab_objects;
     
@@ -143,6 +415,66 @@ public class MainController implements Initializable {
     @FXML
     private Button object_btn_new;
     
+    /*****************************          OBJECTS - METHODS         *****************************/
+    
+    public void refreshObjectsTable(User user){
+        
+        //Create list of orders
+        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.getObjects(user));
+        
+        object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
+        object_col_stlLink.setCellValueFactory((param) -> {return param.getValue().getObject_stlLink();});           
+        object_col_buildTime_formated.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
+        object_col_comment.setCellValueFactory((param) -> {return param.getValue().getObject_comment();});
+        
+        object_col_id.setCellValueFactory((param) -> {return param.getValue().getObject_id().asObject();});        
+        object_col_soldCount.setCellValueFactory((param) -> {return param.getValue().getObject_SoldCount().asObject();});
+        
+        object_col_weight.setCellValueFactory((param) -> {return param.getValue().getObject_weight().asObject();});
+        object_col_supportWeight.setCellValueFactory((param) -> {return param.getValue().getObject_supportWeight().asObject();});
+        object_col_soldPrice.setCellValueFactory((param) -> {return param.getValue().getObject_soldPrice().asObject();});
+        
+        //Centering content
+        object_col_name.setStyle("-fx-alignment: CENTER;");
+        object_col_stlLink.setStyle("-fx-alignment: CENTER;");
+        
+        object_col_id.setStyle("-fx-alignment: CENTER;");
+        object_col_buildTime_formated.setStyle("-fx-alignment: CENTER;");
+        object_col_soldCount.setStyle("-fx-alignment: CENTER;");
+        
+        object_col_weight.setStyle("-fx-alignment: CENTER;");
+        object_col_supportWeight.setStyle("-fx-alignment: CENTER;");
+        object_col_soldPrice.setStyle("-fx-alignment: CENTER;");
+        
+        tv_objects.setItems(objectList);
+        
+    }    
+    
+    // Create the service
+    private final Service<Void> service_refreshObjects = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {            
+                    
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);
+                        refreshObjectsTable(user);
+                        calculateOrderStatistics();
+                    });
+                    
+                    
+                    return null;
+                }        
+            };
+        return task_refreshCostsTable;
+        }
+    };
+
+    public Service<Void> getService_refreshObjects() {
+        return service_refreshObjects;
+    }
     /*
     *
     *
@@ -150,7 +482,7 @@ public class MainController implements Initializable {
     *
     *    
     */
-    /*****************************          MATERIALS TAB          *****************************/
+    /*****************************          MATERIALS - VARIABLES          *****************************/
     
     @FXML
     private Tab tab_materials;
@@ -169,6 +501,78 @@ public class MainController implements Initializable {
     
     @FXML
     private Button material_btn_new;
+    
+    /*****************************          MATERIALS - METHODS          *****************************/
+    
+    public void refreshMaterialsTable(User user){
+        
+        //Create list of orders
+        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(user));
+        
+        material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
+        material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});           
+        material_col_finished.setCellValueFactory((param) -> {return param.getValue().getMaterial_finished();});
+        material_col_manufacturer.setCellValueFactory((param) -> {return param.getValue().getMaterial_manufacturer();});
+        material_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getMaterial_purchaseDate();});
+        material_col_type.setCellValueFactory((param) -> {return param.getValue().getMaterial_type();});
+        material_col_comment.setCellValueFactory((param) -> {return param.getValue().getMaterial_comment();});
+        
+        material_col_id.setCellValueFactory((param) -> {return param.getValue().getMaterial_id().asObject();});        
+        material_col_weight.setCellValueFactory((param) -> {return param.getValue().getMaterial_weight().asObject();});        
+                
+        material_col_diameter.setCellValueFactory((param) -> {return param.getValue().getMaterial_diameter().asObject();});
+        material_col_price.setCellValueFactory((param) -> {return param.getValue().getMaterial_price().asObject();});
+        material_col_shipping.setCellValueFactory((param) -> {return param.getValue().getMaterial_shipping().asObject();});
+        material_col_profit.setCellValueFactory((param) -> {return param.getValue().getMaterial_profit().asObject();});        
+        material_col_soldFor.setCellValueFactory((param) -> {return param.getValue().getMaterial_soldFor().asObject();});
+        material_col_trash.setCellValueFactory((param) -> {return param.getValue().getMaterial_trash().asObject();});
+        material_col_used.setCellValueFactory((param) -> {return param.getValue().getMaterial_used().asObject();});
+
+        
+        //Centering content
+        material_col_color.setStyle("-fx-alignment: CENTER;");
+        material_col_distributor.setStyle("-fx-alignment: CENTER;");
+        material_col_finished.setStyle("-fx-alignment: CENTER;");
+        material_col_manufacturer.setStyle("-fx-alignment: CENTER;");
+        material_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
+        material_col_type.setStyle("-fx-alignment: CENTER;");
+        
+        material_col_id.setStyle("-fx-alignment: CENTER;");
+        
+        material_col_price.setStyle("-fx-alignment: CENTER;");
+        material_col_profit.setStyle("-fx-alignment: CENTER;");
+        material_col_shipping.setStyle("-fx-alignment: CENTER;");        
+        material_col_soldFor.setStyle("-fx-alignment: CENTER;");
+        material_col_trash.setStyle("-fx-alignment: CENTER;");
+        material_col_used.setStyle("-fx-alignment: CENTER;");        
+        material_col_weight.setStyle("-fx-alignment: CENTER;");        
+        material_col_diameter.setStyle("-fx-alignment: CENTER;");
+        
+        tv_materials.setItems(materialList);        
+    }    
+    
+    // Create the service
+    private final Service<Void> service_refreshMaterials = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);
+                        refreshMaterialsTable(user);
+                    });
+                    
+                    return null;
+                }        
+            };
+        return task_refreshCostsTable;
+        }
+    };
+
+    public Service<Void> getService_refreshMaterials() {
+        return service_refreshMaterials;
+    }    
     /*
     *
     *
@@ -176,7 +580,7 @@ public class MainController implements Initializable {
     *
     *    
     */
-    /*****************************          COSTS TAB          *****************************/
+    /*****************************          COSTS - VARIALES          *****************************/
     
     @FXML
     private Tab tab_costs;
@@ -195,6 +599,67 @@ public class MainController implements Initializable {
     
     @FXML
     private Button cost_btn_newCost, cost_btn_refresh;
+    
+    /*****************************          COSTS - METHODS         *****************************/
+    
+    public void refreshCostsTable(User user){
+        
+        //Create list of orders
+        ObservableList<Cost> costsList = FXCollections.observableArrayList(Cost.getCosts(user));
+        
+        cost_col_comment.setCellValueFactory((param) -> {return param.getValue().getCost_comment();});
+        cost_col_name.setCellValueFactory((param) -> {return param.getValue().getCost_name();});           
+        cost_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getCost_purchaseDate();});
+        cost_col_printer.setCellValueFactory((param) -> {return param.getValue().getCost_printer();});
+        
+        cost_col_id.setCellValueFactory((param) -> {return param.getValue().getCost_id().asObject();});        
+        cost_col_quantity.setCellValueFactory((param) -> {return param.getValue().getCost_quantity().asObject();});
+        cost_col_printerID.setCellValueFactory((param) -> {return param.getValue().getCost_printerID().asObject();});
+        
+        cost_col_price.setCellValueFactory((param) -> {return param.getValue().getCost_price().asObject();});
+        cost_col_shipping.setCellValueFactory((param) -> {return param.getValue().getCost_shipping().asObject();});
+        
+        //Centering content
+        cost_col_comment.setStyle("-fx-alignment: CENTER;");
+        cost_col_name.setStyle("-fx-alignment: CENTER;");
+        cost_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
+        cost_col_printer.setStyle("-fx-alignment: CENTER;");
+        
+        cost_col_id.setStyle("-fx-alignment: CENTER;");
+        cost_col_quantity.setStyle("-fx-alignment: CENTER;");
+        cost_col_printerID.setStyle("-fx-alignment: CENTER;");
+        
+        cost_col_price.setStyle("-fx-alignment: CENTER;");
+        cost_col_shipping.setStyle("-fx-alignment: CENTER;");
+        
+        tv_costs.setItems(costsList);
+        
+    }
+    
+    // Create the service
+    private final Service<Void> service_refreshCosts = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshCostsTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);                 
+                        refreshCostsTable(user);                         
+                    });
+                                       
+                    return null;
+                }        
+            };
+        return task_refreshCostsTable;
+        }
+    };
+    
+    public Service<Void> getService_refreshCosts() {
+        return service_refreshCosts;
+    }
+    
+    
     /*
     *
     *
@@ -207,6 +672,12 @@ public class MainController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
     /*****************************          INITIALIZE ORDERS TAB          *****************************/    
+        tv_orders.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                calculateSelectedOrdersStatistics(tv_orders.getSelectionModel().getSelectedItems());
+            }
+        });
+    
     
         tab_orders.setOnSelectionChanged(new EventHandler<Event>() {
             @Override
@@ -215,6 +686,10 @@ public class MainController implements Initializable {
                         runService(service_refreshOrders);                  
                 }
             }
+        });
+        
+        btn_refresh_orders.setOnAction((event) -> {            
+            runService(service_refreshOrders);            
         });
         
         btn_newOrder.setOnAction((event) -> {
@@ -261,7 +736,7 @@ public class MainController implements Initializable {
             
             ctrl.setUser(user);            
             ctrl.setMainController(this);
-            ctrl.setUpdateOrderFields(tv_orders.getSelectionModel().getSelectedItem());            
+            ctrl.setUpdateOrderFields(tv_orders.getSelectionModel().getSelectedItems());            
             
         } catch (IOException e){
             
@@ -456,7 +931,8 @@ public class MainController implements Initializable {
     });//end new cost button  setOnAction
     
     cost_btn_refresh.setOnAction((event) -> {
-        refreshCostsTable(user);
+        //refreshCostsTable(user);
+        runService(service_refreshCosts);
     });
     
     /*
@@ -468,468 +944,5 @@ public class MainController implements Initializable {
     */
     
     }//end initialize    
-    
-    
-    
-    
-    
-    
-    /*
-    *
-    *                                       METHODS
-    *
-    *
-    *    
-    */
-    /*****************************          GENERAL          *****************************/          
-    public void setUser(User user){
-        this.user = user;        
-    }
-    
-    public void runService(Service service){
-            
-            service.start();
-            progressBar.progressProperty().bind(service.progressProperty());
-            
-            service.setOnSucceeded((event) -> {
-                service.reset();
-                progressBar.progressProperty().unbind();
-                progressBar.setProgress(1);                
-            });
-            
-            service.setOnFailed((event) -> {
-                service.reset();
-                progressBar.progressProperty().unbind();
-                progressBar.setProgress(-1);
-                service.start();                
-                System.out.print(service.getState().toString());
-            });
-    }
-    
-    
-    /*****************************          ORDERS TAB
-     * @param user      
-     * *****************************/      
-    
-    public void calculateOrderStatistics(){
         
-        int size = tv_orders.getItems().size();
-        
-        int sold_orders, notSold_orders, total_ordes,selected_orders, total_itemsSold, selected_itemsSold, total_buildTime, selected_buildTime;        
-        double sold_price = 0, sold_costs = 0, notSold_price = 0, notSold_costs = 0, total_pricePerHour, selected_pricePerHour, total_weight, total_supportWeight, selected_weight, selected_supportWeight;
-        
-        //setting  statistics for sold and not sold orders
-        sold_orders = MngApi.performIntegerQuery("SELECT COUNT(OrderID) FROM Orders WHERE OrderStatus='Sold'", user);
-        //notSold_orders = MngApi.performIntegerQuery("SELECT COUNT(OrderID) FROM Orders WHERE OrderStatus='Not Sold'", user);
-        notSold_orders = size - sold_orders;
-        
-        for (int i = 0; i < tv_orders.getItems().size(); i++) {
-            Order order = tv_orders.getItems().get(i);
-            if (order.getOrder_status().get().equals("Sold")){
-                sold_costs = sold_costs + order.getOrder_costs().get();
-                sold_price = sold_price + order.getOrder_price().get();  
-            }  else {
-                notSold_costs = notSold_costs + order.getOrder_costs().get();
-                notSold_price = notSold_price + order.getOrder_price().get();  
-            }                    
-        }
-        
-        label_SoldOrders.setText(String.format(Locale.US, "Sold(%d)", sold_orders));
-        label_SoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", sold_price, sold_costs));
-        label_OrderProfit.setText(String.format(Locale.US, "%.2f $", sold_price - sold_costs));
-        
-        label_NotSoldOrders.setText(String.format(Locale.US, "Not Sold(%d)", notSold_orders));
-        label_NotSoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", notSold_price, notSold_costs));
-        label_NotSoldOrderProfit.setText(String.format(Locale.US, "%.2f $", notSold_price - notSold_costs));
-        
-        
-    }
-    
-    public void calculateSelectedOrdersStatistics(){
-        
-        int sold_orders, notSold_orders, total_ordes,selected_orders, total_itemsSold, selected_itemsSold, total_buildTime, selected_buildTime;        
-        double sold_price, sold_costs, notSold_price, notSold_costs, total_pricePerHour, selected_pricePerHour, total_weight, total_supportWeight, selected_weight, selected_supportWeight;
-        
-        
-    }
-    
-    public void refreshOrdersTable(User user) {
-        
-        //Create list of orders
-        ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
-        
-        //set cell value factory for columns by type
-        
-        //Strings
-        order_col_comment.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_comment());        
-        order_col_customer.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_customer());
-        order_col_dateCreated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dateCreated());
-        order_col_dueDate.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_dueDate());
-        order_col_status.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_status());
-        order_col_totalBuildTime_formated.setCellValueFactory((TableColumn.CellDataFeatures<Order, String> param) -> param.getValue().getOrder_buildTime_formated());
-        
-        //Integers
-        order_col_orderId.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_id().asObject());        
-        order_col_totalQuantity.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_quantity().asObject());
-        order_col_customerID.setCellValueFactory((TableColumn.CellDataFeatures<Order, Integer> param) -> param.getValue().getOrder_customerID().asObject());
-        
-        //Doubles
-        order_col_totalCosts.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_costs().asObject());
-        order_col_totalPrice.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_price().asObject());
-        order_col_totalWeight.setCellValueFactory((TableColumn.CellDataFeatures<Order, Double> param) -> param.getValue().getOrder_weighht().asObject());
-        
-        //centering content of columns
-        order_col_comment.setStyle("-fx-alignment: CENTER;");        
-        order_col_customer.setStyle("-fx-alignment: CENTER;");
-        order_col_dateCreated.setStyle("-fx-alignment: CENTER;");
-        order_col_dueDate.setStyle("-fx-alignment: CENTER;");
-        order_col_status.setStyle("-fx-alignment: CENTER;");
-        
-        order_col_orderId.setStyle("-fx-alignment: CENTER;");
-        order_col_totalBuildTime_formated.setStyle("-fx-alignment: CENTER;");
-        order_col_totalQuantity.setStyle("-fx-alignment: CENTER;");
-        order_col_customerID.setStyle("-fx-alignment: CENTER;");
-        
-        order_col_totalCosts.setStyle("-fx-alignment: CENTER;");
-        order_col_totalPrice.setStyle("-fx-alignment: CENTER;");
-        order_col_totalWeight.setStyle("-fx-alignment: CENTER;");
-        
-        //set list to display in table
-        tv_orders.setItems(orderList);
-        
-    }
-    
-    // Create the service
-    private final Service<Void> service_refreshOrders = new Service<Void>() {
-        @Override
-        protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    updateProgress(-1, 100);
-                    refreshOrdersTable(user);
-                    Platform.runLater(() -> {
-                        calculateOrderStatistics();
-                    });
-                    return null;
-                }        
-            };
-        return task_refreshCostsTable;
-        }
-    };
-
-    public Service<Void> getService_refreshOrders() {
-        return service_refreshOrders;
-    }
-    
-    public Order getSelectedOrder(){
-        return tv_orders.getSelectionModel().getSelectedItem();
-    }
-    /*
-    *
-    *
-    *
-    *
-    *    
-    */
-    /*****************************          CUSTOMERS TAB          *****************************/
-    
-    public void refreshCustomersTable(User user) {
-        //Create list of orders
-        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(user));
-        
-        //set cell value factory for columns by type
-        // customer_col_company, customer_col_comment;
-        //Strings
-        customer_col_lastName.setCellValueFactory((param) -> {return param.getValue().getCustomer_lastName();});
-        customer_col_firstName.setCellValueFactory((param) -> {return param.getValue().getCustomer_firstName();});
-        customer_col_dateCreated.setCellValueFactory((param) -> {return param.getValue().getCustomer_dateCreated();});
-        customer_col_mail.setCellValueFactory((param) -> {return param.getValue().getCustomer_mail();});
-        customer_col_phone.setCellValueFactory((param) -> {return param.getValue().getCustomer_phone();});
-        customer_col_address.setCellValueFactory((param) -> {return param.getValue().getCustomer_address();});        
-        customer_col_city.setCellValueFactory((param) -> {return param.getValue().getCustomer_city();});
-        customer_col_zipCode.setCellValueFactory((param) -> {return param.getValue().getCustomer_zipCode();});
-        customer_col_country.setCellValueFactory((param) -> {return param.getValue().getCustomer_country();});
-        customer_col_company.setCellValueFactory((param) -> {return param.getValue().getCustomer_company();});
-        customer_col_comment.setCellValueFactory((param) -> {return param.getValue().getCustomer_comment();});
-        
-        //Integers
-        customer_col_id.setCellValueFactory((param) -> {return param.getValue().getCustomer_id().asObject();});
-        customer_col_orderCount.setCellValueFactory((param) -> {return param.getValue().getCustomer_orderCount().asObject();});
-        
-        //Doubles
-        customer_col_ordersPrice.setCellValueFactory((param) -> {return param.getValue().getCustomer_ordersPrice().asObject();});
-        
-        //centering content of columns
-        customer_col_lastName.setStyle("-fx-alignment: CENTER;");        
-        customer_col_firstName.setStyle("-fx-alignment: CENTER;");
-        customer_col_dateCreated.setStyle("-fx-alignment: CENTER;");
-        customer_col_mail.setStyle("-fx-alignment: CENTER;");
-        customer_col_phone.setStyle("-fx-alignment: CENTER;");
-        customer_col_address.setStyle("-fx-alignment: CENTER;");        
-        customer_col_city.setStyle("-fx-alignment: CENTER;");        
-        customer_col_zipCode.setStyle("-fx-alignment: CENTER;");
-        customer_col_country.setStyle("-fx-alignment: CENTER;");
-        customer_col_company.setStyle("-fx-alignment: CENTER;");
-        customer_col_comment.setStyle("-fx-alignment: CENTER;");
-        
-        customer_col_id.setStyle("-fx-alignment: CENTER;");
-        customer_col_orderCount.setStyle("-fx-alignment: CENTER;");
-        
-        customer_col_ordersPrice.setStyle("-fx-alignment: CENTER;");
-        
-        
-        //set list to display in table
-        tv_customers.setItems(customerList);
-    }
-    
-    // Create the service
-    private final Service<Void> service_refreshCustomers = new Service<Void>() {
-        @Override
-        protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {            
-                @Override
-                public Void call() throws Exception {
-                    Platform.runLater(() -> {
-                        updateProgress(-1, 100);
-                        refreshCustomersTable(user);                    
-                    });                    
-                    
-                    return null;
-                }        
-            };
-        return task_refreshCostsTable;
-        }
-    };
-
-    public Service<Void> getService_refreshCustomers() {
-        return service_refreshCustomers;
-    }
-    
-    
-    /*
-    *
-    *
-    *
-    *
-    *    
-    */
-    /*****************************          OBJECTS TAB          *****************************/
-    
-    public void refreshObjectsTable(User user){
-        
-        //Create list of orders
-        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.getObjects(user));
-        
-        object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
-        object_col_stlLink.setCellValueFactory((param) -> {return param.getValue().getObject_stlLink();});           
-        object_col_buildTime_formated.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
-        object_col_comment.setCellValueFactory((param) -> {return param.getValue().getObject_comment();});
-        
-        object_col_id.setCellValueFactory((param) -> {return param.getValue().getObject_id().asObject();});        
-        object_col_soldCount.setCellValueFactory((param) -> {return param.getValue().getObject_SoldCount().asObject();});
-        
-        object_col_weight.setCellValueFactory((param) -> {return param.getValue().getObject_weight().asObject();});
-        object_col_supportWeight.setCellValueFactory((param) -> {return param.getValue().getObject_supportWeight().asObject();});
-        object_col_soldPrice.setCellValueFactory((param) -> {return param.getValue().getObject_soldPrice().asObject();});
-        
-        //Centering content
-        object_col_name.setStyle("-fx-alignment: CENTER;");
-        object_col_stlLink.setStyle("-fx-alignment: CENTER;");
-        
-        object_col_id.setStyle("-fx-alignment: CENTER;");
-        object_col_buildTime_formated.setStyle("-fx-alignment: CENTER;");
-        object_col_soldCount.setStyle("-fx-alignment: CENTER;");
-        
-        object_col_weight.setStyle("-fx-alignment: CENTER;");
-        object_col_supportWeight.setStyle("-fx-alignment: CENTER;");
-        object_col_soldPrice.setStyle("-fx-alignment: CENTER;");
-        
-        tv_objects.setItems(objectList);
-        
-    }    
-    
-    // Create the service
-    private final Service<Void> service_refreshObjects = new Service<Void>() {
-        @Override
-        protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {            
-                @Override
-                public Void call() throws Exception {            
-                    
-                    Platform.runLater(() -> {
-                        updateProgress(-1, 100);
-                        refreshObjectsTable(user);
-                        calculateOrderStatistics();
-                    });
-                    
-                    
-                    return null;
-                }        
-            };
-        return task_refreshCostsTable;
-        }
-    };
-
-    public Service<Void> getService_refreshObjects() {
-        return service_refreshObjects;
-    }
-        
-    /*
-    *
-    *
-    *
-    *
-    *    
-    */
-    
-    /*****************************          MATERIALS TAB          *****************************/
-    
-    public void refreshMaterialsTable(User user){
-        
-        //Create list of orders
-        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(user));
-        
-        material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
-        material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});           
-        material_col_finished.setCellValueFactory((param) -> {return param.getValue().getMaterial_finished();});
-        material_col_manufacturer.setCellValueFactory((param) -> {return param.getValue().getMaterial_manufacturer();});
-        material_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getMaterial_purchaseDate();});
-        material_col_type.setCellValueFactory((param) -> {return param.getValue().getMaterial_type();});
-        material_col_comment.setCellValueFactory((param) -> {return param.getValue().getMaterial_comment();});
-        
-        material_col_id.setCellValueFactory((param) -> {return param.getValue().getMaterial_id().asObject();});        
-        material_col_weight.setCellValueFactory((param) -> {return param.getValue().getMaterial_weight().asObject();});        
-                
-        material_col_diameter.setCellValueFactory((param) -> {return param.getValue().getMaterial_diameter().asObject();});
-        material_col_price.setCellValueFactory((param) -> {return param.getValue().getMaterial_price().asObject();});
-        material_col_shipping.setCellValueFactory((param) -> {return param.getValue().getMaterial_shipping().asObject();});
-        material_col_profit.setCellValueFactory((param) -> {return param.getValue().getMaterial_profit().asObject();});        
-        material_col_soldFor.setCellValueFactory((param) -> {return param.getValue().getMaterial_soldFor().asObject();});
-        material_col_trash.setCellValueFactory((param) -> {return param.getValue().getMaterial_trash().asObject();});
-        material_col_used.setCellValueFactory((param) -> {return param.getValue().getMaterial_used().asObject();});
-
-        
-        //Centering content
-        material_col_color.setStyle("-fx-alignment: CENTER;");
-        material_col_distributor.setStyle("-fx-alignment: CENTER;");
-        material_col_finished.setStyle("-fx-alignment: CENTER;");
-        material_col_manufacturer.setStyle("-fx-alignment: CENTER;");
-        material_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
-        material_col_type.setStyle("-fx-alignment: CENTER;");
-        
-        material_col_id.setStyle("-fx-alignment: CENTER;");
-        
-        material_col_price.setStyle("-fx-alignment: CENTER;");
-        material_col_profit.setStyle("-fx-alignment: CENTER;");
-        material_col_shipping.setStyle("-fx-alignment: CENTER;");        
-        material_col_soldFor.setStyle("-fx-alignment: CENTER;");
-        material_col_trash.setStyle("-fx-alignment: CENTER;");
-        material_col_used.setStyle("-fx-alignment: CENTER;");        
-        material_col_weight.setStyle("-fx-alignment: CENTER;");        
-        material_col_diameter.setStyle("-fx-alignment: CENTER;");
-        
-        tv_materials.setItems(materialList);        
-    }    
-    
-    // Create the service
-    private final Service<Void> service_refreshMaterials = new Service<Void>() {
-        @Override
-        protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {            
-                @Override
-                public Void call() throws Exception {
-                    Platform.runLater(() -> {
-                        updateProgress(-1, 100);
-                        refreshMaterialsTable(user);
-                    });
-                    
-                    return null;
-                }        
-            };
-        return task_refreshCostsTable;
-        }
-    };
-
-    public Service<Void> getService_refreshMaterials() {
-        return service_refreshMaterials;
-    }
-        
-    /*
-    *
-    *
-    *
-    *
-    *    
-    */
-    
-    /*****************************          COSTS TAB          *****************************/
-    
-    public void refreshCostsTable(User user){
-        
-        //Create list of orders
-        ObservableList<Cost> costsList = FXCollections.observableArrayList(Cost.getCosts(user));
-        
-        cost_col_comment.setCellValueFactory((param) -> {return param.getValue().getCost_comment();});
-        cost_col_name.setCellValueFactory((param) -> {return param.getValue().getCost_name();});           
-        cost_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getCost_purchaseDate();});
-        cost_col_printer.setCellValueFactory((param) -> {return param.getValue().getCost_printer();});
-        
-        cost_col_id.setCellValueFactory((param) -> {return param.getValue().getCost_id().asObject();});        
-        cost_col_quantity.setCellValueFactory((param) -> {return param.getValue().getCost_quantity().asObject();});
-        cost_col_printerID.setCellValueFactory((param) -> {return param.getValue().getCost_printerID().asObject();});
-        
-        cost_col_price.setCellValueFactory((param) -> {return param.getValue().getCost_price().asObject();});
-        cost_col_shipping.setCellValueFactory((param) -> {return param.getValue().getCost_shipping().asObject();});
-        
-        //Centering content
-        cost_col_comment.setStyle("-fx-alignment: CENTER;");
-        cost_col_name.setStyle("-fx-alignment: CENTER;");
-        cost_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
-        cost_col_printer.setStyle("-fx-alignment: CENTER;");
-        
-        cost_col_id.setStyle("-fx-alignment: CENTER;");
-        cost_col_quantity.setStyle("-fx-alignment: CENTER;");
-        cost_col_printerID.setStyle("-fx-alignment: CENTER;");
-        
-        cost_col_price.setStyle("-fx-alignment: CENTER;");
-        cost_col_shipping.setStyle("-fx-alignment: CENTER;");
-        
-        tv_costs.setItems(costsList);
-        
-    }
-    
-    // Create the service
-    private final Service<Void> service_refreshCosts = new Service<Void>() {
-        @Override
-        protected Task<Void> createTask(){
-            Task<Void> task_refreshCostsTable = new Task<Void>() {            
-                @Override
-                public Void call() throws Exception {
-                    Platform.runLater(() -> {
-                        updateProgress(-1, 100);                 
-                        refreshCostsTable(user);                         
-                    });
-                                       
-                    return null;
-                }        
-            };
-        return task_refreshCostsTable;
-        }
-    };
-    
-    public Service<Void> getService_refreshCosts() {
-        return service_refreshCosts;
-    }
-    
-    
-    /*
-    *
-    *
-    *
-    *
-    *    
-    */
-    
-    
 }//end MainController

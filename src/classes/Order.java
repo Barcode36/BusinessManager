@@ -25,9 +25,9 @@ public class Order {
     
     private SimpleStringProperty order_customer, order_status, order_comment, order_dateCreated, order_dueDate, order_buildTime_formated;    
     private SimpleIntegerProperty order_id, order_customerID, order_quantity, order_buildTime;
-    private SimpleDoubleProperty order_costs, order_price, order_weighht;
+    private SimpleDoubleProperty order_costs, order_price, order_weight, order_support_weight;
 
-    public Order(SimpleIntegerProperty order_customerID, SimpleStringProperty order_customer, SimpleStringProperty order_status, SimpleStringProperty order_comment, SimpleStringProperty order_dateCreated, SimpleStringProperty order_dueDate, SimpleStringProperty order_buildTime_formated, SimpleIntegerProperty order_id, SimpleIntegerProperty order_quantity, SimpleIntegerProperty order_buildTime, SimpleDoubleProperty order_costs, SimpleDoubleProperty order_price, SimpleDoubleProperty order_weighht) {
+    public Order(SimpleStringProperty order_customer, SimpleStringProperty order_status, SimpleStringProperty order_comment, SimpleStringProperty order_dateCreated, SimpleStringProperty order_dueDate, SimpleStringProperty order_buildTime_formated, SimpleIntegerProperty order_id, SimpleIntegerProperty order_customerID, SimpleIntegerProperty order_quantity, SimpleIntegerProperty order_buildTime, SimpleDoubleProperty order_costs, SimpleDoubleProperty order_price, SimpleDoubleProperty order_weighht, SimpleDoubleProperty order_support_weight) {
         this.order_customer = order_customer;
         this.order_status = order_status;
         this.order_comment = order_comment;
@@ -35,12 +35,13 @@ public class Order {
         this.order_dueDate = order_dueDate;
         this.order_buildTime_formated = order_buildTime_formated;
         this.order_id = order_id;
+        this.order_customerID = order_customerID;
         this.order_quantity = order_quantity;
         this.order_buildTime = order_buildTime;
         this.order_costs = order_costs;
         this.order_price = order_price;
-        this.order_weighht = order_weighht;
-        this.order_customerID = order_customerID;
+        this.order_weight = order_weighht;
+        this.order_support_weight = order_support_weight;
     }
 
     public SimpleStringProperty getOrder_customer() {
@@ -99,6 +100,14 @@ public class Order {
         this.order_id = order_id;
     }
 
+    public SimpleIntegerProperty getOrder_customerID() {
+        return order_customerID;
+    }
+
+    public void setOrder_customerID(SimpleIntegerProperty order_customerID) {
+        this.order_customerID = order_customerID;
+    }
+
     public SimpleIntegerProperty getOrder_quantity() {
         return order_quantity;
     }
@@ -132,22 +141,21 @@ public class Order {
     }
 
     public SimpleDoubleProperty getOrder_weighht() {
-        return order_weighht;
+        return order_weight;
     }
 
     public void setOrder_weighht(SimpleDoubleProperty order_weighht) {
-        this.order_weighht = order_weighht;
+        this.order_weight = order_weighht;
     }
 
-    public SimpleIntegerProperty getOrder_customerID() {
-        return order_customerID;
+    public SimpleDoubleProperty getOrder_support_weight() {
+        return order_support_weight;
     }
 
-    public void setOrder_customerID(SimpleIntegerProperty order_customerID) {
-        this.order_customerID = order_customerID;
+    public void setOrder_support_weight(SimpleDoubleProperty order_support_weight) {
+        this.order_support_weight = order_support_weight;
     }
 
-    
     
     public static List<Order> getOrders(User user) {
         
@@ -189,7 +197,7 @@ public class Order {
                 
                 SimpleStringProperty customer, status, comment, dateCreated, dueDate, buildTime_formated;    
                 SimpleIntegerProperty id, customer_id, totalQuantity, totalBuildTime;
-                SimpleDoubleProperty totalCosts, totalPrice, totalWeighht;
+                SimpleDoubleProperty totalCosts, totalPrice, totalWeight, totalSupportWeight;
                 
                 customer = new SimpleStringProperty(rs.getString("Customer"));
                 status = new SimpleStringProperty(rs.getString("OrderStatus"));
@@ -206,9 +214,10 @@ public class Order {
                 
                 totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
                 totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
-                totalWeighht = new SimpleDoubleProperty(getTotalWeight(id, user));
+                totalWeight = new SimpleDoubleProperty(getTotalWeight(id, user));
+                totalSupportWeight = new SimpleDoubleProperty(getTotalSupportWeight(id, user));
                 
-                Order order = new Order(customer_id, customer, status, comment, dateCreated, dueDate, buildTime_formated, id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeighht);
+                Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, customer_id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
                 
                 orderList.add(order);
             }
@@ -563,6 +572,70 @@ public class Order {
             }
         }//end finally
         return totalWeight;
+    }
+    
+    private static double getTotalSupportWeight(SimpleIntegerProperty order_id, User user) {
+        double totalSupportWeight = 0;
+        
+        //Create query
+        String query = "SELECT SUM(ItemSupportWeight) FROM OrderItems WHERE OrderID=" + order_id.get();
+        
+        //Create list
+        List<Order> orderList = new ArrayList<>();
+        
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                totalSupportWeight = rs.getInt("SUM(ItemSupportWeight)");                
+            }
+
+            rs.close();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }//end finally
+        return totalSupportWeight;
     }
     
     public static void insertNewOrder(Order order, User user){

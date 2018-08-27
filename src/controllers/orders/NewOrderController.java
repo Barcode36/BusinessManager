@@ -371,7 +371,7 @@ public class NewOrderController implements Initializable {
             String[] totalPriceFormatted = label_price.getText().split(" ");
             totalPrice = new SimpleDoubleProperty(Double.parseDouble(totalPriceFormatted[0]));
             
-            newOrder = new Order(customer_id, null, status, comment, dateCreated, dueDate, null, id, totalQuantity, null, null, totalPrice, null);
+            newOrder = new Order(null, status, comment, dateCreated, dueDate, null, order_id, customer_id, totalQuantity, null, null, totalPrice, null, null);
             
             //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
             //They are basicaly mulitple insert querries in a row separated by ";"
@@ -447,7 +447,7 @@ public class NewOrderController implements Initializable {
             String[] totalPriceFormatted = label_price.getText().split(" ");
             totalPrice = new SimpleDoubleProperty(Double.parseDouble(totalPriceFormatted[0]));
             
-            newOrder = new Order(customer_id, null, status, comment, dateCreated, dueDate, null, id, totalQuantity, null, null, totalPrice, null);
+            newOrder = new Order(null, status, comment, dateCreated, dueDate, null, order_id, customer_id, totalQuantity, null, null, totalPrice, null, null);
             
             //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
             //They are basicaly mulitple insert querries in a row separated by ";"
@@ -519,12 +519,19 @@ public class NewOrderController implements Initializable {
         datePicker_dateCreated.setValue(LocalDate.now());
         datePicker_dueDate.setValue(LocalDate.now());
                 
-    }        
-    
-    public void setUpdateOrderFields(Order order){
+    }
+   
+    public void setUpdateOrderFields(ObservableList<Order> orders){        
+        Order order = orders.get(0);
         
         label_orderID.setText(String.valueOf(order.getOrder_id().get()));
         txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());
+        
+	//convert String to LocalDate
+	LocalDate dateCerated = LocalDate.parse(order.getOrder_dateCreated().get());        
+        LocalDate dueDate = LocalDate.parse(order.getOrder_dueDate().get());
+        datePicker_dateCreated.setValue(dateCerated);
+        datePicker_dueDate.setValue(dueDate);
         
     }
       
