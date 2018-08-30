@@ -179,7 +179,7 @@ public class OrderItem {
         MngApi.performMultipleUpdates(updateQueries, user);
     }
     
-    public static ObservableList<OrderItem> getOrderItems(int order_id, User user){
+    public static List<OrderItem> getOrderItems(int order_id, User user){
         
         //Create list
         List<OrderItem> itemList = new ArrayList<>();
@@ -220,23 +220,29 @@ public class OrderItem {
                 SimpleIntegerProperty object_id, object_buildTime, quantity, printer_id, material_id;
                 SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
                
-                object_name = new SimpleStringProperty(rs.getString("ObjectName"));
-                object_stlLink = new SimpleStringProperty(rs.getString("StlLink"));
-                object_comment = new SimpleStringProperty(rs.getString("Comment"));
-               
+                object_name = new SimpleStringProperty(rs.getString("ObjectName"));                
+                printer_name = new SimpleStringProperty(rs.getString("PrinterName"));
+                material_type = new SimpleStringProperty(rs.getString("MaterialType"));
+                material_color = new SimpleStringProperty(rs.getString("ColorName"));
+                
                 object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
                 object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
-                object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
-               
+                    object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+                quantity = new SimpleIntegerProperty(rs.getInt("ItemQuantity"));
+                printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
+                material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
                 //object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));               
                
                 object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
                 object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
-                //object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, user));
+                price = new SimpleDoubleProperty(rs.getDouble("ItemPrice"));
+                costs = new SimpleDoubleProperty(rs.getDouble("ItemCosts"));
+                
+                System.out.println(object_name.get());
+                
+                OrderItem item = new OrderItem(object_name, object_buildTime_formated, printer_name, material_type, material_color, printer_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
                
-                //Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice);                
-               
-                // objectList.add(object);
+                itemList.add(item);
             }
 
             rs.close();

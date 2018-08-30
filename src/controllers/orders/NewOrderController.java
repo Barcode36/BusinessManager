@@ -241,10 +241,7 @@ public class NewOrderController implements Initializable {
                 summary_buildTime += buildTime;
                 summary_price += price;
                 summary_costs += costs;
-            }
-            
-            
-            
+            }            
         }
         
         summary_weightSum = summary_weight + summary_supportWeight;
@@ -258,9 +255,12 @@ public class NewOrderController implements Initializable {
         label_buildTime.setText(String.format("%s", summary_buildTime_formatted));
         label_price.setText(String.format(Locale.UK, "%.2f $", summary_price));
         label_costs.setText(String.format(Locale.UK, "%.2f $", summary_costs));
-        label_profit.setText(String.format(Locale.UK, "%.2f $", summary_profit));
+        label_profit.setText(String.format(Locale.UK, "%.2f $", summary_profit));        
+        txtField_pricePerHour.setText(String.format("%.2f", price/summary_buildTime*60));
+        
     }
     
+    //calculate prices based on user input in txtField_pricePerHour
     public void calculatePrices(){
         
         try{
@@ -382,18 +382,18 @@ public class NewOrderController implements Initializable {
                 OrderItem obj = selectedObjects.get(i);
                 obj.setOrder_id(order_id);
                 
-                SimpleIntegerProperty object_id, buildTime, quantity, printer_id, material_id;
-                SimpleDoubleProperty supportWeight, weight, price;            
-                
-                object_id = obj.getObject_id();
-                buildTime = obj.getObject_buildTime();
-                quantity = obj.getQuantity();
-                printer_id = obj.getPrinter_id();
-                material_id = obj.getMaterial_id();
-                
-                supportWeight = obj.getObject_supportWeight();
-                weight = obj.getObject_weight();
-                price = obj.getPrice();
+//                SimpleIntegerProperty object_id, buildTime, quantity, printer_id, material_id;
+//                SimpleDoubleProperty supportWeight, weight, price;            
+//                
+//                object_id = obj.getObject_id();
+//                buildTime = obj.getObject_buildTime();
+//                quantity = obj.getQuantity();
+//                printer_id = obj.getPrinter_id();
+//                material_id = obj.getMaterial_id();
+//                
+//                supportWeight = obj.getObject_supportWeight();
+//                weight = obj.getObject_weight();
+//                price = obj.getPrice();
                 
                 updateQueries.add(OrderItem.generateUpdateQuery(obj));
             }
@@ -532,6 +532,13 @@ public class NewOrderController implements Initializable {
         LocalDate dueDate = LocalDate.parse(order.getOrder_dueDate().get());
         datePicker_dateCreated.setValue(dateCerated);
         datePicker_dueDate.setValue(dueDate);
+        
+        txtField_comment.setText(order.getOrder_comment().get());
+        
+        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(order.getOrder_id().get(), user));
+        System.out.println(order.getOrder_id().get());
+        selectedObjects.addAll(itemList);
+        calcualteSummary();
         
     }
       
