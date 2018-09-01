@@ -45,7 +45,7 @@
           <RowConstraints maxHeight="103.0" minHeight="10.0" prefHeight="78.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="New Order" GridPane.columnSpan="5" GridPane.halignment="CENTER">
+            <Label fx:id="label_title" text="New Order" GridPane.columnSpan="5" GridPane.halignment="CENTER">
                <font>
                   <Font name="System Bold" size="22.0" />
                </font>

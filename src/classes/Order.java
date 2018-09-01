@@ -202,7 +202,7 @@ public class Order {
                 customer = new SimpleStringProperty(rs.getString("Customer"));
                 status = new SimpleStringProperty(rs.getString("OrderStatus"));
                 comment = new SimpleStringProperty(rs.getString("Comment"));
-                dateCreated = new SimpleStringProperty(rs.getString("DateCreated"));
+                dateCreated = new SimpleStringProperty(rs.getString("DateCreated"));                
                 dueDate = new SimpleStringProperty(rs.getString("DateCreated"));
                 
                 id = new SimpleIntegerProperty(rs.getInt("OrderID"));
@@ -217,7 +217,7 @@ public class Order {
                 totalWeight = new SimpleDoubleProperty(getTotalWeight(id, user));
                 totalSupportWeight = new SimpleDoubleProperty(getTotalSupportWeight(id, user));
                 
-                Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, customer_id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
+                Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
                 
                 orderList.add(order);
             }

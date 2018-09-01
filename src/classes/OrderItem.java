@@ -186,7 +186,7 @@ public class OrderItem {
         
         //Create query
         String query = "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.ItemQuantity, Printers.PrinterID, Printers.PrinterName, OrderItems.ItemBuildTime, OrderItems.ItemMaterialID, MaterialTypes.MaterialType, MaterialColors.ColorName, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemPrice FROM OrderItems JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialTypes ON Materials.MaterialTypeID = MaterialTypes.MaterialTypeID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
-                
+
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
         String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
@@ -218,29 +218,42 @@ public class OrderItem {
                 
                 SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
                 SimpleIntegerProperty object_id, object_buildTime, quantity, printer_id, material_id;
-                SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
-               
+                SimpleDoubleProperty object_supportWeight, object_weight, price, item_costs;
+                
                 object_name = new SimpleStringProperty(rs.getString("ObjectName"));                
                 printer_name = new SimpleStringProperty(rs.getString("PrinterName"));
                 material_type = new SimpleStringProperty(rs.getString("MaterialType"));
                 material_color = new SimpleStringProperty(rs.getString("ColorName"));
                 
                 object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
-                object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
+                object_buildTime = new SimpleIntegerProperty(rs.getInt("ItemBuildTime"));
                     object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
                 quantity = new SimpleIntegerProperty(rs.getInt("ItemQuantity"));
                 printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
-                material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
+                material_id = new SimpleIntegerProperty(rs.getInt("ItemMaterialID"));
                 //object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));               
                
-                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
-                object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
+                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("ItemSupportWeight"));
+                object_weight = new SimpleDoubleProperty(rs.getDouble("ItemWeight"));
                 price = new SimpleDoubleProperty(rs.getDouble("ItemPrice"));
-                costs = new SimpleDoubleProperty(rs.getDouble("ItemCosts"));
                 
-                System.out.println(object_name.get());
+                //costs calculation
+                    Double material_price, material_shipping, price_per_gram, total_weight, total_supportWeight, costs;
+                    int material_weight;
                 
-                OrderItem item = new OrderItem(object_name, object_buildTime_formated, printer_name, material_type, material_color, printer_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
+                    Material material = Material.getMaterialByID(user, material_id);
+                
+                    material_price = material.getMaterial_price().get();
+                    material_shipping = material.getMaterial_shipping().get();
+                    material_weight = material.getMaterial_weight().get();        
+                    price_per_gram = (material_price+material_shipping)/material_weight;        
+                    total_weight = object_weight.get();
+                    total_supportWeight = object_supportWeight.get();                        
+                    total_weight = total_weight + total_supportWeight;                    
+                    costs = price_per_gram*total_weight;                                
+                    item_costs = new SimpleDoubleProperty(costs);
+                    
+                    OrderItem item = new OrderItem(object_name, object_buildTime_formated, printer_name, material_type, material_color, printer_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, item_costs);
                
                 itemList.add(item);
             }

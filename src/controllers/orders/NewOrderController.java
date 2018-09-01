@@ -65,7 +65,7 @@ public class NewOrderController implements Initializable {
     private ToggleGroup toggleGroup_status = new ToggleGroup();
     
     @FXML
-    private Label label_info, label_orderID, label_weight, label_supportWeight, label_weightSum, label_quantity, label_buildTime, label_price, label_costs, label_profit;
+    private Label label_title, label_info, label_orderID, label_weight, label_supportWeight, label_weightSum, label_quantity, label_buildTime, label_price, label_costs, label_profit;
     
     @FXML
     private TextField txtField_customer, txtField_pricePerHour, txtField_comment;
@@ -256,7 +256,7 @@ public class NewOrderController implements Initializable {
         label_price.setText(String.format(Locale.UK, "%.2f $", summary_price));
         label_costs.setText(String.format(Locale.UK, "%.2f $", summary_costs));
         label_profit.setText(String.format(Locale.UK, "%.2f $", summary_profit));        
-        txtField_pricePerHour.setText(String.format("%.2f", price/summary_buildTime*60));
+        txtField_pricePerHour.setText(String.format(Locale.UK, "%.2f", price/summary_buildTime*60));
         
     }
     
@@ -381,20 +381,6 @@ public class NewOrderController implements Initializable {
                 
                 OrderItem obj = selectedObjects.get(i);
                 obj.setOrder_id(order_id);
-                
-//                SimpleIntegerProperty object_id, buildTime, quantity, printer_id, material_id;
-//                SimpleDoubleProperty supportWeight, weight, price;            
-//                
-//                object_id = obj.getObject_id();
-//                buildTime = obj.getObject_buildTime();
-//                quantity = obj.getQuantity();
-//                printer_id = obj.getPrinter_id();
-//                material_id = obj.getMaterial_id();
-//                
-//                supportWeight = obj.getObject_supportWeight();
-//                weight = obj.getObject_weight();
-//                price = obj.getPrice();
-                
                 updateQueries.add(OrderItem.generateUpdateQuery(obj));
             }
                 
@@ -512,7 +498,7 @@ public class NewOrderController implements Initializable {
     }
     
     public void setNewOrderFields(){
-        
+        mode = "create";
         label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(user, "Orders")));
         tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);        
         txtField_pricePerHour.setText("2.5");        
@@ -521,24 +507,42 @@ public class NewOrderController implements Initializable {
                 
     }
    
-    public void setUpdateOrderFields(ObservableList<Order> orders){        
+    public void setUpdateOrderFields(ObservableList<Order> orders){
+        mode = "update";
+        
         Order order = orders.get(0);
         
-        label_orderID.setText(String.valueOf(order.getOrder_id().get()));
-        txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());
+        btn_create.setText("Update");
+        btn_create.setDisable(false);
         
-	//convert String to LocalDate
-	LocalDate dateCerated = LocalDate.parse(order.getOrder_dateCreated().get());        
+	LocalDate dateCerated = LocalDate.parse(order.getOrder_dateCreated().get());
         LocalDate dueDate = LocalDate.parse(order.getOrder_dueDate().get());
         datePicker_dateCreated.setValue(dateCerated);
         datePicker_dueDate.setValue(dueDate);
         
-        txtField_comment.setText(order.getOrder_comment().get());
+        label_orderID.setText(String.valueOf(order.getOrder_id().get()));
+        txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());        
+        txtField_comment.setText(order.getOrder_comment().get());        
         
-        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(order.getOrder_id().get(), user));
-        System.out.println(order.getOrder_id().get());
-        selectedObjects.addAll(itemList);
-        calcualteSummary();
+       // RadioButton soldStatus = (RadioButton)toggleGroup_status.getSelectedToggle();            
+        String status = order.getOrder_status().get();
+        
+        switch (status){
+            case "Sold":
+                radioBtn_Sold.setSelected(true);
+                return;                
+            default:
+                radioBtn_NotSold.setSelected(true);            
+        }
+        
+        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(order.getOrder_id().get(), user));        
+        selectedObjects.addAll(itemList);        
+        setSelectedObjects();
+        refreshSelectedObjects();        
+        
+        label_title.setText("Update Order");        
+        label_info.setText("Edit fields");
+        label_info.setTextFill(Color.web("#ff0000"));
         
     }
       
