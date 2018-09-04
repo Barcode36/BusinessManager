@@ -199,7 +199,7 @@ public class MainController implements Initializable {
             selected_itemsSold += seleectedOrder.getOrder_quantity().get();
         }
         
-        label_order_SelectedOrders.setText(String.format(Locale.US, "Sold(%d)", selected_orders));
+        label_order_SelectedOrders.setText(String.format(Locale.US, "Selected(%d)", selected_orders));
         label_order_SelectedCostsPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", selected_price, selected_cost));
         label_order_SelectedPricePerHour.setText(String.format(Locale.US, "%.2f$/h", selected_price/selected_buildTime*60));
         if (selected_weight >= 1000) {

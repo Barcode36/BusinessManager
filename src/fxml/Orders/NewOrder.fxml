@@ -50,7 +50,7 @@
                   <Font name="System Bold" size="22.0" />
                </font>
             </Label>
-            <Label text="Fill the fields." textFill="#00cd00" GridPane.columnSpan="5" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+            <Label fx:id="label_info" text="Fill the fields." textFill="#00cd00" GridPane.columnSpan="5" GridPane.halignment="CENTER" GridPane.rowIndex="1">
                <font>
                   <Font size="14.0" />
                </font>
@@ -198,7 +198,7 @@
                   <ToggleGroup fx:id="toggleGroup_status" />
                </toggleGroup>
             </RadioButton>
-            <RadioButton fx:id="radioBtn_NotSold" mnemonicParsing="false" text="Not  Sold" toggleGroup="$toggleGroup_status" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.rowSpan="2" GridPane.valignment="CENTER">
+            <RadioButton fx:id="radioBtn_NotSold" mnemonicParsing="false" text="Not Sold" toggleGroup="$toggleGroup_status" GridPane.columnIndex="1" GridPane.rowIndex="10" GridPane.rowSpan="2" GridPane.valignment="CENTER">
                <font>
                   <Font size="12.0" />
                </font>

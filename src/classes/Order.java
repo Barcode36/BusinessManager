@@ -640,7 +640,8 @@ public class Order {
     
     public static void insertNewOrder(Order order, User user){
         
-        String updateQuery = "INSERT INTO Orders VALUES (null," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "')";
+        String updateQuery = "INSERT INTO Orders VALUES (" + order.getOrder_id().get() + "," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "')";
+        System.out.println(updateQuery);
         MngApi.performUpdate(updateQuery, user);                
         
     }    
