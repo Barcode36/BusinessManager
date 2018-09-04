@@ -271,7 +271,7 @@ public class NewOrderController implements Initializable {
         label_price.setText(String.format(Locale.UK, "%.2f $", summary_price));
         label_costs.setText(String.format(Locale.UK, "%.2f $", summary_costs));
         label_profit.setText(String.format(Locale.UK, "%.2f $", summary_profit));        
-        txtField_pricePerHour.setText(String.format(Locale.UK, "%.2f", price/summary_buildTime*60));
+        txtField_pricePerHour.setText(String.format(Locale.UK, "%.2f", summary_price/((double) summary_buildTime/60)));
         
     }
     
@@ -287,10 +287,9 @@ public class NewOrderController implements Initializable {
                 
                 OrderItem item = selectedObjects.get(i);
                 
-                int buildTime = item.getObject_buildTime().get();
-                int quantity = item.getQuantity().get();
+                int buildTime = item.getObject_buildTime().get()*item.getQuantity().get();                
                 
-                double finalPrice = buildTime*quantity*pricePerMinute;
+                double finalPrice = buildTime*pricePerMinute;
                 
                 item.setPrice(new SimpleDoubleProperty(MngApi.round(finalPrice, 2)));
             }

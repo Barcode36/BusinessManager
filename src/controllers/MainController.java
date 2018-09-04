@@ -12,11 +12,13 @@ import classes.Material;
 import classes.MngApi;
 import classes.Object;
 import classes.Order;
+import classes.OrderItem;
 import classes.User;
 import controllers.customers.NewCustomerController;
 import controllers.materials.NewMaterialController;
 import controllers.objects.NewObjectController;
 import controllers.orders.NewOrderController;
+import controllers.select.SelectPrinterMaterialPriceController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
@@ -40,6 +42,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -671,7 +674,17 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-    /*****************************          INITIALIZE ORDERS TAB          *****************************/    
+    /*****************************          INITIALIZE ORDERS TAB          *****************************/ 
+        tv_orders.setRowFactory( tv -> {
+            TableRow<Order> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                    btn_editOrder.fire();
+                }
+            });
+            return row;
+        });
+    
         tv_orders.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 calculateSelectedOrdersStatistics(tv_orders.getSelectionModel().getSelectedItems());
