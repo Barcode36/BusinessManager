@@ -56,7 +56,7 @@ public class NewCostController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         cost_btn_create.setOnAction((event) -> {
-            boolean isEmpty = MngApi.isTextFieldEmpty(cost_txtField_name, cost_txtField_quantity, cost_txtField_price, cost_txtField_shipping, cost_txtField_comment);
+            boolean isEmpty = MngApi.isTextFieldEmpty(cost_txtField_name, cost_txtField_quantity, cost_txtField_price, cost_txtField_shipping);
             
             if (isEmpty == true){
                 cost_label_info.setText("Fields cannot be empty.");

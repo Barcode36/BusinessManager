@@ -175,9 +175,6 @@ public class Customer  {
         this.customer_ordersPrice = customer_ordersPrice;
     }
 
-    
-
-
     public static List<Customer> getCustomers(User user){
             
         //Create list
@@ -274,7 +271,13 @@ public class Customer  {
         
         return customersList;
     }
-    
+
+    public static String[] getCustomerStats(int customer_id){
+        String[] statistics;
+        
+        
+        return statistics;
+    }
     
     private static int getOrderCount(SimpleIntegerProperty id, User user) {
         int orderCount = 0;

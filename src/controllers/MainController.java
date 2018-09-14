@@ -318,8 +318,21 @@ public class MainController implements Initializable {
     @FXML
     private Button customer_btn_new;
     
+    @FXML
+    private Label label_customers_custCount, label_customers_selectedOrders, label_customers_selectedItems, label_customers_selectedPrice, label_customers_selectedCosts, label_customers_selectedWeight, label_customers_selectedSupportWeight, label_customers_selectedBuildTime, label_customers_selectedPricePerHour;
+    
     
     /*****************************          CUSTOMERS - METHODS         *****************************/
+    
+    private void calculateCustomersStatistic(){
+        
+        ObservableList<Customer> customers = tv_customers.getItems();
+        
+        int total_customers = customers.size();        
+        label_customers_custCount.setText(String.valueOf(total_customers));
+        
+        
+    }
     
     public void refreshCustomersTable(User user) {
         //Create list of orders
