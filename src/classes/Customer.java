@@ -273,7 +273,12 @@ public class Customer  {
     }
 
     public static String[] getCustomerStats(int customer_id){
-        String[] statistics;
+        String[] statistics = null;
+        
+        String orders = null, items = null, price = null, costs = null, weight = null, supports = null, time = null, perHour = null;
+        
+        
+        statistics[0] = orders;
         
         
         return statistics;
