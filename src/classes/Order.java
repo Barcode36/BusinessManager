@@ -164,7 +164,9 @@ public class Order {
         
         //Create query
         String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
-                
+        //String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment, Orders.OrderCosts,Orders.OrderWeight,Orders.OrderSupportWeight,Orders.OrderBuildTime FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
+
+        
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
         String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
@@ -209,13 +211,19 @@ public class Order {
                 customer_id = new SimpleIntegerProperty(rs.getInt("CustomerID"));
                 
                 totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(id, user));
+                //totalQuantity = new SimpleIntegerProperty(rs.getInt("OrderQuantity"));
                 totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
+                //totalBuildTime = new SimpleIntegerProperty(rs.getInt("OrderBuildTime"));
                 buildTime_formated = MngApi.convertToHours(totalBuildTime.get());
                 
                 totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
+                //totalCosts = new SimpleDoubleProperty(rs.getInt("OrderCosts"));
                 totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
+                //totalPrice = new SimpleDoubleProperty(rs.getInt("OrderPrice"));
                 totalWeight = new SimpleDoubleProperty(getTotalWeight(id, user));
+                //totalWeight = new SimpleDoubleProperty(rs.getInt("OrderWeight"));
                 totalSupportWeight = new SimpleDoubleProperty(getTotalSupportWeight(id, user));
+                //totalSupportWeight = new SimpleDoubleProperty(rs.getInt("OrderSupportWeight"));a
                 
                 Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
                 
@@ -386,6 +394,7 @@ public class Order {
         
         //Create query
         String query = "SELECT SUM((Materials.MaterialPrice + Materials.MaterialShipping)/MaterialWeights.WeightValue*OrderItems.ItemWeight) AS 'Costs' FROM OrderItems JOIN Materials ON OrderItems.ItemMaterialID = Materials.MaterialID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID WHERE OrderItems.OrderID=" + order_id.get();
+        //String query = "SELECT OrderCosts FROM Orders WHERE OrderId=" + order_id.get();
         
         //Create list
         List<Order> orderList = new ArrayList<>();
@@ -420,6 +429,7 @@ public class Order {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                itemCosts = rs.getDouble("Costs");
+               //itemCosts = rs.getDouble("OrderCosts"); 
             }
 
             rs.close();
@@ -640,7 +650,7 @@ public class Order {
     
     public static void insertNewOrder(Order order, User user){
         
-        String updateQuery = "INSERT INTO Orders VALUES (" + order.getOrder_id().get() + "," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "')";
+        String updateQuery = "INSERT INTO Orders VALUES (" + order.getOrder_id().get() + "," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "'," + order.getOrder_costs().get() + "," + order.getOrder_weighht().get() + "," + order.getOrder_support_weight().get() + "," + order.getOrder_buildTime().get() + ")";
         System.out.println(updateQuery);
         MngApi.performUpdate(updateQuery, user);                
         

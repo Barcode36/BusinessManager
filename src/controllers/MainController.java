@@ -12,13 +12,11 @@ import classes.Material;
 import classes.MngApi;
 import classes.Object;
 import classes.Order;
-import classes.OrderItem;
 import classes.User;
 import controllers.customers.NewCustomerController;
 import controllers.materials.NewMaterialController;
 import controllers.objects.NewObjectController;
 import controllers.orders.NewOrderController;
-import controllers.select.SelectPrinterMaterialPriceController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
@@ -337,6 +335,7 @@ public class MainController implements Initializable {
     public void refreshCustomersTable(User user) {
         //Create list of orders
         ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(user));
+        
         
         //set cell value factory for columns by type
         // customer_col_company, customer_col_comment;

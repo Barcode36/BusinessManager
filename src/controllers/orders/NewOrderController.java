@@ -366,9 +366,9 @@ public class NewOrderController implements Initializable {
             Order newOrder;            
             SimpleIntegerProperty order_id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
             
-            SimpleStringProperty status, comment, dateCreated, dueDate;    
-            SimpleIntegerProperty customer_id, totalQuantity;
-            SimpleDoubleProperty totalPrice;
+            SimpleStringProperty status, comment, dateCreated, dueDate, totalBuildTimeFormatted;    
+            SimpleIntegerProperty customer_id, totalQuantity, totalBuildTime;
+            SimpleDoubleProperty totalPrice, totalCosts, totalWeight, totalSupportWeight;
             
             RadioButton soldStatus = (RadioButton)toggleGroup_status.getSelectedToggle();            
             status = new SimpleStringProperty(soldStatus.getText());
@@ -376,15 +376,25 @@ public class NewOrderController implements Initializable {
             comment = new SimpleStringProperty(txtField_comment.getText());
             dateCreated = new SimpleStringProperty(datePicker_dateCreated.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
             dueDate = new SimpleStringProperty(datePicker_dueDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            
-            //String[] customerID = txtField_customer.getText().split(";");
+            totalBuildTimeFormatted = new SimpleStringProperty(label_buildTime.getText());
+                        
             customer_id = new SimpleIntegerProperty(Integer.parseInt(txtField_customer.getText().split(";")[0]));
             totalQuantity = new SimpleIntegerProperty(Integer.parseInt(label_quantity.getText()));
+            totalBuildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(label_buildTime.getText()));
             
             String[] totalPriceFormatted = label_price.getText().split(" ");
             totalPrice = new SimpleDoubleProperty(Double.parseDouble(totalPriceFormatted[0]));
             
-            newOrder = new Order(null, status, comment, dateCreated, dueDate, null, order_id, customer_id, totalQuantity, null, null, totalPrice, null, null);
+            String[] totalCostsFormatted = label_costs.getText().split(" ");
+            totalCosts = new SimpleDoubleProperty(Double.parseDouble(totalCostsFormatted[0]));
+            
+            String[] totalWeightFormatted = label_weight.getText().split(" ");
+            totalWeight = new SimpleDoubleProperty(Double.parseDouble(totalWeightFormatted[0]));
+            
+            String[] totalSupportWeightFormatted = label_supportWeight.getText().split(" ");
+            totalSupportWeight = new SimpleDoubleProperty(Double.parseDouble(totalSupportWeightFormatted[0]));
+            
+            newOrder = new Order(null, status, comment, dateCreated, dueDate, totalBuildTimeFormatted, order_id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
             
             //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
             //They are basicaly mulitple insert querries in a row separated by ";"

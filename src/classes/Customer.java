@@ -272,14 +272,22 @@ public class Customer  {
         return customersList;
     }
 
-    public static String[] getCustomerStats(int customer_id){
+    public static String[] getCustomerStats(int customer_id, User user){
         String[] statistics = null;
         
-        String orders = null, items = null, price = null, costs = null, weight = null, supports = null, time = null, perHour = null;
-        
+        String orders = MngApi.performStringQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user);
+        String items = MngApi.performStringQuery("SELECT SUM(Orderuantity) FROM Orders WHERE CustomerID=" + customer_id, user);
+        String price = MngApi.performStringQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, user); 
+        String costs = MngApi.performStringQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, user); 
+        String weight = MngApi.performStringQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
+        String supports = MngApi.performStringQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
         
         statistics[0] = orders;
-        
+        statistics[1] = items;
+        statistics[2] = price;
+        statistics[3] = costs;
+        statistics[4] = weight;
+        statistics[5] = supports;
         
         return statistics;
     }
