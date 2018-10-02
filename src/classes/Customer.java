@@ -276,7 +276,7 @@ public class Customer  {
         String[] statistics = null;
         
         String orders = MngApi.performStringQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user);
-        String items = MngApi.performStringQuery("SELECT SUM(Orderuantity) FROM Orders WHERE CustomerID=" + customer_id, user);
+        String items = MngApi.performStringQuery("SELECT SUM(OrderQantity) FROM Orders WHERE CustomerID=" + customer_id, user);
         String price = MngApi.performStringQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, user); 
         String costs = MngApi.performStringQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, user); 
         String weight = MngApi.performStringQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
