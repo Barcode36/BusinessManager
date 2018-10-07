@@ -163,8 +163,8 @@ public class Order {
         List<Order> orderList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
-        //String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment, Orders.OrderCosts,Orders.OrderWeight,Orders.OrderSupportWeight,Orders.OrderBuildTime FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
+        //String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
+        String query = "SELECT Orders.OrderID, Orders.OrderQuantity, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment, Orders.OrderCosts,Orders.OrderWeight,Orders.OrderSupportWeight,Orders.OrderBuildTime FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
 
         
         // JDBC driver name and database URL
@@ -210,20 +210,20 @@ public class Order {
                 id = new SimpleIntegerProperty(rs.getInt("OrderID"));
                 customer_id = new SimpleIntegerProperty(rs.getInt("CustomerID"));
                 
-                totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(id, user));
-                //totalQuantity = new SimpleIntegerProperty(rs.getInt("OrderQuantity"));
-                totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
-                //totalBuildTime = new SimpleIntegerProperty(rs.getInt("OrderBuildTime"));
+                //totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(id, user));
+                totalQuantity = new SimpleIntegerProperty(rs.getInt("OrderQuantity"));
+                //totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
+                totalBuildTime = new SimpleIntegerProperty(rs.getInt("OrderBuildTime"));
                 buildTime_formated = MngApi.convertToHours(totalBuildTime.get());
                 
-                totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
-                //totalCosts = new SimpleDoubleProperty(rs.getInt("OrderCosts"));
-                totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
-                //totalPrice = new SimpleDoubleProperty(rs.getInt("OrderPrice"));
-                totalWeight = new SimpleDoubleProperty(getTotalWeight(id, user));
-                //totalWeight = new SimpleDoubleProperty(rs.getInt("OrderWeight"));
-                totalSupportWeight = new SimpleDoubleProperty(getTotalSupportWeight(id, user));
-                //totalSupportWeight = new SimpleDoubleProperty(rs.getInt("OrderSupportWeight"));a
+                //totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
+                totalCosts = new SimpleDoubleProperty(rs.getInt("OrderCosts"));
+                //totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
+                totalPrice = new SimpleDoubleProperty(rs.getInt("OrderPrice"));
+                //totalWeight = new SimpleDoubleProperty(getTotalWeight(id, user));
+                totalWeight = new SimpleDoubleProperty(rs.getInt("OrderWeight"));
+                //totalSupportWeight = new SimpleDoubleProperty(getTotalSupportWeight(id, user));
+                totalSupportWeight = new SimpleDoubleProperty(rs.getInt("OrderSupportWeight"));
                 
                 Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
                 

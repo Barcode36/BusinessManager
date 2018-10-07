@@ -183,7 +183,7 @@ public class MainController implements Initializable {
         label_order_TotalItemsPrinted.setText(String.valueOf(total_itemsSold));        
     }
     
-    public void calculateSelectedOrdersStatistics(ObservableList<Order> selectedOrders){
+    private void calculateSelectedOrdersStatistics(ObservableList<Order> selectedOrders){
                
         int selected_orders, selected_itemsSold = 0, selected_buildTime = 0;        
         double  selected_weight = 0, selected_supportWeight = 0, selected_price = 0, selected_cost = 0;
@@ -317,18 +317,64 @@ public class MainController implements Initializable {
     private Button customer_btn_new;
     
     @FXML
-    private Label label_customers_custCount, label_customers_selectedOrders, label_customers_selectedItems, label_customers_selectedPrice, label_customers_selectedCosts, label_customers_selectedWeight, label_customers_selectedSupportWeight, label_customers_selectedBuildTime, label_customers_selectedPricePerHour;
+    private Label label_customer_selected, label_customers_custCount, label_customers_selectedOrders, label_customers_selectedItems, label_customers_selectedPrice, label_customers_selectedCosts, label_customers_selectedWeight, label_customers_selectedSupportWeight, label_customers_selectedBuildTime, label_customers_selectedPricePerHour;
     
     
     /*****************************          CUSTOMERS - METHODS         *****************************/
     
-    private void calculateCustomersStatistic(){
+    private void calculateSelectedCustomersStatistics(ObservableList<Customer> selectedCustomers){
         
-        ObservableList<Customer> customers = tv_customers.getItems();
+        int orders = 0, items = 0, time = 0;
+        double price = 0.0, costs = 0.0, weight = 0.0, supports = 0.0, perHour;
         
-        int total_customers = customers.size();        
-        label_customers_custCount.setText(String.valueOf(total_customers));
+        label_customer_selected.setText(String.format("Selected(%d)", selectedCustomers.size()));
         
+        try {
+            for (int i = 0; i < selectedCustomers.size(); i++) {
+                
+                int customer_id = selectedCustomers.get(i).getCustomer_id().get();
+                Double[] statistics = Customer.getCustomerStats(customer_id, user);
+                
+                double d_orders = statistics[0];
+                double d_items = statistics[1];
+                double d_time = statistics[6];
+                
+                orders = (int) d_orders;
+                items = (int) d_items;
+                time = (int) d_time;
+                
+                orders += orders;
+                items += items;
+                price += statistics[2];
+                costs += statistics[3];
+                weight += statistics[4];
+                supports += statistics[5];
+                time += time;
+                            
+            }
+        
+            label_customers_selectedOrders.setText(String.format(Locale.US, "%d", orders));
+            label_customers_selectedItems.setText(String.format(Locale.US, "%d", items));
+            label_customers_selectedPrice.setText(String.format(Locale.US, "%.2f $", price));
+            label_customers_selectedCosts.setText(String.format(Locale.US, "%.2f $", costs));
+            label_customers_selectedWeight.setText(String.format(Locale.US, "%.2g $", weight));
+            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2g $", supports));
+            perHour = MngApi.round(price/time*60, 2);
+            label_customers_selectedBuildTime.setText(MngApi.convertToHours(time).get());        
+            label_customers_selectedPricePerHour.setText(String.format(Locale.US, "%.2f $/h", perHour));
+        
+        } catch (ArithmeticException | NumberFormatException e) {
+            
+            label_customers_selectedOrders.setText(String.format(Locale.US, "%d", orders));
+            label_customers_selectedItems.setText(String.format(Locale.US, "%d", items));
+            label_customers_selectedPrice.setText(String.format(Locale.US, "%.2f $", price));
+            label_customers_selectedCosts.setText(String.format(Locale.US, "%.2f $", costs));
+            label_customers_selectedWeight.setText(String.format(Locale.US, "%.2g $", weight));
+            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2g $", supports));            
+            label_customers_selectedBuildTime.setText("0");        
+            label_customers_selectedPricePerHour.setText(String.format(Locale.US, "0 $/h"));
+            
+        }
         
     }
     
@@ -377,9 +423,13 @@ public class MainController implements Initializable {
         
         customer_col_ordersPrice.setStyle("-fx-alignment: CENTER;");
         
-        
+        tv_customers.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //set list to display in table
         tv_customers.setItems(customerList);
+        
+        
+        int total_customers = customerList.size();        
+        label_customers_custCount.setText(String.valueOf(total_customers));
     }
     
     // Create the service
@@ -687,6 +737,16 @@ public class MainController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
     /*****************************          INITIALIZE ORDERS TAB          *****************************/ 
+        
+        tab_orders.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event t) {
+                if (tab_orders.isSelected()) {                   
+                        runService(service_refreshOrders);                  
+                }
+            }
+        });
+        
         tv_orders.setRowFactory( tv -> {
             TableRow<Order> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -700,16 +760,6 @@ public class MainController implements Initializable {
         tv_orders.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 calculateSelectedOrdersStatistics(tv_orders.getSelectionModel().getSelectedItems());
-            }
-        });
-    
-    
-        tab_orders.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event t) {
-                if (tab_orders.isSelected()) {                   
-                        runService(service_refreshOrders);                  
-                }
             }
         });
         
@@ -788,6 +838,22 @@ public class MainController implements Initializable {
                 if (tab_customers.isSelected()) {
                     runService(service_refreshCustomers);
                 }
+            }
+        });
+    
+//    tv_orders.setRowFactory( tv -> {
+//            TableRow<Order> row = new TableRow<>();
+//            row.setOnMouseClicked(event -> {
+//                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+//                    btn_editOrder.fire();
+//                }
+//            });
+//            return row;
+//        });
+    
+        tv_customers.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                calculateSelectedCustomersStatistics(tv_customers.getSelectionModel().getSelectedItems());
             }
         });
     

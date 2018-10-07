@@ -402,7 +402,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_Selected1" text="Selected (0)" textFill="BLUE" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="6">
+                                    <Label fx:id="label_customer_selected" text="Selected (0)" textFill="BLUE" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="6">
                                        <font>
                                           <Font name="System Bold" size="20.0" />
                                        </font>
@@ -415,7 +415,7 @@
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Total Orders:" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
+                                    <Label alignment="CENTER" text="Total Orders:" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
@@ -425,7 +425,7 @@
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_customers_selectedOrders" text="-" GridPane.columnSpan="2" GridPane.rowIndex="7">
+                                    <Label fx:id="label_customers_selectedOrders" contentDisplay="RIGHT" text="-" GridPane.columnSpan="2" GridPane.rowIndex="7">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -493,7 +493,7 @@
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_customers_selectedCosts" text="-" GridPane.rowIndex="10">
+                                    <Label fx:id="label_customers_selectedCosts" text="-" GridPane.columnSpan="2" GridPane.rowIndex="10">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -506,7 +506,7 @@
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_customers_selectedPricePerHour" text="-" GridPane.rowIndex="14">
+                                    <Label fx:id="label_customers_selectedPricePerHour" text="-" GridPane.columnSpan="2" GridPane.rowIndex="14">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>

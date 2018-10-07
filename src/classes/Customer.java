@@ -272,22 +272,27 @@ public class Customer  {
         return customersList;
     }
 
-    public static String[] getCustomerStats(int customer_id, User user){
-        String[] statistics = null;
+    public static Double[] getCustomerStats(int customer_id, User user){
+        Double[] statistics = new Double[7];
         
-        String orders = MngApi.performStringQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user);
-        String items = MngApi.performStringQuery("SELECT SUM(OrderQantity) FROM Orders WHERE CustomerID=" + customer_id, user);
-        String price = MngApi.performStringQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, user); 
-        String costs = MngApi.performStringQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, user); 
-        String weight = MngApi.performStringQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
-        String supports = MngApi.performStringQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
         
-        statistics[0] = orders;
-        statistics[1] = items;
-        statistics[2] = price;
-        statistics[3] = costs;
-        statistics[4] = weight;
-        statistics[5] = supports;
+        if (MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user) == 0){
+            statistics[0] = 0.0;
+            statistics[1] = 0.0;
+            statistics[2] = 0.0;
+            statistics[3] = 0.0;
+            statistics[4] = 0.0;
+            statistics[5] = 0.0;
+            statistics[6] = 0.0;
+        } else {
+            statistics[0] = MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user);
+            statistics[1] = MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, user);
+            statistics[2] = MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, user);
+            statistics[3] = MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, user); 
+            statistics[4] = MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
+            statistics[5] = MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
+            statistics[6] = MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, user);
+        }        
         
         return statistics;
     }
