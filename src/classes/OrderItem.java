@@ -25,10 +25,11 @@ import javafx.collections.ObservableList;
 public class OrderItem {
     
     private SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
-    private SimpleIntegerProperty order_id, object_id, object_buildTime, quantity, printer_id, material_id;
+    private SimpleIntegerProperty orderItem_id, order_id, object_id, object_buildTime, quantity, printer_id, material_id;
     private SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
 
-    public OrderItem(SimpleStringProperty object_name, SimpleStringProperty object_buildTime_formated, SimpleStringProperty printer_name, SimpleStringProperty material_type, SimpleStringProperty material_color, SimpleIntegerProperty order_id, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty quantity, SimpleIntegerProperty printer_id, SimpleIntegerProperty material_id, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty price, SimpleDoubleProperty costs) {
+    public OrderItem(SimpleIntegerProperty orderItem_id, SimpleStringProperty object_name, SimpleStringProperty object_buildTime_formated, SimpleStringProperty printer_name, SimpleStringProperty material_type, SimpleStringProperty material_color, SimpleIntegerProperty order_id, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty quantity, SimpleIntegerProperty printer_id, SimpleIntegerProperty material_id, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty price, SimpleDoubleProperty costs) {
+        this.orderItem_id = orderItem_id;
         this.object_name = object_name;
         this.object_buildTime_formated = object_buildTime_formated;
         this.printer_name = printer_name;
@@ -46,6 +47,14 @@ public class OrderItem {
         this.costs = costs;
     }
 
+    public SimpleIntegerProperty getOrderItem_id() {
+        return orderItem_id;
+    }
+
+    public void setOrderItem_id(SimpleIntegerProperty orderItem_id) {
+        this.orderItem_id = orderItem_id;
+    }
+    
     public SimpleIntegerProperty getOrder_id() {
         return order_id;
     }
@@ -185,7 +194,7 @@ public class OrderItem {
         List<OrderItem> itemList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.ItemQuantity, Printers.PrinterID, Printers.PrinterName, OrderItems.ItemBuildTime, OrderItems.ItemMaterialID, MaterialTypes.MaterialType, MaterialColors.ColorName, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemPrice FROM OrderItems JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialTypes ON Materials.MaterialTypeID = MaterialTypes.MaterialTypeID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
+        String query = "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.ItemQuantity, Printers.PrinterID, Printers.PrinterName, OrderItems.OrderItemID, OrderItems.ItemBuildTime, OrderItems.ItemMaterialID, MaterialTypes.MaterialType, MaterialColors.ColorName, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemPrice FROM OrderItems JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialTypes ON Materials.MaterialTypeID = MaterialTypes.MaterialTypeID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -217,7 +226,7 @@ public class OrderItem {
             while(rs.next()){
                 
                 SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
-                SimpleIntegerProperty object_id, object_buildTime, quantity, printer_id, material_id;
+                SimpleIntegerProperty orderItem_id, object_id, object_buildTime, quantity, printer_id, material_id;
                 SimpleDoubleProperty object_supportWeight, object_weight, price, item_costs;
                 
                 object_name = new SimpleStringProperty(rs.getString("ObjectName"));                
@@ -225,6 +234,7 @@ public class OrderItem {
                 material_type = new SimpleStringProperty(rs.getString("MaterialType"));
                 material_color = new SimpleStringProperty(rs.getString("ColorName"));
                 
+                orderItem_id = new SimpleIntegerProperty(rs.getInt("OrderItemID"));
                 object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
                 object_buildTime = new SimpleIntegerProperty(rs.getInt("ItemBuildTime"));
                     object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
@@ -253,7 +263,7 @@ public class OrderItem {
                     costs = price_per_gram*total_weight;                                
                     item_costs = new SimpleDoubleProperty(costs);
                     
-                    OrderItem item = new OrderItem(object_name, object_buildTime_formated, printer_name, material_type, material_color, printer_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, item_costs);
+                    OrderItem item = new OrderItem(orderItem_id, object_name, object_buildTime_formated, printer_name, material_type, material_color, printer_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, item_costs);
                
                 itemList.add(item);
             }

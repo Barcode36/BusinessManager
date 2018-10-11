@@ -11,6 +11,7 @@ import classes.SimpleTableObject;
 import classes.User;
 import controllers.MainController;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -35,12 +36,12 @@ import javafx.util.StringConverter;
  */
 public class NewCustomerController implements Initializable {
 
-    private User user;
-    
-    private MainController mainController;   
+    private User user;    
+    private MainController mainController; 
+    private String mode;
     
     @FXML
-    private Label customer_label_id, customer_label_info;
+    private Label customer_label_id, customer_label_info, customer_label_title;
     
     @FXML
     private TextField  customer_txtField_firstName, customer_txtField_lastName, customer_txtField_phone, customer_txtField_mail, customer_txtField_address, customer_txtField_city, customer_txtField_zipCode, customer_txtField_comment; 
@@ -58,7 +59,23 @@ public class NewCustomerController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
         customer_btn_create.setOnAction((event) -> {
-            boolean isEmpty = MngApi.isTextFieldEmpty(customer_txtField_firstName, customer_txtField_lastName);
+            switch(mode){
+                case "create":
+                    createCustomer();
+                    return;
+                case "edit":
+                    editCustomer();
+            }
+            
+        });
+        
+        customer_btn_cancel.setOnAction((event) -> {            
+            MngApi.closeWindow(customer_btn_cancel);
+        });
+    }    
+    
+    private void createCustomer(){
+        boolean isEmpty = MngApi.isTextFieldEmpty(customer_txtField_firstName, customer_txtField_lastName);
             
             if (isEmpty == true || MngApi.isComboBoxEmpty(customer_comboBox_country, customer_comboBox_company)){
                 customer_label_info.setText("Fields cannot be empty.");
@@ -103,16 +120,60 @@ public class NewCustomerController implements Initializable {
                 customer_label_info.setText("Wrong number format, please check your fields.");
                 customer_label_info.setTextFill(Color.web("#ff0000"));
             }
+    }
+    
+    private void editCustomer(){
+        boolean isEmpty = MngApi.isTextFieldEmpty(customer_txtField_firstName, customer_txtField_lastName);
             
-        });
-        
-        customer_btn_cancel.setOnAction((event) -> {            
-            MngApi.closeWindow(customer_btn_cancel);
-        });
-    }    
+            if (isEmpty == true || MngApi.isComboBoxEmpty(customer_comboBox_country, customer_comboBox_company)){
+                customer_label_info.setText("Fields cannot be empty.");
+                customer_label_info.setTextFill(Color.web("#ff0000"));
+                return;
+            }
+            
+            SimpleStringProperty customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment;
+            SimpleIntegerProperty customer_id, customer_id_company, customer_id_country, customer_orderCount;
+            SimpleDoubleProperty customer_ordersPrice;
+            
+            try {
+                
+                customer_lastName = new SimpleStringProperty(customer_txtField_lastName.getText());
+                customer_firstName = new SimpleStringProperty(customer_txtField_firstName.getText());
+                customer_dateCreated = new SimpleStringProperty(customer_datePicker_dateCreated.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                customer_comment = new SimpleStringProperty(customer_txtField_comment.getText());
+                customer_mail = new SimpleStringProperty(customer_txtField_mail.getText());
+                customer_phone = new SimpleStringProperty(customer_txtField_phone.getText());                
+                customer_address = new SimpleStringProperty(customer_txtField_address.getText());
+                customer_city = new SimpleStringProperty(customer_txtField_city.getText());
+                customer_zipCode = new SimpleStringProperty(customer_txtField_zipCode.getText());
+                customer_country = null;
+                
+                customer_company = new SimpleStringProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getName().get());
+                
+                customer_id = new SimpleIntegerProperty(getCustomer_label_id_value());
+                customer_id_company = new SimpleIntegerProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getId().get());
+                customer_id_country = new SimpleIntegerProperty(customer_comboBox_country.getSelectionModel().getSelectedItem().getId().get());
+                
+                customer_orderCount = new SimpleIntegerProperty(0);
+                customer_ordersPrice = new SimpleDoubleProperty(0);                
+                
+                //Customer newCustomer = new Customer(customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment, customer_id, customer_id_company, customer_id_country, customer_orderCount, customer_ordersPrice);
+                
+                String updateQuery = "UPDATE Customers SET FirstName='" + customer_firstName.get() + "', LastName='" + customer_lastName.get() + "', DateCreated='" + customer_dateCreated.get() + "', Comment='" + customer_comment.get() + "', Phone='" + customer_phone.get() + "', Address='" +  customer_address.get() + "', City='" + customer_city.get() + "', Mail='" + customer_mail.get() + "', ZipCode='" + customer_zipCode.get() + "', CountryID=" + customer_id_country.get() + ", CompanyID=" + customer_id_company.get() + " WHERE CustomerID=" + customer_id.get();
+                
+                MngApi.performUpdate(updateQuery, user);
+            
+            MngApi.closeWindow(customer_btn_create);            
+            mainController.runService(mainController.getService_refreshCustomers());
+            
+            } catch (NumberFormatException e) {
+                customer_label_info.setText("Wrong number format, please check your fields.");
+                customer_label_info.setTextFill(Color.web("#ff0000"));
+            }
+    }
     
     public void setComboBoxes(){
-        
+                
         ObservableList<SimpleTableObject> countries = FXCollections.observableArrayList(Customer.getCountries(user));
         ObservableList<SimpleTableObject> companies = FXCollections.observableArrayList(Customer.getCompanies(user));
         
@@ -148,7 +209,42 @@ public class NewCustomerController implements Initializable {
         customer_comboBox_country.setVisibleRowCount(5);
         customer_comboBox_company.setVisibleRowCount(5);
         
-    }    
+    }
+
+    public void setUpdateCustomerFields(ObservableList<Customer> customers){
+        mode = "edit";
+        
+        setComboBoxes();
+        Customer customer = customers.get(0);
+        
+        customer_btn_create.setText("Update");
+        //customer_btn_create.setDisable(false);
+        
+	LocalDate dateCerated = LocalDate.parse(customer.getCustomer_dateCreated().get());        
+        customer_datePicker_dateCreated.setValue(dateCerated);
+        
+        
+        customer_label_id.setText(String.valueOf(customer.getCustomer_id().get()));
+        customer_txtField_firstName.setText(customer.getCustomer_firstName().get());        
+        customer_txtField_lastName.setText(customer.getCustomer_lastName().get());     
+        customer_txtField_phone.setText(customer.getCustomer_phone().get());
+        customer_txtField_mail.setText(customer.getCustomer_mail().get());
+        customer_txtField_address.setText(customer.getCustomer_address().get());
+        customer_txtField_city.setText(customer.getCustomer_city().get());
+        customer_txtField_zipCode.setText(customer.getCustomer_zipCode().get());
+        customer_txtField_comment.setText(customer.getCustomer_comment().get());
+        
+        SimpleTableObject company = new SimpleTableObject(customer.getCustomer_id_company(), customer.getCustomer_company());
+        customer_comboBox_company.setValue(company);
+        
+        SimpleTableObject country = new SimpleTableObject(customer.getCustomer_id_country(), customer.getCustomer_country());
+        customer_comboBox_country.setValue(country);
+        
+        customer_label_title.setText("Edit Customer");        
+        customer_label_info.setText("Edit fields");
+        customer_label_info.setTextFill(Color.web("#ff0000"));
+        
+    }
     
     public DatePicker getCustomer_datePicker_dateCreated() {
         return this.customer_datePicker_dateCreated;
@@ -169,5 +265,11 @@ public class NewCustomerController implements Initializable {
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+    
+    
     
 }

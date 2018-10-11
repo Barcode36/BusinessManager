@@ -145,7 +145,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                     weight = Double.parseDouble(txtField_weight.getText());
                     supportWeight = Double.parseDouble(txtField_supportWeight.getText());
                 
-                    String buildTime_formatted = txtField_hours.getText() + "," + txtField_minutes.getText();
+                    String buildTime_formatted = txtField_hours.getText() + " " + txtField_minutes.getText();
                         buildTime = MngApi.convertToMinutes(buildTime_formatted);
                 
                     String[] printer = comboBox_printer.getValue().split(";");

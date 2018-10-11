@@ -72,7 +72,7 @@ public class NewObjectController implements Initializable {
                 object_id = new SimpleIntegerProperty(getObject_label_id_value());
 
             
-                object_buildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(object_txtField_hours.getText() + "," + object_txtField_minutes.getText()));
+                object_buildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(object_txtField_hours.getText() + " " + object_txtField_minutes.getText()));
                 object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
                
                 object_soldCount = new SimpleIntegerProperty(0);

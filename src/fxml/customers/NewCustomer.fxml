@@ -34,7 +34,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="New Customer" GridPane.columnSpan="2" GridPane.halignment="CENTER">
+            <Label fx:id="customer_label_title" text="New Customer" GridPane.columnSpan="2" GridPane.halignment="CENTER">
                <font>
                   <Font name="System Bold" size="22.0" />
                </font>

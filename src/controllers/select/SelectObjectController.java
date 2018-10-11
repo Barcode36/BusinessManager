@@ -120,7 +120,7 @@ public class SelectObjectController implements Initializable {
             listObject = selectedObjects.get(i);
             
             SimpleStringProperty object_name, object_buildTime_formated, printer_name, material_type, material_color;
-            SimpleIntegerProperty order_id, object_id, object_buildTime, quantity, printer_id, material_id;
+            SimpleIntegerProperty orderItem_id, order_id, object_id, object_buildTime, quantity, printer_id, material_id;
             SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
             
             object_name = listObject.getObject_name();
@@ -129,6 +129,7 @@ public class SelectObjectController implements Initializable {
             material_type = new SimpleStringProperty(" ");
             material_color = new SimpleStringProperty(" ");
             
+            orderItem_id = new SimpleIntegerProperty();
             order_id = new SimpleIntegerProperty();
             object_id = listObject.getObject_id();
             object_buildTime = listObject.getObject_buildTime();
@@ -142,7 +143,7 @@ public class SelectObjectController implements Initializable {
             price = new SimpleDoubleProperty();
             costs = new SimpleDoubleProperty();
             
-            OrderItem orderItem = new OrderItem(object_name, object_buildTime_formated, printer_name, material_type, material_color, order_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
+            OrderItem orderItem = new OrderItem(orderItem_id, object_name, object_buildTime_formated, printer_name, material_type, material_color, order_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
             
             orderItems.add(orderItem);
             

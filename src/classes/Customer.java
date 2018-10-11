@@ -285,13 +285,13 @@ public class Customer  {
             statistics[5] = 0.0;
             statistics[6] = 0.0;
         } else {
-            statistics[0] = MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user);
-            statistics[1] = MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, user);
-            statistics[2] = MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, user);
-            statistics[3] = MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, user); 
-            statistics[4] = MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
-            statistics[5] = MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, user);
-            statistics[6] = MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, user);
+            statistics[0] = MngApi.round(MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
+            statistics[1] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
+            statistics[2] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
+            statistics[3] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, user), 2); 
+            statistics[4] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
+            statistics[5] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
+            statistics[6] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
         }        
         
         return statistics;

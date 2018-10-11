@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -130,7 +131,7 @@ public class MainController implements Initializable {
     
     
     
-    public void calculateOrderStatistics(){
+    private void calculateOrderStatistics(){
         
         int sold_orders = 0, notSold_orders = 0, total_orders, total_itemsSold = 0, total_buildTime = 0;        
         double sold_price = 0, sold_costs = 0, notSold_price = 0, notSold_costs = 0, total_costs = 0, total_price = 0, total_weight = 0, total_supportWeight = 0;
@@ -268,11 +269,12 @@ public class MainController implements Initializable {
         protected Task<Void> createTask(){
             Task<Void> task_refreshCostsTable = new Task<Void>() {
                 @Override
-                public Void call() throws Exception {
-                    updateProgress(-1, 100);
-                    refreshOrdersTable(user);
+                public Void call() throws Exception {                                        
                     Platform.runLater(() -> {
+                        updateProgress(-1, 100);
+                        refreshOrdersTable(user);
                         calculateOrderStatistics();
+                        
                     });
                     return null;
                 }        
@@ -314,7 +316,7 @@ public class MainController implements Initializable {
     private TableColumn<Customer, Double> customer_col_ordersPrice;
     
     @FXML
-    private Button customer_btn_new;
+    private Button customer_btn_new,customer_btn_refresh, customer_btn_showDetails, customer_btn_edit;
     
     @FXML
     private Label label_customer_selected, label_customers_custCount, label_customers_selectedOrders, label_customers_selectedItems, label_customers_selectedPrice, label_customers_selectedCosts, label_customers_selectedWeight, label_customers_selectedSupportWeight, label_customers_selectedBuildTime, label_customers_selectedPricePerHour;
@@ -339,17 +341,17 @@ public class MainController implements Initializable {
                 double d_items = statistics[1];
                 double d_time = statistics[6];
                 
-                orders = (int) d_orders;
-                items = (int) d_items;
-                time = (int) d_time;
+                //orders = (int) d_orders;
+                //items = (int) d_items;                
+                //time = (int) d_time;
                 
-                orders += orders;
-                items += items;
+                orders += (int) d_orders;
+                items += (int) d_items;                
                 price += statistics[2];
                 costs += statistics[3];
                 weight += statistics[4];
                 supports += statistics[5];
-                time += time;
+                time += (int) d_time;
                             
             }
         
@@ -357,8 +359,8 @@ public class MainController implements Initializable {
             label_customers_selectedItems.setText(String.format(Locale.US, "%d", items));
             label_customers_selectedPrice.setText(String.format(Locale.US, "%.2f $", price));
             label_customers_selectedCosts.setText(String.format(Locale.US, "%.2f $", costs));
-            label_customers_selectedWeight.setText(String.format(Locale.US, "%.2g $", weight));
-            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2g $", supports));
+            label_customers_selectedWeight.setText(String.format(Locale.US, "%.2f g", weight));
+            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2f g", supports));
             perHour = MngApi.round(price/time*60, 2);
             label_customers_selectedBuildTime.setText(MngApi.convertToHours(time).get());        
             label_customers_selectedPricePerHour.setText(String.format(Locale.US, "%.2f $/h", perHour));
@@ -430,6 +432,12 @@ public class MainController implements Initializable {
         
         int total_customers = customerList.size();        
         label_customers_custCount.setText(String.valueOf(total_customers));
+    }
+    
+    private void showCustomerDetails(ObservableList<Customer> selectedCustomer){
+        Customer customer = selectedCustomer.get(0);
+        
+        
     }
     
     // Create the service
@@ -521,8 +529,7 @@ public class MainController implements Initializable {
         protected Task<Void> createTask(){
             Task<Void> task_refreshCostsTable = new Task<Void>() {            
                 @Override
-                public Void call() throws Exception {            
-                    
+                public Void call() throws Exception {                     
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
                         refreshObjectsTable(user);
@@ -756,11 +763,9 @@ public class MainController implements Initializable {
             });
             return row;
         });
-    
-        tv_orders.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                calculateSelectedOrdersStatistics(tv_orders.getSelectionModel().getSelectedItems());
-            }
+            
+        tv_orders.getSelectionModel().getSelectedItems().addListener((Change<? extends Order> c) -> {        
+            calculateSelectedOrdersStatistics(tv_orders.getSelectionModel().getSelectedItems());
         });
         
         btn_refresh_orders.setOnAction((event) -> {            
@@ -801,7 +806,7 @@ public class MainController implements Initializable {
             NewOrderController ctrl = fxmlLoader.getController();
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("New Order");
+            stage.setTitle("Edit Order");
            
             stage.setScene(new Scene(root1));
             stage.setResizable(false);
@@ -841,21 +846,27 @@ public class MainController implements Initializable {
             }
         });
     
-//    tv_orders.setRowFactory( tv -> {
-//            TableRow<Order> row = new TableRow<>();
-//            row.setOnMouseClicked(event -> {
-//                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-//                    btn_editOrder.fire();
-//                }
-//            });
-//            return row;
-//        });
+    customer_btn_refresh.setOnAction((event) -> {        
+        runService(service_refreshCustomers);        
+    });
     
-        tv_customers.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                calculateSelectedCustomersStatistics(tv_customers.getSelectionModel().getSelectedItems());
+    customer_btn_showDetails.setOnAction((event) -> {
+        showCustomerDetails(tv_customers.getSelectionModel().getSelectedItems());
+    });
+        
+    tv_customers.setRowFactory( tv -> {
+        TableRow<Customer> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                customer_btn_edit.fire();
             }
         });
+    return row;
+    });
+
+    tv_customers.getSelectionModel().getSelectedItems().addListener((Change<? extends Customer> c) -> {        
+        calculateSelectedCustomersStatistics(tv_customers.getSelectionModel().getSelectedItems());        
+    });
     
     customer_btn_new.setOnAction((event) -> {
         try{            
@@ -883,6 +894,30 @@ public class MainController implements Initializable {
             
         }
     });//end new cost button  setOnAction
+    
+    customer_btn_edit.setOnAction((event) -> {
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/customers/NewCustomer.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewCustomerController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Edit Customer");
+
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);            
+            ctrl.setUpdateCustomerFields(tv_customers.getSelectionModel().getSelectedItems());
+            stage.show();
+                        
+        }catch (IOException e){
+            
+        }        
+    });
     
     /*****************************          INITIALIZE OBJECTS TAB          *****************************/
     

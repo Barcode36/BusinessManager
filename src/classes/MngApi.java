@@ -103,12 +103,17 @@ public class MngApi {
         return newTime;
     }
     
-    public static int convertToMinutes(String time){
+    public static int convertToMinutes(String time){ 
         
+        String str1 = time.split(" ")[0], str2 = time.split(" ")[1];
         int newTime = 0;
         
-        int hours = Integer.parseInt(time.split(",")[0]);
-        int minutes = Integer.parseInt(time.split(",")[1]);
+        
+        str1 = str1.substring(0, str1.length() - 1);
+        str2 = str2.substring(0, str2.length() - 1);
+        
+        int hours = Integer.parseInt(str1);        
+        int minutes = Integer.parseInt(str2);
         
         newTime = hours*60 + minutes;
         

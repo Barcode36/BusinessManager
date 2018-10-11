@@ -380,6 +380,8 @@ public class NewOrderController implements Initializable {
                         
             customer_id = new SimpleIntegerProperty(Integer.parseInt(txtField_customer.getText().split(";")[0]));
             totalQuantity = new SimpleIntegerProperty(Integer.parseInt(label_quantity.getText()));
+            System.out.println(label_buildTime.getText());
+            System.out.println(MngApi.convertToMinutes(label_buildTime.getText()));
             totalBuildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(label_buildTime.getText()));
             
             String[] totalPriceFormatted = label_price.getText().split(" ");
@@ -420,6 +422,7 @@ public class NewOrderController implements Initializable {
         } catch (NumberFormatException e) {                
             label_info.setText("Wrong number format, please check your fields.");
             label_info.setTextFill(Color.web("#ff0000"));
+            e.printStackTrace();
             //e.printStackTrace();
         } catch (NullPointerException | IndexOutOfBoundsException e) {                
             label_info.setText("Insert some objects first.");
@@ -435,11 +438,7 @@ public class NewOrderController implements Initializable {
         String query = "DELETE FROM OrderItems WHERE OrderID=" + order_id;
         MngApi.performUpdate(query, user);
         query = "DELETE FROM Orders WHERE OrderID=" + order_id;        
-        MngApi.performUpdate(query, user);                
-        
-        label_info.setText("Order must contain objects.");
-        label_info.setTextFill(Color.web("#ff0000"));
-        //e.printStackTrace();        
+        MngApi.performUpdate(query, user);           
     }
    
     public void setSelectedCustomer(Customer selectedCustomer) {
@@ -500,8 +499,6 @@ public class NewOrderController implements Initializable {
         label_title.setText("Update Order");        
         label_info.setText("Edit fields");
         label_info.setTextFill(Color.web("#ff0000"));
-        
-        
         
     }
       
