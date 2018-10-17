@@ -246,7 +246,7 @@ public class MngApi {
         
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName() + "?allowMultiQueries=true";
 
         //  Database credentials
         String USER = user.getName();

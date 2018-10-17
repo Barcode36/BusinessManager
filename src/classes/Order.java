@@ -650,8 +650,37 @@ public class Order {
     
     public static void insertNewOrder(Order order, User user){
         
-        String updateQuery = "INSERT INTO Orders VALUES (" + order.getOrder_id().get() + "," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "'," + order.getOrder_costs().get() + "," + order.getOrder_weighht().get() + "," + order.getOrder_support_weight().get() + "," + order.getOrder_buildTime().get() + ")";
-        System.out.println(updateQuery);
+        //String updateQuery = "INSERT INTO Orders VALUES (" + order.getOrder_id().get() + "," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "'," + order.getOrder_costs().get() + "," + order.getOrder_weighht().get() + "," + order.getOrder_support_weight().get() + "," + order.getOrder_buildTime().get() + ")";        
+        
+        String updateQuery = "INSERT INTO Orders (OrderID,CustomerID,OrderPrice,OrderQuantity,DateCreated,OrderStatus,DueDate,Comment,OrderCosts,OrderWeight,OrderSupportWeight,OrderBuildTime) " +
+        "VALUES (" + 
+                order.getOrder_id().get() + "," + 
+                order.getOrder_customerID().get() + "," + 
+                order.getOrder_price().get() + "," + 
+                order.getOrder_quantity().get() + ",'" + 
+                order.getOrder_dateCreated().get() + "','" + 
+                order.getOrder_status().get() + "','" + 
+                order.getOrder_dueDate().get() + "','" + 
+                order.getOrder_comment().get() + "'," + 
+                order.getOrder_costs().get() + "," + 
+                order.getOrder_weighht().get() + "," + 
+                order.getOrder_support_weight().get() + "," + 
+                order.getOrder_buildTime().get() + 
+        ") " +
+        "ON DUPLICATE KEY UPDATE " +        
+                //"OrderID="+ order.getOrder_id().get() + 
+                "CustomerID=" + order.getOrder_customerID().get() + 
+                ",OrderPrice=" + order.getOrder_price().get() + 
+                ",OrderQuantity=" + order.getOrder_quantity().get() + 
+                ",DateCreated='" + order.getOrder_dateCreated().get() + 
+                "',OrderStatus='" + order.getOrder_status().get() + 
+                "',DueDate='" + order.getOrder_dueDate().get() + 
+                "',Comment='" + order.getOrder_comment().get() + 
+                "',OrderCosts=" + order.getOrder_costs().get() + 
+                ",OrderWeight=" + order.getOrder_weighht().get() + 
+                ",OrderSupportWeight=" + order.getOrder_support_weight().get() + 
+                ",OrderBuildTime=" + order.getOrder_buildTime().get();
+        
         MngApi.performUpdate(updateQuery, user);                
         
     }    

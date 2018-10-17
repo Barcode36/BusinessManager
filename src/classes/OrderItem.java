@@ -7,6 +7,7 @@ package classes;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
@@ -175,17 +176,224 @@ public class OrderItem {
         this.costs = costs;
     }
 
-    public static void insertNewOrderItem(OrderItem orderItem, User user){        
-        String updateQuery = "INSERT INTO OrderItems VALUES (null," + orderItem.getOrder_id().get() + "," + orderItem.getObject_id().get() + "," + orderItem.getMaterial_id().get() + "," + orderItem.getObject_weight().get() + "," + orderItem.getObject_supportWeight().get() + "," + orderItem.getObject_buildTime().get() + "," + orderItem.getPrice().get() + "," + orderItem.getPrinter_id().get() + ")";
-        MngApi.performUpdate(updateQuery, user);        
+//    public static void insertNewOrderItem(OrderItem orderItem, User user){        
+//        String updateQuery = "INSERT INTO OrderItems (OrderItemID,OrderID,ObjectID,ItemMaterialID,ItemWeight,ItemSupportWeight,ItemBuildTime,ItemPrice,ItemQuantity,PrinterID) " +
+//        "VALUES (" +
+//		orderItem.getOrderItem_id().get() + "," +
+//		orderItem.getOrder_id().get() + "," +
+//		orderItem.getObject_id().get() + "," + 
+//		orderItem.getMaterial_id().get() + "," + 
+//		orderItem.getObject_weight().get() + "," + 
+//		orderItem.getObject_supportWeight().get() + "," + 
+//		orderItem.getObject_buildTime().get() + "," + 
+//		orderItem.getPrice().get() + "," +
+//		orderItem.getQuantity().get() + "," +	
+//		orderItem.getPrinter_id().get() + "," + 
+//        ") " +	
+//        "ON DUPLICATE KEY UPDATE " + 
+//		//",OrderItemID=" + orderItem.getOrderItem_id().get() + "," +
+//		",OrderID=" + orderItem.getOrder_id().get() + "," +
+//		",ObjectID=" + orderItem.getObject_id().get() + "," + 
+//		",ItemMaterialID=" + orderItem.getMaterial_id().get() + "," + 
+//		",ItemWeight=" + orderItem.getObject_weight().get() + "," + 
+//		",ItemSupportWeight=" + orderItem.getObject_supportWeight().get() + "," + 
+//		",ItemBuildTime=" + orderItem.getObject_buildTime().get() + "," + 
+//		",ItemPrice=" +  orderItem.getPrice().get() + "," + 
+//		",ItemQuantity=" + orderItem.getQuantity().get() + "," +	
+//		",PrinterID=" + orderItem.getPrinter_id().get();
+//        
+//        MngApi.performUpdate(updateQuery, user);  
+//        
+//    }
+    
+    public static void insertNewOrderItems(ObservableList<OrderItem> orderItems, User user){ 
+        //Create query
+        String updateQuery;
+
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            //STEP 4: Execute a query
+	    for (int i = 0; i < orderItems.size(); i++) {
+                
+                OrderItem orderItem = orderItems.get(i);
+                               
+                if(orderItem.getOrderItem_id().get() == 0){
+                    updateQuery = "SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA ='" + user.getName() + "' AND   TABLE_NAME   ='OrderItems'";
+                    stmt = conn.prepareStatement(updateQuery);
+                    ResultSet rs = stmt.executeQuery(updateQuery);
+                
+                    while(rs.next()){
+                        orderItem.setOrderItem_id(new SimpleIntegerProperty(rs.getInt(1)));
+                    }
+                }
+                
+                updateQuery = "INSERT INTO OrderItems (OrderItemID,OrderID,ObjectID,ItemMaterialID,ItemWeight,ItemSupportWeight,ItemBuildTime,ItemPrice,ItemQuantity,PrinterID) VALUES (?,?,?,?,?,?,?,?,?,?) "
+                    + "ON DUPLICATE KEY UPDATE OrderID=?,ObjectID=?,ItemMaterialID=?,ItemWeight=?,ItemSupportWeight=?,ItemBuildTime=?,ItemPrice=?,ItemQuantity=?,PrinterID=?";            
+                stmt = conn.prepareStatement(updateQuery);
+                
+                System.out.println(orderItem.getOrder_id().get());
+                System.out.println(orderItem.getOrderItem_id().get());
+                
+                stmt.setInt(1, orderItem.getOrderItem_id().get());
+                stmt.setInt(2, orderItem.getOrder_id().get());
+                stmt.setInt(3, orderItem.getObject_id().get());
+                stmt.setInt(4, orderItem.getMaterial_id().get());
+                stmt.setDouble(5, orderItem.getObject_weight().get());
+                stmt.setDouble(6, orderItem.getObject_supportWeight().get());
+                stmt.setInt(7, orderItem.getObject_buildTime().get());
+                stmt.setDouble(8,orderItem.getPrice().get());
+                stmt.setInt(9,orderItem.getQuantity().get());
+                stmt.setInt(10,orderItem.getPrinter_id().get());
+                
+                stmt.setInt(11, orderItem.getOrder_id().get());
+                stmt.setInt(12, orderItem.getObject_id().get());
+                stmt.setInt(13, orderItem.getMaterial_id().get());
+                stmt.setDouble(14, orderItem.getObject_weight().get());
+                stmt.setDouble(15, orderItem.getObject_supportWeight().get());
+                stmt.setInt(16, orderItem.getObject_buildTime().get());
+                stmt.setDouble(17,orderItem.getPrice().get());
+                stmt.setInt(18,orderItem.getQuantity().get());
+                stmt.setInt(19,orderItem.getPrinter_id().get());
+                
+                System.out.println(updateQuery);
+                stmt.executeUpdate();
+            }
+            stmt.close();
+            conn.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try        
     }
     
-    public static String generateUpdateQuery(OrderItem orderItem){
-        return "INSERT INTO OrderItems VALUES (null," + orderItem.getOrder_id().get() + "," + orderItem.getObject_id().get() + "," + orderItem.getMaterial_id().get() + "," + orderItem.getObject_weight().get() + "," + orderItem.getObject_supportWeight().get() + "," + orderItem.getObject_buildTime().get() + "," + orderItem.getPrice().get() + "," + orderItem.getQuantity().get() + "," + orderItem.getPrinter_id().get() + ")";        
-    }    
+    public static void deleteOrderItem(OrderItem orderItem, User user){
+        String query = "DELETE FROM OrderItems WHERE OrderItemID=" + orderItem.getOrderItem_id().get();
+        MngApi.performUpdate(query, user);
+    }
     
-    public static void insertMultipleOrderItems(ObservableList<String> updateQueries, User user){
-        MngApi.performMultipleUpdates(updateQueries, user);
+    public static void deleteOrderItem(List<Integer> orderItemIDs, User user){
+        //check if list is empty
+        if(orderItemIDs.size() > 0){
+            String query = "DELETE FROM OrderItems WHERE ";
+            
+            for (int i = 1; i <= orderItemIDs.size(); i++) {                
+                if (i != orderItemIDs.size()){
+                    query += " OrderItemID=" + orderItemIDs.get(i) + " OR ";
+                } else {
+                    query += " OrderItemID=" + orderItemIDs.get(i);
+                }
+            }
+            
+            MngApi.performUpdate(query, user);            
+        }
+    }
+    
+    public static List<Integer> getListOfIOrderItemIDs(Order order, User user){
+        
+        //Create list
+        List<Integer> orderItemsIDs = new ArrayList<>();
+        
+        //Create query
+        String query = "SELECT OrderItemID FROM OrderItems WHERE OrderID=" + order.getOrder_id().get();
+
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){                
+                int orderItemID = rs.getInt(1);                
+                orderItemsIDs.add(orderItemID);                
+            }
+
+            rs.close();
+        } catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+        return orderItemsIDs;
     }
     
     public static List<OrderItem> getOrderItems(int order_id, User user){
@@ -194,7 +402,7 @@ public class OrderItem {
         List<OrderItem> itemList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.ItemQuantity, Printers.PrinterID, Printers.PrinterName, OrderItems.OrderItemID, OrderItems.ItemBuildTime, OrderItems.ItemMaterialID, MaterialTypes.MaterialType, MaterialColors.ColorName, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemPrice FROM OrderItems JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialTypes ON Materials.MaterialTypeID = MaterialTypes.MaterialTypeID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
+        String query = "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.ItemQuantity, Printers.PrinterID, Printers.PrinterName, OrderItems.OrderID, OrderItems.OrderItemID, OrderItems.ItemBuildTime, OrderItems.ItemMaterialID, MaterialTypes.MaterialType, MaterialColors.ColorName, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemPrice FROM OrderItems JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialTypes ON Materials.MaterialTypeID = MaterialTypes.MaterialTypeID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -233,7 +441,7 @@ public class OrderItem {
                 printer_name = new SimpleStringProperty(rs.getString("PrinterName"));
                 material_type = new SimpleStringProperty(rs.getString("MaterialType"));
                 material_color = new SimpleStringProperty(rs.getString("ColorName"));
-                
+                                
                 orderItem_id = new SimpleIntegerProperty(rs.getInt("OrderItemID"));
                 object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
                 object_buildTime = new SimpleIntegerProperty(rs.getInt("ItemBuildTime"));
@@ -263,7 +471,7 @@ public class OrderItem {
                     costs = price_per_gram*total_weight;                                
                     item_costs = new SimpleDoubleProperty(costs);
                     
-                    OrderItem item = new OrderItem(orderItem_id, object_name, object_buildTime_formated, printer_name, material_type, material_color, printer_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, item_costs);
+                    OrderItem item = new OrderItem(orderItem_id, object_name, object_buildTime_formated, printer_name, material_type, material_color, new SimpleIntegerProperty(order_id), object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, item_costs);
                
                 itemList.add(item);
             }

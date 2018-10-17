@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -133,8 +135,7 @@ public class NewOrderController implements Initializable {
             stage.setResizable(false);
             stage.centerOnScreen();            
             
-            stage.show();
-            //stage.setAlwaysOnTop(true);            
+            stage.show();        
             ctrl.setUser(user);            
             ctrl.setNewOrderController(this);
             ctrl.getTv_objects().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);            
@@ -197,29 +198,8 @@ public class NewOrderController implements Initializable {
             
         });
         
-        btn_create.setOnAction((event) -> {             
-            switch(mode){
-                case "create":
-                    try {
-                    createOrder();
-                    } catch (IndexOutOfBoundsException e) {
-                        label_info.setText("Insert some objects");
-                        label_info.setTextFill(Color.web("#ff0000"));
-                    }                    
-                    return;
-                case "edit":
-                    try {
-                        System.out.println(tv_selectedObjects.getItems().get(0).getObject_name().get());
-                        deleteOrder();
-                        createOrder();
-                        MngApi.closeWindow(btn_create);
-                        mainController.runService(mainController.getService_refreshOrders());
-                    } catch (IndexOutOfBoundsException e) {
-                        label_info.setText("Insert some objects");
-                        label_info.setTextFill(Color.web("#ff0000"));
-                    }   
-                    
-            }
+        btn_create.setOnAction((event) -> {
+            createOrUpdateOrder();
         });
         
         btn_cancel.setOnAction((event) -> {            
@@ -350,7 +330,11 @@ public class NewOrderController implements Initializable {
     public ObservableList<OrderItem> getSelectedObjects() {
         return selectedObjects;
     }    
-
+    
+    public int getOrderID(){
+        return Integer.parseInt(label_orderID.getText());        
+    }
+    
     public void refreshSelectedObjects(){        
         tv_selectedObjects.refresh();
         calcualteSummary();
@@ -360,8 +344,12 @@ public class NewOrderController implements Initializable {
         return btn_create;
     }
     
-    private void createOrder(){
+    private void createOrUpdateOrder(){
         try{           
+            //check empty order or items without assigned material, printer, etc.
+            for (int i = 0; i < tv_selectedObjects.getItems().size(); i++) {
+                if(tv_selectedObjects.getItems().get(i).getPrinter_id().get() == 0 || tv_selectedObjects.getItems().isEmpty()) throw new NullPointerException();            
+            }
             //preparing order
             Order newOrder;            
             SimpleIntegerProperty order_id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
@@ -380,8 +368,6 @@ public class NewOrderController implements Initializable {
                         
             customer_id = new SimpleIntegerProperty(Integer.parseInt(txtField_customer.getText().split(";")[0]));
             totalQuantity = new SimpleIntegerProperty(Integer.parseInt(label_quantity.getText()));
-            System.out.println(label_buildTime.getText());
-            System.out.println(MngApi.convertToMinutes(label_buildTime.getText()));
             totalBuildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(label_buildTime.getText()));
             
             String[] totalPriceFormatted = label_price.getText().split(" ");
@@ -397,35 +383,56 @@ public class NewOrderController implements Initializable {
             totalSupportWeight = new SimpleDoubleProperty(Double.parseDouble(totalSupportWeightFormatted[0]));
             
             newOrder = new Order(null, status, comment, dateCreated, dueDate, totalBuildTimeFormatted, order_id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
+            Order.insertNewOrder(newOrder, user);
             
-            //preparing orderItem - we have only one order but multiple items in it so we do this in loop. First of all we will generate update query for all items
-            //They are basicaly mulitple insert querries in a row separated by ";"
-            ObservableList<String> updateQueries = FXCollections.observableArrayList();
-                        
-            for (int i = 0; i < selectedObjects.size(); i++) {                
-                OrderItem obj = selectedObjects.get(i);
-                obj.setOrder_id(order_id);
-                updateQueries.add(OrderItem.generateUpdateQuery(obj));
-            }
-                
-            if (tv_selectedObjects.getItems().isEmpty()){
-                label_info.setText("Cannot create an empty order.");
-                label_info.setTextFill(Color.web("#ff0000"));
-            } else {
-                Order.insertNewOrder(newOrder, user);
-                OrderItem.insertMultipleOrderItems(updateQueries, user);                
-                mainController.runService(mainController.getService_refreshOrders());                
-                MngApi.closeWindow(btn_create);
-            }
-                
-                
+            //We will now add assign order to objects, but first, we have to assign OrderID to items belonging to current order
+            //we also have to assing correct orderItemID. We have to keep OrderItemID the same if it is old order item or assign new OrderItemID
+            //if it's brand new object (OrderItemID == 0).
+            
+            //For correct mechanism which will ensure the deleted/updated/added objects belonging to order we have to do 3 key things:
+                //1. Determine IDs of removed original objects and remove them frob DB table
+                //2. Determine updated original objects and update them in DB table
+                //3. Determine new objects in order and add then in DB table
+                    
+            //1. Determine IDs of removed original objects and remove them frob DB table
+            /*
+            We do this by comparing IDs of old OrderItems vs NewOrderItems. We remove matches from old OrderItems so we can keep only objects to remove
+            because they are not in new OrderItems.
+            */
+            
+            List<Integer> originalObjects = OrderItem.getListOfIOrderItemIDs(newOrder, user);                
+            List<Integer> newObjects = new ArrayList<>();
+                for (int j = 0; j < selectedObjects.size(); j++) {
+                    OrderItem item = selectedObjects.get(j);
+                    newObjects.add(item.getOrderItem_id().get());
+                }
+            
+            originalObjects.removeAll(newObjects);            
+            OrderItem.deleteOrderItem(originalObjects, user);
+            
+            //2. Determine updated original objects and update them in DB table
+            /*
+            In selectedObjects (new OrderItems) we have items with OrderItemID=<Integer> (old object - might be changed, need to update)
+            or OrderItemID=0 (new objects)
+            */
+            
+            //3. Determine new objects in order and add then in DB table
+            /*
+            New objects have OrderItemID=0. We will update existing objects and insert newone using OrderItem.insertNewOrderItems(selectedObjects, user)
+            method. Correct orderItemID will be assigned within this method
+            */
+            
+            OrderItem.insertNewOrderItems(selectedObjects, user);
+            
+            mainController.runService(mainController.getService_refreshOrders());                
+            MngApi.closeWindow(btn_create);
+            
         } catch (NumberFormatException e) {                
             label_info.setText("Wrong number format, please check your fields.");
             label_info.setTextFill(Color.web("#ff0000"));
-            e.printStackTrace();
-            //e.printStackTrace();
+            e.printStackTrace();            
         } catch (NullPointerException | IndexOutOfBoundsException e) {                
-            label_info.setText("Insert some objects first.");
+            label_info.setText("Insert some objects and assign some material first.");
             label_info.setTextFill(Color.web("#ff0000"));
             //e.printStackTrace();
         }
@@ -433,6 +440,7 @@ public class NewOrderController implements Initializable {
         
     }    
     
+
     private void deleteOrder(){        
         String order_id = label_orderID.getText();
         String query = "DELETE FROM OrderItems WHERE OrderID=" + order_id;

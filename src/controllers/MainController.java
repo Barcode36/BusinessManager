@@ -73,7 +73,7 @@ public class MainController implements Initializable {
     }
     
     public void runService(Service service){
-            
+                        
             service.start();
             progressBar.progressProperty().bind(service.progressProperty());
             
@@ -84,7 +84,8 @@ public class MainController implements Initializable {
             });
             
             service.setOnFailed((event) -> {
-                service.reset();
+                //service.reset();
+                service.restart();
                 progressBar.progressProperty().unbind();
                 progressBar.setProgress(-1);
                 service.start();                

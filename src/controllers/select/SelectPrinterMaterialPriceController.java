@@ -145,7 +145,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                     weight = Double.parseDouble(txtField_weight.getText());
                     supportWeight = Double.parseDouble(txtField_supportWeight.getText());
                 
-                    String buildTime_formatted = txtField_hours.getText() + " " + txtField_minutes.getText();
+                    String buildTime_formatted = txtField_hours.getText() + "h " + txtField_minutes.getText() + "m";
                         buildTime = MngApi.convertToMinutes(buildTime_formatted);
                 
                     String[] printer = comboBox_printer.getValue().split(";");
@@ -177,13 +177,13 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 
                     newOrderController.setSelectedObjects();
                     newOrderController.refreshSelectedObjects();
-                    MngApi.closeWindow(btn_assign);
+                    MngApi.closeWindow(btn_assign);                    
                 }
             }
             catch (NumberFormatException e) {                
                 label_info.setText("Wrong number format, please check your fields.");
                 label_info.setTextFill(Color.web("#ff0000"));
-                //e.printStackTrace();
+                e.printStackTrace();
             } catch (ArithmeticException e){
                 label_info.setText("Enter some positive, non-zero value!");
                 label_info.setTextFill(Color.web("#ff0000"));

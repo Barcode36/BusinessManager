@@ -11,7 +11,6 @@ import classes.Object;
 import classes.OrderItem;
 import controllers.orders.NewOrderController;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -64,10 +63,6 @@ public class SelectObjectController implements Initializable {
             TableRow<Object> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-//                    ObservableList<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());                    
-//                    newOrderController.getSelectedObjects().addAll(selectedObjects);
-//                    newOrderController.setSelectedObjects();
-//                    MngApi.closeWindow(btn_close);
                       addObjects();
 
                 }
@@ -76,17 +71,11 @@ public class SelectObjectController implements Initializable {
         });
         
         btn_select.setOnAction((event) -> {
-//            List<OrderItem> selectedObjects = generateOrderItems(tv_objects.getSelectionModel().getSelectedItems());                    
-//            newOrderController.getSelectedObjects().addAll(selectedObjects);
-//            newOrderController.setSelectedObjects();
-//            MngApi.closeWindow(btn_close);
               addObjects();
         });
         
-        btn_close.setOnAction((event) -> {
-            
-            MngApi.closeWindow(btn_close);
-            
+        btn_close.setOnAction((event) -> {            
+            MngApi.closeWindow(btn_close);            
         });
     }    
     
@@ -106,13 +95,15 @@ public class SelectObjectController implements Initializable {
         
     }
     
+    //with this method we add selected objects to the list of selected objects for current order
+    //we assign orderitem_id=0 for every new object so we know that these objects are just added, not the ones already in order (in case of edit)
     private ObservableList<OrderItem> generateOrderItems(ObservableList<Object> selectedObjects){
         
         //Create list of orders
         ObservableList<OrderItem> orderItems = FXCollections.observableArrayList();
         
         classes.Object listObject;
-        
+                
         int i = 0;
         
         while (selectedObjects.get(i) != null){
@@ -129,8 +120,8 @@ public class SelectObjectController implements Initializable {
             material_type = new SimpleStringProperty(" ");
             material_color = new SimpleStringProperty(" ");
             
-            orderItem_id = new SimpleIntegerProperty();
-            order_id = new SimpleIntegerProperty();
+            orderItem_id = new SimpleIntegerProperty(0);
+            order_id = new SimpleIntegerProperty(newOrderController.getOrderID());
             object_id = listObject.getObject_id();
             object_buildTime = listObject.getObject_buildTime();
             quantity = new SimpleIntegerProperty();
@@ -145,6 +136,7 @@ public class SelectObjectController implements Initializable {
             
             OrderItem orderItem = new OrderItem(orderItem_id, object_name, object_buildTime_formated, printer_name, material_type, material_color, order_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
             
+            System.out.println(orderItem.getOrder_id().get());
             orderItems.add(orderItem);
             
             i++;
