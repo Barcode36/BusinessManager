@@ -130,12 +130,12 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Button fx:id="btn_newOrder" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Order" GridPane.columnSpan="2" />
+                                    <Button fx:id="order_btn_new" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Order" GridPane.columnSpan="2" />
                                     <Button fx:id="btnMarkAsSold" layoutX="110.0" layoutY="13.0" mnemonicParsing="false" prefWidth="150.0" text="Mar As Not Sold" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <Button fx:id="btnCancelOrder" mnemonicParsing="false" prefWidth="150.0" text="Cancel Order(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Button fx:id="btnOrdersFilters" mnemonicParsing="false" prefWidth="150.0" text="Mark As Sold" GridPane.rowIndex="2" />
                                     <Button fx:id="btnNewOrderFrom" mnemonicParsing="false" prefWidth="150.0" text="New Order From..." GridPane.rowIndex="1" />
-                                    <Button fx:id="btn_refresh_orders" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                                    <Button fx:id="order_btn_refresh" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                                     <Label fx:id="label_order_SoldOrders" text="Sold(0)" textFill="LIME" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="5">
                                        <GridPane.margin>
                                           <Insets top="10.0" />
@@ -342,8 +342,8 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Button fx:id="btn_editOrder" layoutX="10.0" layoutY="79.0" mnemonicParsing="false" prefWidth="150.0" text="Edit" GridPane.rowIndex="3" />
-                                    <Button fx:id="btnOrdersFilters11" layoutX="10.0" layoutY="112.0" mnemonicParsing="false" prefWidth="150.0" text="Delete Order(s)" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Button fx:id="order_btn_edit" layoutX="10.0" layoutY="79.0" mnemonicParsing="false" prefWidth="150.0" text="Edit" GridPane.rowIndex="3" />
+                                    <Button fx:id="order_btn_delete" layoutX="10.0" layoutY="112.0" mnemonicParsing="false" prefWidth="150.0" text="Delete Order(s)" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                  </children>
                               </GridPane>
                            </children>

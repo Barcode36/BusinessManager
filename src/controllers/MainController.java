@@ -117,7 +117,7 @@ public class MainController implements Initializable {
     private TableColumn<Order, Double> order_col_totalCosts, order_col_totalPrice, order_col_totalWeight, order_col_totalSupportWeight;     
     
     @FXML
-    private Button btn_newOrder, btn_editOrder, btn_refresh_orders;
+    private Button order_btn_new, order_btn_edit, order_btn_refresh, order_btn_delete;
     
     @FXML
     private Label label_order_SoldOrders, label_order_SoldCostPrice, label_order_OrderProfit, label_order_NotSoldOrders, label_order_NotSoldCostPrice, label_order_NotSoldOrderProfit, label_order_info;
@@ -130,6 +130,13 @@ public class MainController implements Initializable {
     
     /*****************************          ORDERS TAB - METHODS        *****************************/
     
+    private void deleteOrder(Order order){        
+        int order_id = order.getOrder_id().get();
+        String query = "DELETE FROM OrderItems WHERE OrderID=" + order_id;
+        MngApi.performUpdate(query, user);
+        query = "DELETE FROM Orders WHERE OrderID=" + order_id;        
+        MngApi.performUpdate(query, user);           
+    }
     
     
     private void calculateOrderStatistics(){
@@ -755,11 +762,11 @@ public class MainController implements Initializable {
             }
         });
         
-        tv_orders.setRowFactory( tv -> {
+        tv_orders.setRowFactory(tv -> {
             TableRow<Order> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    btn_editOrder.fire();
+                    order_btn_edit.fire();
                 }
             });
             return row;
@@ -769,11 +776,11 @@ public class MainController implements Initializable {
             calculateSelectedOrdersStatistics(tv_orders.getSelectionModel().getSelectedItems());
         });
         
-        btn_refresh_orders.setOnAction((event) -> {            
+        order_btn_refresh.setOnAction((event) -> {            
             runService(service_refreshOrders);            
         });
         
-        btn_newOrder.setOnAction((event) -> {
+        order_btn_new.setOnAction((event) -> {
             
             try {            
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Orders/NewOrder.fxml"));            
@@ -799,35 +806,37 @@ public class MainController implements Initializable {
             
         });
         
-        btn_editOrder.setOnAction((event) -> {
+        order_btn_edit.setOnAction((event) -> {
             
             try {            
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Orders/NewOrder.fxml"));            
-            Parent root1 = fxmlLoader.load();
-            NewOrderController ctrl = fxmlLoader.getController();
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Edit Order");
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Orders/NewOrder.fxml"));            
+                Parent root1 = fxmlLoader.load();
+                NewOrderController ctrl = fxmlLoader.getController();
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setTitle("Edit Order");
            
-            stage.setScene(new Scene(root1));
-            stage.setResizable(false);
-            stage.centerOnScreen();            
+                stage.setScene(new Scene(root1));
+                stage.setResizable(false);
+                stage.centerOnScreen();            
+                
+                stage.show();
             
-            stage.show();
+                ctrl.setUser(user);            
+                ctrl.setMainController(this);
+                ctrl.setUpdateOrderFields(tv_orders.getSelectionModel().getSelectedItems());            
             
-            ctrl.setUser(user);            
-            ctrl.setMainController(this);
-            ctrl.setUpdateOrderFields(tv_orders.getSelectionModel().getSelectedItems());            
-            
-        } catch (IOException e){
-            
-        } catch (NullPointerException e){
-            label_order_info.setText("Info: Select one order");
-            label_order_info.setTextFill(Color.web("#ff0000"));
-        }
-            
+            } catch (IOException e){
+                e.printStackTrace();
+            } catch (NullPointerException e){
+                label_order_info.setText("Info: Select one order");
+                label_order_info.setTextFill(Color.web("#ff0000"));
+            }            
         });
         
+        order_btn_delete.setOnAction((event) -> {            
+            deleteOrder(tv_orders.getSelectionModel().getSelectedItem());            
+        });
         
     /*
     *

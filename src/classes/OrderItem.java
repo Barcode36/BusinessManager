@@ -249,9 +249,6 @@ public class OrderItem {
                     + "ON DUPLICATE KEY UPDATE OrderID=?,ObjectID=?,ItemMaterialID=?,ItemWeight=?,ItemSupportWeight=?,ItemBuildTime=?,ItemPrice=?,ItemQuantity=?,PrinterID=?";            
                 stmt = conn.prepareStatement(updateQuery);
                 
-                System.out.println(orderItem.getOrder_id().get());
-                System.out.println(orderItem.getOrderItem_id().get());
-                
                 stmt.setInt(1, orderItem.getOrderItem_id().get());
                 stmt.setInt(2, orderItem.getOrder_id().get());
                 stmt.setInt(3, orderItem.getObject_id().get());
@@ -317,7 +314,7 @@ public class OrderItem {
                 if (i != orderItemIDs.size()){
                     query += " OrderItemID=" + orderItemIDs.get(i) + " OR ";
                 } else {
-                    query += " OrderItemID=" + orderItemIDs.get(i);
+                    query += " OrderItemID=" + orderItemIDs.get(i-1);
                 }
             }
             
@@ -447,7 +444,7 @@ public class OrderItem {
                 object_buildTime = new SimpleIntegerProperty(rs.getInt("ItemBuildTime"));
                     object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
                 quantity = new SimpleIntegerProperty(rs.getInt("ItemQuantity"));
-                printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
+                printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));                
                 material_id = new SimpleIntegerProperty(rs.getInt("ItemMaterialID"));
                 //object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));               
                

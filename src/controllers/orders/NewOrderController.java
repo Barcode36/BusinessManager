@@ -59,9 +59,8 @@ public class NewOrderController implements Initializable {
     
     private Customer selectedCustomer;
     
-    private ObservableList<OrderItem> selectedObjects = FXCollections.observableArrayList();
+    private ObservableList<OrderItem> selectedObjects = FXCollections.observableArrayList();    
     
-    private String mode;
     
     @FXML
     private ToggleGroup toggleGroup_status = new ToggleGroup();
@@ -346,6 +345,8 @@ public class NewOrderController implements Initializable {
     
     private void createOrUpdateOrder(){
         try{           
+            System.out.println(selectedObjects.size());
+            System.out.println(selectedObjects.get(0).getPrinter_id().get());
             //check empty order or items without assigned material, printer, etc.
             for (int i = 0; i < tv_selectedObjects.getItems().size(); i++) {
                 if(tv_selectedObjects.getItems().get(i).getPrinter_id().get() == 0 || tv_selectedObjects.getItems().isEmpty()) throw new NullPointerException();            
@@ -430,7 +431,7 @@ public class NewOrderController implements Initializable {
         } catch (NumberFormatException e) {                
             label_info.setText("Wrong number format, please check your fields.");
             label_info.setTextFill(Color.web("#ff0000"));
-            e.printStackTrace();            
+            //e.printStackTrace();            
         } catch (NullPointerException | IndexOutOfBoundsException e) {                
             label_info.setText("Insert some objects and assign some material first.");
             label_info.setTextFill(Color.web("#ff0000"));
@@ -440,15 +441,6 @@ public class NewOrderController implements Initializable {
         
     }    
     
-
-    private void deleteOrder(){        
-        String order_id = label_orderID.getText();
-        String query = "DELETE FROM OrderItems WHERE OrderID=" + order_id;
-        MngApi.performUpdate(query, user);
-        query = "DELETE FROM Orders WHERE OrderID=" + order_id;        
-        MngApi.performUpdate(query, user);           
-    }
-   
     public void setSelectedCustomer(Customer selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
         txtField_customer.setText(selectedCustomer.getCustomer_id().get() + ";" + selectedCustomer.getCustomer_lastName().get() + ";" + selectedCustomer.getCustomer_firstName().get());
@@ -463,7 +455,7 @@ public class NewOrderController implements Initializable {
     }
     
     public void setNewOrderFields(){
-        mode = "create";
+       
         label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(user, "Orders")));
         tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);        
         txtField_pricePerHour.setText("2.5");        
@@ -473,8 +465,6 @@ public class NewOrderController implements Initializable {
     }
    
     public void setUpdateOrderFields(ObservableList<Order> orders){
-        mode = "edit";
-        
         Order order = orders.get(0);
         
         btn_create.setText("Update");
@@ -507,12 +497,6 @@ public class NewOrderController implements Initializable {
         label_title.setText("Update Order");        
         label_info.setText("Edit fields");
         label_info.setTextFill(Color.web("#ff0000"));
-        
-    }
-      
-    public void setSelectedOrderField(Order order){
-        
-        label_orderID.setText(String.valueOf(order.getOrder_id().get()));
         
     }
     
