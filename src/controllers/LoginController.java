@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.sql.SQLNonTransientConnectionException;
 import javafx.fxml.FXML;
 
 public class LoginController {

@@ -184,8 +184,7 @@ public class Order {
             //STEP 2: Register JDBC driver
             Class.forName("org.mariadb.jdbc.Driver");
 
-            //STEP 3: Open a connection
-
+            //STEP 3: Open a connection            
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             //STEP 4: Execute a query
@@ -237,6 +236,7 @@ public class Order {
         } catch (SQLNonTransientConnectionException se) {
             MngApi obj = new MngApi();
             obj.alertConnectionLost();
+            se.printStackTrace();
         } catch (SQLException se) {
             se.printStackTrace();
         } catch (ClassNotFoundException se) {
