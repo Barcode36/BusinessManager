@@ -245,8 +245,8 @@ public class OrderItem {
                     }
                 }
                 
-                updateQuery = "INSERT INTO OrderItems (OrderItemID,OrderID,ObjectID,ItemMaterialID,ItemWeight,ItemSupportWeight,ItemBuildTime,ItemPrice,ItemQuantity,PrinterID) VALUES (?,?,?,?,?,?,?,?,?,?) "
-                    + "ON DUPLICATE KEY UPDATE OrderID=?,ObjectID=?,ItemMaterialID=?,ItemWeight=?,ItemSupportWeight=?,ItemBuildTime=?,ItemPrice=?,ItemQuantity=?,PrinterID=?";            
+                updateQuery = "INSERT INTO OrderItems (OrderItemID,OrderID,ObjectID,ItemMaterialID,ItemWeight,ItemSupportWeight,ItemBuildTime,ItemPrice,ItemQuantity,PrinterID,ItemCosts) VALUES (?,?,?,?,?,?,?,?,?,?,?) "
+                    + "ON DUPLICATE KEY UPDATE OrderID=?,ObjectID=?,ItemMaterialID=?,ItemWeight=?,ItemSupportWeight=?,ItemBuildTime=?,ItemPrice=?,ItemQuantity=?,PrinterID=?,ItemCosts=?";            
                 stmt = conn.prepareStatement(updateQuery);
                 
                 stmt.setInt(1, orderItem.getOrderItem_id().get());
@@ -259,16 +259,18 @@ public class OrderItem {
                 stmt.setDouble(8,orderItem.getPrice().get());
                 stmt.setInt(9,orderItem.getQuantity().get());
                 stmt.setInt(10,orderItem.getPrinter_id().get());
+                stmt.setDouble(11, orderItem.getCosts().get());
                 
-                stmt.setInt(11, orderItem.getOrder_id().get());
-                stmt.setInt(12, orderItem.getObject_id().get());
-                stmt.setInt(13, orderItem.getMaterial_id().get());
-                stmt.setDouble(14, orderItem.getObject_weight().get());
-                stmt.setDouble(15, orderItem.getObject_supportWeight().get());
-                stmt.setInt(16, orderItem.getObject_buildTime().get());
-                stmt.setDouble(17,orderItem.getPrice().get());
-                stmt.setInt(18,orderItem.getQuantity().get());
-                stmt.setInt(19,orderItem.getPrinter_id().get());
+                stmt.setInt(12, orderItem.getOrder_id().get());
+                stmt.setInt(13, orderItem.getObject_id().get());
+                stmt.setInt(14, orderItem.getMaterial_id().get());
+                stmt.setDouble(15, orderItem.getObject_weight().get());
+                stmt.setDouble(16, orderItem.getObject_supportWeight().get());
+                stmt.setInt(17, orderItem.getObject_buildTime().get());
+                stmt.setDouble(18,orderItem.getPrice().get());
+                stmt.setInt(19,orderItem.getQuantity().get());
+                stmt.setInt(20,orderItem.getPrinter_id().get());
+                stmt.setDouble(21, orderItem.getCosts().get());
                 
                 System.out.println(updateQuery);
                 stmt.executeUpdate();

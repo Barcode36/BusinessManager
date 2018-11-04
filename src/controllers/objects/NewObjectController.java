@@ -80,7 +80,7 @@ public class NewObjectController implements Initializable {
                 object_supportWeight = new SimpleDoubleProperty(Double.parseDouble(object_txtField_supportWeight.getText()));
                 object_weight = new SimpleDoubleProperty(Double.parseDouble(object_txtField_weight.getText()));
             
-                newObject = new classes.Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_weight);
+                newObject = new classes.Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_weight, new SimpleDoubleProperty(0));
             
                 classes.Object.insertNewObject(newObject, user);
                 

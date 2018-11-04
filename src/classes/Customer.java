@@ -181,7 +181,7 @@ public class Customer  {
         List<Customer> customersList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Customers.DateCreated, Customers.LastName, Customers.FirstName, Customers.Comment, Customers.Mail, Customers.Phone, Customers.Address, Customers.City, Customers.CompanyID, Customers.ZipCode, Countries.CountryID, Countries.CountryName, Companies.CompanyName, Customers.CustomerID FROM Customers JOIN Countries ON Customers.CountryID=Countries.CountryID JOIN Companies ON Customers.CompanyID = Companies.CompanyID ORDER BY Customers.LastName ASC";
+        String query = "SELECT Customers.DateCreated, Customers.LastName, Customers.FirstName, Customers.Comment, Customers.Mail, Customers.Phone, Customers.Address, Customers.City, Customers.CompanyID, Customers.ZipCode, Countries.CountryID, Countries.CountryName, Companies.CompanyName, Customers.CustomerID FROM Customers JOIN Countries ON Customers.CountryID=Countries.CountryID JOIN Companies ON Customers.CompanyID = Companies.CompanyID ORDER BY Customers.CustomerID ASC";
                 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";

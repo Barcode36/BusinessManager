@@ -173,7 +173,8 @@ public class NewCustomerController implements Initializable {
     }
     
     public void setComboBoxes(){
-                
+        mode = "create";
+        
         ObservableList<SimpleTableObject> countries = FXCollections.observableArrayList(Customer.getCountries(user));
         ObservableList<SimpleTableObject> companies = FXCollections.observableArrayList(Customer.getCompanies(user));
         

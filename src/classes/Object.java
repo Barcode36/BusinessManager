@@ -25,9 +25,9 @@ public class Object {
     
     private SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
     private SimpleIntegerProperty object_id, object_buildTime, object_SoldCount;
-    private SimpleDoubleProperty object_supportWeight, object_weight, object_soldPrice;
+    private SimpleDoubleProperty object_supportWeight, object_weight, object_soldPrice, object_costs;
 
-    public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleStringProperty object_comment, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_SoldCount, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty object_soldPrice) {
+    public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleStringProperty object_comment, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_SoldCount, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty object_soldPrice, SimpleDoubleProperty object_costs) {
         this.object_name = object_name;
         this.object_stlLink = object_stlLink;
         this.object_buildTime_formated = object_buildTime_formated;
@@ -38,6 +38,7 @@ public class Object {
         this.object_supportWeight = object_supportWeight;
         this.object_weight = object_weight;
         this.object_soldPrice = object_soldPrice;
+        this.object_costs = object_costs;
     }
 
     public SimpleStringProperty getObject_name() {
@@ -120,6 +121,16 @@ public class Object {
         this.object_soldPrice = object_soldPrice;
     }
 
+    public SimpleDoubleProperty getObject_costs() {
+        return object_costs;
+    }
+
+    public void setObject_costs(SimpleDoubleProperty object_costs) {
+        this.object_costs = object_costs;
+    }
+
+   
+
     public static List<Object> getObjects(User user){
         
         //Create list
@@ -159,7 +170,7 @@ public class Object {
                 
                SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
                SimpleIntegerProperty object_id, object_buildTime, object_soldCount;
-               SimpleDoubleProperty object_supportWeight, object_weight, object_soldPrice;
+               SimpleDoubleProperty object_supportWeight, object_weight, object_soldPrice, object_costs;
                
                object_name = new SimpleStringProperty(rs.getString("ObjectName"));
                object_stlLink = new SimpleStringProperty(rs.getString("StlLink"));
@@ -174,8 +185,9 @@ public class Object {
                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
                object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
                object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, user));
-               
-               Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice);                
+               object_costs = new SimpleDoubleProperty(MngApi.round(MngApi.performDoubleQuery("SELECT SUM(ItemCosts) FROM OrderItems WHERE ObjectID=" + object_id.get(), user), 2));
+                              
+               Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice,object_costs);                
                
                objectList.add(object);
             }
@@ -314,7 +326,7 @@ public class Object {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-               soldPrice = rs.getInt("SoldPrice");
+               soldPrice = rs.getDouble("SoldPrice");
                 
             }
 
