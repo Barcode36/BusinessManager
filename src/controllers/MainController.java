@@ -496,6 +496,9 @@ public class MainController implements Initializable {
     @FXML
     private Button object_btn_new;
     
+    @FXML
+    private Label object_label_objCount,object_label_Selected,object_label_TimesPrinted,object_label_PriceCosts,object_label_PricePerHour,object_label_BuildTime, object_label_ItemSupportWeight;
+    
     /*****************************          OBJECTS - METHODS         *****************************/
     
     public void refreshObjectsTable(User user){
@@ -530,7 +533,7 @@ public class MainController implements Initializable {
         object_col_objectCosts.setStyle("-fx-alignment: CENTER;");
         
         tv_objects.setItems(objectList);
-        
+        object_label_objCount.setText(String.valueOf(objectList.size()));
     }    
     
     // Create the service
@@ -556,6 +559,29 @@ public class MainController implements Initializable {
 
     public Service<Void> getService_refreshObjects() {
         return service_refreshObjects;
+    }
+    
+    private void calculateSelectedObjectsStatistics(ObservableList<classes.Object> selectedObjects){
+        
+        int timesPrinted = 0, buildTime = 0;
+        double price = 0, costs = 0, weight = 0, supportWeight = 0,pricePerHour = 0;
+        
+        for (int i = 0; i < selectedObjects.size(); i++) {
+            
+            
+            
+        }
+        
+        object_label_objCount.setText(String.valueOf(selectedObjects.size()));
+        object_label_TimesPrinted.setText(String.valueOf(timesPrinted));
+        object_label_BuildTime.setText(String.valueOf(buildTime));
+        object_label_PriceCosts.setText(String.format(Locale.US, "%.2f $/%.2f $", price, costs));        
+        object_label_ItemSupportWeight.setText(String.format(Locale.US, "%.2f g/%.2f g", weight, supportWeight));
+        object_label_PricePerHour.setText(String.valueOf(supportWeight) + " $/h");
+        object_label_objCount.setText(MngApi.convertToHours(buildTime).get());
+        
+        
+        
     }
     /*
     *

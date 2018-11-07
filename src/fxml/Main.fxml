@@ -616,7 +616,7 @@
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="objects_label_objCount" text="0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+                                    <Label fx:id="object_label_objCount" text="0" GridPane.columnSpan="2" GridPane.rowIndex="4">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
