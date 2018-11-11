@@ -533,6 +533,7 @@ public class MainController implements Initializable {
         object_col_objectCosts.setStyle("-fx-alignment: CENTER;");
         
         tv_objects.setItems(objectList);
+        tv_objects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         object_label_objCount.setText(String.valueOf(objectList.size()));
     }    
     
@@ -568,20 +569,24 @@ public class MainController implements Initializable {
         
         for (int i = 0; i < selectedObjects.size(); i++) {
             
+            classes.Object current = selectedObjects.get(i);
             
-            
+            timesPrinted += current.getObject_SoldCount().get();
+            buildTime += current.getObject_buildTime().get()*current.getObject_SoldCount().get();
+            price += current.getObject_soldPrice().get();
+            costs += current.getObject_costs().get();
+            weight += current.getObject_weight().get();
+            supportWeight += current.getObject_supportWeight().get();
+                        
         }
         
-        object_label_objCount.setText(String.valueOf(selectedObjects.size()));
+        object_label_Selected.setText(String.valueOf(selectedObjects.size()));
         object_label_TimesPrinted.setText(String.valueOf(timesPrinted));
         object_label_BuildTime.setText(String.valueOf(buildTime));
         object_label_PriceCosts.setText(String.format(Locale.US, "%.2f $/%.2f $", price, costs));        
         object_label_ItemSupportWeight.setText(String.format(Locale.US, "%.2f g/%.2f g", weight, supportWeight));
-        object_label_PricePerHour.setText(String.valueOf(supportWeight) + " $/h");
-        object_label_objCount.setText(MngApi.convertToHours(buildTime).get());
-        
-        
-        
+        object_label_PricePerHour.setText(String.format(Locale.US, "%.2f $/h" , price/buildTime*60));
+        object_label_BuildTime.setText(MngApi.convertToHours(buildTime).get());        
     }
     /*
     *
@@ -959,6 +964,10 @@ public class MainController implements Initializable {
     });
     
     /*****************************          INITIALIZE OBJECTS TAB          *****************************/
+    
+    tv_objects.getSelectionModel().getSelectedItems().addListener((Change<? extends classes.Object> c) -> {        
+            calculateSelectedObjectsStatistics(tv_objects.getSelectionModel().getSelectedItems());
+        });
     
     tab_objects.setOnSelectionChanged(new EventHandler<Event>() {
             @Override

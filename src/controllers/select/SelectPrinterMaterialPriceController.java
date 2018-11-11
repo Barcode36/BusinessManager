@@ -234,9 +234,17 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             txtField_hours.setText(hours);
             txtField_minutes.setText(minutes);
         
-            double weight = quantity*selectedObject.getObject_weight().get();
-            double support_weight = quantity*selectedObject.getObject_supportWeight().get();
+            double weight = MngApi.performDoubleQuery("SELECT ObjectWeight FROM Objects WHERE ObjectID=" + selectedObject.getObject_weight().get(), user);
+            double support_weight = MngApi.performIntegerQuery("SELECT BuildTime FROM Objects WHERE ObjectID=" + selectedObject.getObject_weight().get(), user);
         
+//            System.out.println(weight);
+//            System.out.println(support_weight);
+            System.out.println(selectedObject.getObject_id().get());
+            System.out.println(selectedObject.getObject_name().get());
+            System.out.println(selectedObject.getObject_weight().get());
+            System.out.println(selectedObject.getObject_supportWeight().get());
+            System.out.println(selectedObject.getObject_.get());
+            
             txtField_weight.setText(String.valueOf(weight));
             txtField_supportWeight.setText(String.valueOf(support_weight));
             
