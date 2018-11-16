@@ -24,10 +24,10 @@ import javafx.beans.property.SimpleStringProperty;
 public class Material {
     
     SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
-    SimpleIntegerProperty material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
-    SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
+    SimpleIntegerProperty material_id, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
+    SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining, material_weight;
 
-    public Material(SimpleStringProperty material_color, SimpleStringProperty material_manufacturer, SimpleStringProperty material_type, SimpleStringProperty material_finished, SimpleStringProperty material_distributor, SimpleStringProperty material_purchaseDate, SimpleStringProperty material_comment, SimpleIntegerProperty material_id, SimpleIntegerProperty material_weight, SimpleIntegerProperty material_id_manufacturer, SimpleIntegerProperty material_id_materialType, SimpleIntegerProperty material_id_color, SimpleIntegerProperty material_id_weight, SimpleIntegerProperty material_id_seller, SimpleIntegerProperty material_id_diameter, SimpleDoubleProperty material_diameter, SimpleDoubleProperty material_price, SimpleDoubleProperty material_shipping, SimpleDoubleProperty material_used, SimpleDoubleProperty material_trash, SimpleDoubleProperty material_soldFor, SimpleDoubleProperty material_profit) {
+    public Material(SimpleStringProperty material_color, SimpleStringProperty material_manufacturer, SimpleStringProperty material_type, SimpleStringProperty material_finished, SimpleStringProperty material_distributor, SimpleStringProperty material_purchaseDate, SimpleStringProperty material_comment, SimpleIntegerProperty material_id, SimpleDoubleProperty material_weight, SimpleIntegerProperty material_id_manufacturer, SimpleIntegerProperty material_id_materialType, SimpleIntegerProperty material_id_color, SimpleIntegerProperty material_id_weight, SimpleIntegerProperty material_id_seller, SimpleIntegerProperty material_id_diameter, SimpleDoubleProperty material_diameter, SimpleDoubleProperty material_price, SimpleDoubleProperty material_shipping, SimpleDoubleProperty material_used, SimpleDoubleProperty material_trash, SimpleDoubleProperty material_soldFor, SimpleDoubleProperty material_profit, SimpleDoubleProperty material_remaining) {
         this.material_color = material_color;
         this.material_manufacturer = material_manufacturer;
         this.material_type = material_type;
@@ -50,6 +50,7 @@ public class Material {
         this.material_trash = material_trash;
         this.material_soldFor = material_soldFor;
         this.material_profit = material_profit;
+        this.material_remaining = material_remaining;
     }
 
     public SimpleStringProperty getMaterial_color() {
@@ -116,11 +117,11 @@ public class Material {
         this.material_id = material_id;
     }
 
-    public SimpleIntegerProperty getMaterial_weight() {
+    public SimpleDoubleProperty getMaterial_weight() {
         return material_weight;
     }
 
-    public void setMaterial_weight(SimpleIntegerProperty material_weight) {
+    public void setMaterial_weight(SimpleDoubleProperty material_weight) {
         this.material_weight = material_weight;
     }
 
@@ -228,9 +229,14 @@ public class Material {
         this.material_profit = material_profit;
     }
 
-    
+    public SimpleDoubleProperty getMaterial_remaining() {
+        return material_remaining;
+    }
 
-        
+    public void setMaterial_remaining(SimpleDoubleProperty material_remaining) {
+        this.material_remaining = material_remaining;
+    }
+
     
     //this method get list of materials - ONLY materials, without statistics
     public static List<Material> getMaterials(User user) {
@@ -277,8 +283,8 @@ public class Material {
             while(rs.next()){
                 
                 SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
-                SimpleIntegerProperty material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
-                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
+                SimpleIntegerProperty material_id, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
+                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_weight, material_remaining;
                 
                 material_color = new SimpleStringProperty(rs.getString("Color"));
                 material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
@@ -289,7 +295,6 @@ public class Material {
                 material_comment = new SimpleStringProperty(rs.getString("Comment"));                
                 
                 material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
-                material_weight = new SimpleIntegerProperty(rs.getInt("WeightValue"));
                 material_id_manufacturer = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
                 material_id_materialType = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
                 material_id_color = new SimpleIntegerProperty(rs.getInt("ColorID"));
@@ -298,15 +303,18 @@ public class Material {
                 material_id_diameter = new SimpleIntegerProperty(rs.getInt("DiameterID"));
                 
                 material_diameter = new SimpleDoubleProperty(rs.getDouble("DiameterValue"));
+                material_weight = new SimpleDoubleProperty(rs.getInt("WeightValue"));
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                material_used = new SimpleDoubleProperty(getMaterialUsed(user, material_id));
+                double material_used_absolute = getMaterialUsed(user, material_id);
+                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(user, material_id)/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
                 material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
-                material_profit = new SimpleDoubleProperty(material_soldFor.get() - material_price.get());
+                material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get() - material_price.get(), 2));
+                material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
                 
-                Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit);
+                Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining);
                 
                 allMaterialsList.add(material);
                 
@@ -349,7 +357,7 @@ public class Material {
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Materials.MaterialShipping, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID WHERE Materials.Finished='No' ORDER BY Materials.MaterialID DESC";
+        String query = "SELECT Materials.MaterialShipping, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID WHERE Materials.Finished='No' AND Materials. ORDER BY Materials.MaterialID DESC";
 
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -373,8 +381,8 @@ public class Material {
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
+                MngApi obj2 = new MngApi();
+                obj2.alertConnectionLost();
             }
             
             //STEP 4: Execute a query
@@ -388,7 +396,7 @@ public class Material {
                 
                 SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
                 SimpleIntegerProperty material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
-                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
+                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining;
                 
                 material_color = new SimpleStringProperty(rs.getString("Color"));
                 material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
@@ -411,12 +419,14 @@ public class Material {
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                material_used = new SimpleDoubleProperty(getMaterialUsed(user, material_id));
+                double material_used_absolute = getMaterialUsed(user, material_id);
+                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(user, material_id)/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(0);                    
                 material_soldFor = new SimpleDoubleProperty(0);
                 material_profit = new SimpleDoubleProperty(0);
+                material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
                 
-                Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit);
+                Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_profit, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining);
                 
                 allMaterialsList.add(material);
                 
@@ -427,8 +437,8 @@ public class Material {
             //signIn(event);
             e.printStackTrace();
         } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
+            MngApi obj2 = new MngApi();
+            obj2.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();
@@ -453,11 +463,11 @@ public class Material {
     return allMaterialsList;
     }
     
-    public static Double getMaterialUsed(User user, SimpleIntegerProperty materialID) {        
+    public static double getMaterialUsed(User user, SimpleIntegerProperty materialID) {        
                 
         double used = 0;        
         
-        String query = "SELECT OrderItems.ItemQuantity, OrderItems.ItemSupportWeight, OrderItems.ItemWeight, MaterialWeights.WeightValue FROM OrderItems JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialWeights ON Materials.WeightID=MaterialWeights.WeightID WHERE MaterialID=" + materialID.get();
+        String query = "SELECT SUM(ItemWeight) AS ItemWeight FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
         
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
@@ -485,17 +495,11 @@ public class Material {
             rs = stmt.executeQuery(query);            
             //Query is executed, resultSet saved. Now we need to process the data            
             while(rs.next()){                
-                double itemQuantity = rs.getDouble("ItemQuantity");
-                double itemSupportWeight = rs.getDouble("ItemSupportWeight");
-                double itemWeight = rs.getDouble("ItemWeight");
-                double materialWeight = rs.getDouble("WeightValue");                
                 
-                used = itemQuantity*(itemSupportWeight + itemWeight)/materialWeight*100;
+                used = rs.getDouble("ItemWeight");
                         
             }
             
-            
-
             rs.close();
         } catch (SQLException se) {
             //Handle errors for JDBC
@@ -948,8 +952,8 @@ public class Material {
             while(rs.next()){
                 
                 SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
-                SimpleIntegerProperty material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
-                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit;
+                SimpleIntegerProperty material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
+                SimpleDoubleProperty material_weight, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining;
                 
                 material_color = new SimpleStringProperty(rs.getString("Color"));
                 material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
@@ -959,7 +963,7 @@ public class Material {
                 material_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
                 material_comment = new SimpleStringProperty(rs.getString("Comment"));                
                                 
-                material_weight = new SimpleIntegerProperty(rs.getInt("WeightValue"));
+                
                 material_id_manufacturer = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
                 material_id_materialType = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
                 material_id_color = new SimpleIntegerProperty(rs.getInt("ColorID"));
@@ -967,16 +971,19 @@ public class Material {
                 material_id_seller = new SimpleIntegerProperty(rs.getInt("SellerID"));
                 material_id_diameter = new SimpleIntegerProperty(rs.getInt("DiameterID"));
                 
+                material_weight = new SimpleDoubleProperty(rs.getInt("WeightValue"));
                 material_diameter = new SimpleDoubleProperty(rs.getDouble("DiameterValue"));
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                material_used = new SimpleDoubleProperty(getMaterialUsed(user, material_id));
+                double material_used_absolute = getMaterialUsed(user, material_id);
+                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(user, material_id)/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
                 material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
-                material_profit = new SimpleDoubleProperty(material_soldFor.get() - material_price.get());
+                material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get() - material_price.get(), 2));
+                material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
                 
-                material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit);
+                material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_profit, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining);
                 
             }
 

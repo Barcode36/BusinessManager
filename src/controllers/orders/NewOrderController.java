@@ -245,7 +245,7 @@ public class NewOrderController implements Initializable {
         label_supportWeight.setText(String.format(Locale.UK, "%.2f g", summary_supportWeight));
         label_weightSum.setText(String.format(Locale.UK, "%.2f g", summary_weightSum));        
         label_quantity.setText(String.format(Locale.UK, "%d", summary_quantity));        
-            String summary_buildTime_formatted = MngApi.convertToHours(summary_buildTime).get();
+            String summary_buildTime_formatted = MngApi.convertToFormattedTime(summary_buildTime).get();
         label_buildTime.setText(String.format("%s", summary_buildTime_formatted));
         label_price.setText(String.format(Locale.UK, "%.2f $", summary_price));
         label_costs.setText(String.format(Locale.UK, "%.2f $", summary_costs));

@@ -38,10 +38,10 @@ public class SelectMaterialController implements Initializable {
     private TableColumn<Material, String> material_col_color, material_col_manufacturer, material_col_type, material_col_distributor, material_col_purchaseDate;
     
     @FXML
-    private TableColumn<Material, Integer> material_col_id, material_col_weight;
+    private TableColumn<Material, Integer> material_col_id;
     
     @FXML
-    private TableColumn<Material, Double> material_col_shipping,material_col_price, material_col_used, material_col_diameter; 
+    private TableColumn<Material, Double> material_col_shipping,material_col_price, material_col_used, material_col_diameter, material_col_weight, material_col_remaining; 
     
     @FXML
     private Button btn_select, btn_cancel;
@@ -91,7 +91,7 @@ public class SelectMaterialController implements Initializable {
         material_col_price.setCellValueFactory((param) -> {return param.getValue().getMaterial_price().asObject();});        
         material_col_shipping.setCellValueFactory((param) -> {return param.getValue().getMaterial_shipping().asObject();});
         material_col_used.setCellValueFactory((param) -> {return param.getValue().getMaterial_used().asObject();});
-
+        material_col_remaining.setCellValueFactory((param) -> {return param.getValue().getMaterial_remaining().asObject();});
         
         //Centering content
         material_col_color.setStyle("-fx-alignment: CENTER;");
@@ -102,6 +102,7 @@ public class SelectMaterialController implements Initializable {
         
         material_col_id.setStyle("-fx-alignment: CENTER;");
         
+        material_col_remaining.setStyle("-fx-alignment: CENTER;");
         material_col_price.setStyle("-fx-alignment: CENTER;");
         material_col_shipping.setStyle("-fx-alignment: CENTER;");
         material_col_used.setStyle("-fx-alignment: CENTER;");        

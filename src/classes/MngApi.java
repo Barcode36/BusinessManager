@@ -92,7 +92,7 @@ public class MngApi {
     }
     
     //converting minutes into minutes and hours
-    public static SimpleStringProperty convertToHours (int time){
+    public static SimpleStringProperty convertToFormattedTime (int time){
         SimpleStringProperty newTime;
         
         int hours = time / 60; //since both are ints, you get an int
@@ -120,6 +120,39 @@ public class MngApi {
         return newTime;
     }
 
+    public static int getHours(int time){
+        
+        String formatted_time = convertToFormattedTime(time).get();
+        String str1 = formatted_time.split(" ")[0], str2 = formatted_time.split(" ")[1];
+        
+        //remove letters
+        str1 = str1.substring(0, str1.length() - 1);
+        str2 = str2.substring(0, str2.length() - 1);
+        
+        
+        int hours = Integer.parseInt(str1);        
+        int minutes = hours*60 + Integer.parseInt(str2);
+                
+        return hours;        
+    }
+    
+    public static int getMinutes(int time){
+        
+        String formatted_time = convertToFormattedTime(time).get();
+        String str1 = formatted_time.split(" ")[0], str2 = formatted_time.split(" ")[1];
+        
+        //remove letters
+        str1 = str1.substring(0, str1.length() - 1);
+        str2 = str2.substring(0, str2.length() - 1);
+        
+        
+        int hours = Integer.parseInt(str1);        
+        int minutes = Integer.parseInt(str2);
+        
+        return minutes;
+    }
+    
+    
     public static int getCurrentAutoIncrementValue(User user, String tableName){
         int currentAutoIncrementValue = 0;
         

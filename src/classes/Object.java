@@ -7,6 +7,7 @@ package classes;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
@@ -178,7 +179,7 @@ public class Object {
                
                object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
                object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
-               object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+               object_buildTime_formated = MngApi.convertToFormattedTime(object_buildTime.get());
                
                object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));               
                
@@ -358,8 +359,79 @@ public class Object {
     
     public static void insertNewObject(classes.Object obj, User user){
         
-        String updateQuery = "INSERT INTO Objects VALUES (null,'" + obj.getObject_name().get() + "'," + obj.getObject_weight().get() + "," + obj.getObject_supportWeight().get() + ",1," + obj.getObject_buildTime().get() + ",'" + obj.getObject_stlLink().get() + "','" + obj.getObject_comment().get()+ "')";
-        MngApi.performUpdate(updateQuery, user);
+        //Create query
+        String updateQuery;
+
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            //STEP 4: Execute a query
+	    
+                
+                updateQuery = "INSERT INTO Objects (ObjectID,ObjectName,ObjectWeight,SupportWeight,BuildTime,StlLink,Comment) VALUES (?,?,?,?,?,?,?) "
+                    + "ON DUPLICATE KEY UPDATE ObjectID=?,ObjectName=?,ObjectWeight=?,SupportWeight=?,BuildTime=?,StlLink=?,Comment=?";    
+                stmt = conn.prepareStatement(updateQuery);
+                
+                stmt.setInt(1, obj.getObject_id().get());
+                stmt.setString(2, obj.getObject_name().get());
+                stmt.setDouble(3, obj.getObject_weight().get());
+                stmt.setDouble(4,obj.getObject_supportWeight().get());
+                stmt.setInt(5, obj.getObject_buildTime().get());
+                stmt.setString(6, obj.getObject_stlLink().get());
+                stmt.setString(7, obj.getObject_comment().get());
+                                
+                stmt.setInt(8, obj.getObject_id().get());
+                stmt.setString(9, obj.getObject_name().get());
+                stmt.setDouble(10, obj.getObject_weight().get());
+                stmt.setDouble(11,obj.getObject_supportWeight().get());
+                stmt.setInt(12, obj.getObject_buildTime().get());
+                stmt.setString(13, obj.getObject_stlLink().get());
+                stmt.setString(14, obj.getObject_comment().get());
+                                                
+                stmt.executeUpdate();
+            
+            stmt.close();
+            conn.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj2 = new MngApi();
+            obj2.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try        
         
     }
     

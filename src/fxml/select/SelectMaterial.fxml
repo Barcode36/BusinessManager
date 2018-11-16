@@ -8,7 +8,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="495.0" prefWidth="1088.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.select.SelectMaterialController">
+<AnchorPane id="AnchorPane" prefHeight="495.0" prefWidth="1193.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.select.SelectMaterialController">
    <children>
       <BorderPane layoutX="169.0" layoutY="100.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <bottom>
@@ -68,6 +68,7 @@
                   <TableColumn fx:id="material_col_price" prefWidth="89.0" text="Price" />
                   <TableColumn fx:id="material_col_shipping" prefWidth="89.0" text="Shipping" />
                   <TableColumn fx:id="material_col_used" minWidth="7.0" text="Used (%)" />
+                  <TableColumn fx:id="material_col_remaining" minWidth="7.0" prefWidth="95.0" text="Remaining (g)" />
                   <TableColumn fx:id="material_col_distributor" prefWidth="140.0" text="Distributor" />
                   <TableColumn fx:id="material_col_purchaseDate" minWidth="7.0" prefWidth="100.0" text="Purchase Date" />
                </columns>

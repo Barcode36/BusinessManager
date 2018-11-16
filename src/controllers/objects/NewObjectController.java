@@ -31,7 +31,7 @@ public class NewObjectController implements Initializable {
     private MainController mainController;
     
     @FXML
-    private Label object_label_id, object_label_info;
+    private Label object_label_id, object_label_info, object_label_title;
     
     @FXML
     private TextField object_txtField_name, object_txtField_weight, object_txtField_supportWeight, object_txtField_hours, object_txtField_minutes, object_txtField_stlLink, object_txtField_comment;
@@ -43,7 +43,17 @@ public class NewObjectController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
         object_btn_create.setOnAction((event) -> {            
-            boolean isEmpty = MngApi.isTextFieldEmpty(object_txtField_name, object_txtField_weight, object_txtField_supportWeight, object_txtField_hours, object_txtField_minutes);
+            createOrUpdateObject();
+        });
+        
+        object_btn_cancel.setOnAction((event) -> {
+            MngApi.closeWindow(object_btn_cancel);
+        });
+    }    
+    
+    public void createOrUpdateObject(){
+        
+        boolean isEmpty = MngApi.isTextFieldEmpty(object_txtField_name, object_txtField_weight, object_txtField_supportWeight, object_txtField_hours, object_txtField_minutes);
             
             if (isEmpty == true){
                 object_label_info.setText("Fields cannot be empty.");
@@ -72,8 +82,8 @@ public class NewObjectController implements Initializable {
                 object_id = new SimpleIntegerProperty(getObject_label_id_value());
 
             
-                object_buildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(object_txtField_hours.getText() + " " + object_txtField_minutes.getText()));
-                object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+                object_buildTime = new SimpleIntegerProperty(MngApi.convertToMinutes(object_txtField_hours.getText() + "h " + object_txtField_minutes.getText() + "m"));
+                object_buildTime_formated = MngApi.convertToFormattedTime(object_buildTime.get());
                
                 object_soldCount = new SimpleIntegerProperty(0);
                
@@ -90,14 +100,28 @@ public class NewObjectController implements Initializable {
             } catch (NumberFormatException e) {
                 object_label_info.setText("Wrong number format, please check your fields.");
                 object_label_info.setTextFill(Color.web("#ff0000"));
+                e.printStackTrace();
             }
             
-        });
+    }
+    
+    public void setEditFields(classes.Object obj){
         
-        object_btn_cancel.setOnAction((event) -> {
-            MngApi.closeWindow(object_btn_cancel);
-        });
-    }    
+        int time = obj.getObject_buildTime().get();
+        
+        object_label_title.setText("Edit Object");
+        object_label_id.setText(String.valueOf(obj.getObject_id().get()));
+        
+        object_txtField_name.setText(obj.getObject_name().get());
+        object_txtField_weight.setText(String.valueOf(obj.getObject_weight().get()));
+        object_txtField_supportWeight.setText(String.valueOf(obj.getObject_supportWeight().get()));
+        object_txtField_hours.setText(String.valueOf(MngApi.getHours(time)));
+        object_txtField_minutes.setText(String.valueOf(MngApi.getMinutes(time)));
+        object_txtField_stlLink.setText(obj.getObject_stlLink().get());
+        object_txtField_comment.setText(obj.getObject_comment().get());
+        
+        object_btn_create.setText("Edit");
+    }
     
     public void setUser(User user) {
         this.user = user;
@@ -111,7 +135,13 @@ public class NewObjectController implements Initializable {
         this.object_label_id.setText(String.valueOf(id));        
     }
     
+    public void setCreteButtonText(String text){
+        object_btn_create.setText(text);
+    } 
+     
     public int getObject_label_id_value(){
         return Integer.parseInt(this.object_label_id.getText());
     }
+    
+    
 }

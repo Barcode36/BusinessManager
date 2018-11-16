@@ -188,7 +188,7 @@ public class MainController implements Initializable {
         } else {
             label_order_TotalWeight.setText(String.format(Locale.US, "%.2fg/%.2fg", total_weight, total_supportWeight));
         }        
-        label_order_TotalBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToHours(total_buildTime).get()));
+        label_order_TotalBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToFormattedTime(total_buildTime).get()));
         label_order_TotalItemsPrinted.setText(String.valueOf(total_itemsSold));        
     }
     
@@ -217,7 +217,7 @@ public class MainController implements Initializable {
         } else {
             label_order_SelectedWeight.setText(String.format(Locale.US, "%.2fg/%.2fg", selected_weight, selected_supportWeight));
         }
-        label_order_SelectedBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToHours(selected_buildTime).get()));
+        label_order_SelectedBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToFormattedTime(selected_buildTime).get()));
         label_order_SelectedItemsPrinted.setText(String.valueOf(selected_itemsSold));        
         
     }
@@ -370,7 +370,7 @@ public class MainController implements Initializable {
             label_customers_selectedWeight.setText(String.format(Locale.US, "%.2f g", weight));
             label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2f g", supports));
             perHour = MngApi.round(price/time*60, 2);
-            label_customers_selectedBuildTime.setText(MngApi.convertToHours(time).get());        
+            label_customers_selectedBuildTime.setText(MngApi.convertToFormattedTime(time).get());        
             label_customers_selectedPricePerHour.setText(String.format(Locale.US, "%.2f $/h", perHour));
         
         } catch (ArithmeticException | NumberFormatException e) {
@@ -494,7 +494,7 @@ public class MainController implements Initializable {
     private TableColumn<classes.Object, Double> object_col_weight, object_col_supportWeight, object_col_soldPrice, object_col_objectCosts;
     
     @FXML
-    private Button object_btn_new;
+    private Button object_btn_new, object_btn_edit;
     
     @FXML
     private Label object_label_objCount,object_label_Selected,object_label_TimesPrinted,object_label_PriceCosts,object_label_PricePerHour,object_label_BuildTime, object_label_ItemSupportWeight;
@@ -586,7 +586,7 @@ public class MainController implements Initializable {
         object_label_PriceCosts.setText(String.format(Locale.US, "%.2f $/%.2f $", price, costs));        
         object_label_ItemSupportWeight.setText(String.format(Locale.US, "%.2f g/%.2f g", weight, supportWeight));
         object_label_PricePerHour.setText(String.format(Locale.US, "%.2f $/h" , price/buildTime*60));
-        object_label_BuildTime.setText(MngApi.convertToHours(buildTime).get());        
+        object_label_BuildTime.setText(MngApi.convertToFormattedTime(buildTime).get());        
     }
     /*
     *
@@ -607,10 +607,10 @@ public class MainController implements Initializable {
     private TableColumn<Material, String> material_col_color, material_col_manufacturer, material_col_type, material_col_finished, material_col_distributor, material_col_purchaseDate, material_col_comment;
     
     @FXML
-    private TableColumn<Material, Integer> material_col_id, material_col_weight;
+    private TableColumn<Material, Integer> material_col_id;
     
     @FXML
-    private TableColumn<Material, Double> material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit, material_col_diameter; 
+    private TableColumn<Material, Double> material_col_remaining, material_col_weight, material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit, material_col_diameter; 
     
     @FXML
     private Button material_btn_new;
@@ -632,7 +632,8 @@ public class MainController implements Initializable {
         
         material_col_id.setCellValueFactory((param) -> {return param.getValue().getMaterial_id().asObject();});        
         material_col_weight.setCellValueFactory((param) -> {return param.getValue().getMaterial_weight().asObject();});        
-                
+        
+        material_col_remaining.setCellValueFactory((param) -> {return param.getValue().getMaterial_remaining().asObject();});
         material_col_diameter.setCellValueFactory((param) -> {return param.getValue().getMaterial_diameter().asObject();});
         material_col_price.setCellValueFactory((param) -> {return param.getValue().getMaterial_price().asObject();});
         material_col_shipping.setCellValueFactory((param) -> {return param.getValue().getMaterial_shipping().asObject();});
@@ -652,6 +653,7 @@ public class MainController implements Initializable {
         
         material_col_id.setStyle("-fx-alignment: CENTER;");
         
+        material_col_remaining.setStyle("-fx-alignment: CENTER;");
         material_col_price.setStyle("-fx-alignment: CENTER;");
         material_col_profit.setStyle("-fx-alignment: CENTER;");
         material_col_shipping.setStyle("-fx-alignment: CENTER;");        
@@ -1006,6 +1008,37 @@ public class MainController implements Initializable {
         }
     });//end new object button  setOnAction
     
+    object_btn_edit.setOnAction((event) -> {
+        
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/objects/NewObject.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewObjectController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("New Object");
+            stage.setMinHeight(400);
+            stage.setMinWidth(440);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            classes.Object obj = tv_objects.getSelectionModel().getSelectedItems().get(0);
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setObject_label_id_value(obj.getObject_id().get());
+            ctrl.setEditFields(obj);
+            stage.show();  
+            //stage.setAlwaysOnTop(true);
+            
+        }catch (IOException e){
+            
+        }
+        
+    });
     
     
     /*

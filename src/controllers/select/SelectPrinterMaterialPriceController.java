@@ -126,7 +126,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         btn_assign.setOnAction((event) -> {
             try {
                 int quantity, buildTime;
-                double weight, supportWeight;
+                double weight, supportWeight, material_remaining = MngApi.performDoubleQuery("SELECT MaterialWeights.WeightValue FROM MaterialWeights JOIN Materials ON MaterialWeights.WeightID = Materials.WeightID WHERE MaterialID=" + material.getMaterial_id().get(), user) - MngApi.performDoubleQuery("SELECT SUM(ItemWeight) FROM OrderItems WHERE ItemMaterialID=" + material.getMaterial_id().get(), user);
             
                 double price, costs;
                 
@@ -134,7 +134,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 boolean isZero = false;
                 
                 if(Integer.parseInt(txtField_quantity.getText()) <= 0 || Double.parseDouble(txtField_weight.getText()) <= 0 || (Integer.parseInt(txtField_hours.getText()) <= 0 && Integer.parseInt(txtField_minutes.getText()) <= 0))isZero = true;            
-            
+                                
                 if (isEmpty == true || isZero == true){
                     label_info.setText("Fields cannot be empty or negative/non-zero values.");
                     label_info.setTextFill(Color.web("#ff0000"));
@@ -161,12 +161,14 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                         
                     price = Double.parseDouble(txtField_price.getText());
                     costs = Double.parseDouble(txtField_costs.getText());       
-                     
+                    
+                    if((weight + supportWeight) > material_remaining) throw new IndexOutOfBoundsException();
+                    
                     selectedObject.setQuantity(new SimpleIntegerProperty(quantity));
                     selectedObject.setObject_weight(new SimpleDoubleProperty(weight));
                     selectedObject.setObject_supportWeight(new SimpleDoubleProperty(supportWeight));
                     selectedObject.setObject_buildTime(new SimpleIntegerProperty(buildTime));
-                    selectedObject.setObject_buildTime_formated(MngApi.convertToHours(buildTime));
+                    selectedObject.setObject_buildTime_formated(MngApi.convertToFormattedTime(buildTime));
                     selectedObject.setPrinter_id(new SimpleIntegerProperty(printerID));
                     selectedObject.setPrinter_name(new SimpleStringProperty(printer_name));
                     selectedObject.setMaterial_id(new SimpleIntegerProperty(materialID));
@@ -186,6 +188,9 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 e.printStackTrace();
             } catch (ArithmeticException e){
                 label_info.setText("Enter some positive, non-zero value!");
+                label_info.setTextFill(Color.web("#ff0000"));
+            } catch (IndexOutOfBoundsException e){
+                label_info.setText("Not enough material!");
                 label_info.setTextFill(Color.web("#ff0000"));
             }
             
@@ -221,32 +226,23 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     private void setTimeAndWeight(int quantity){
         try{
             
-            SimpleStringProperty time = MngApi.convertToHours(quantity*selectedObject.getObject_buildTime().get());
+            int time = quantity*MngApi.performIntegerQuery("SELECT BuildTime FROM Objects WHERE ObjectID=" + selectedObject.getObject_id().get(), user);
+            double weight = quantity*MngApi.performDoubleQuery("SELECT ObjectWeight FROM Objects WHERE ObjectID=" + selectedObject.getObject_id().get(), user);
+            double support_weight = (double) quantity*MngApi.performIntegerQuery("SELECT SupportWeight FROM Objects WHERE ObjectID=" + selectedObject.getObject_id().get(), user);
+                      
+            String hours, minutes, time_formatted = MngApi.convertToFormattedTime(time).get();
         
-            String hours, minutes;
-        
-            hours = time.get().split(" ")[0];
-            minutes = time.get().split(" ")[1];
+            hours = time_formatted.split(" ")[0];
+            minutes = time_formatted.split(" ")[1];
         
             hours = hours.replaceAll("\\D+","");
             minutes = minutes.replaceAll("\\D+","");
         
             txtField_hours.setText(hours);
             txtField_minutes.setText(minutes);
-        
-            double weight = MngApi.performDoubleQuery("SELECT ObjectWeight FROM Objects WHERE ObjectID=" + selectedObject.getObject_weight().get(), user);
-            double support_weight = MngApi.performIntegerQuery("SELECT BuildTime FROM Objects WHERE ObjectID=" + selectedObject.getObject_weight().get(), user);
-        
-//            System.out.println(weight);
-//            System.out.println(support_weight);
-            System.out.println(selectedObject.getObject_id().get());
-            System.out.println(selectedObject.getObject_name().get());
-            System.out.println(selectedObject.getObject_weight().get());
-            System.out.println(selectedObject.getObject_supportWeight().get());
-            System.out.println(selectedObject.getObject_.get());
             
-            txtField_weight.setText(String.valueOf(weight));
-            txtField_supportWeight.setText(String.valueOf(support_weight));
+            txtField_weight.setText(String.valueOf(MngApi.round(weight, 2)));
+            txtField_supportWeight.setText(String.valueOf(MngApi.round(support_weight, 2)));
             
         } catch (NumberFormatException e){
             

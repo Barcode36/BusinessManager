@@ -213,7 +213,7 @@ public class Order {
                 totalQuantity = new SimpleIntegerProperty(rs.getInt("OrderQuantity"));
                 //totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
                 totalBuildTime = new SimpleIntegerProperty(rs.getInt("OrderBuildTime"));
-                buildTime_formated = MngApi.convertToHours(totalBuildTime.get());
+                buildTime_formated = MngApi.convertToFormattedTime(totalBuildTime.get());
                 
                 //totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
                 totalCosts = new SimpleDoubleProperty(rs.getDouble("OrderCosts"));

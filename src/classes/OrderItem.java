@@ -271,8 +271,7 @@ public class OrderItem {
                 stmt.setInt(19,orderItem.getQuantity().get());
                 stmt.setInt(20,orderItem.getPrinter_id().get());
                 stmt.setDouble(21, orderItem.getCosts().get());
-                
-                System.out.println(updateQuery);
+                                
                 stmt.executeUpdate();
             }
             stmt.close();
@@ -444,7 +443,7 @@ public class OrderItem {
                 orderItem_id = new SimpleIntegerProperty(rs.getInt("OrderItemID"));
                 object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
                 object_buildTime = new SimpleIntegerProperty(rs.getInt("ItemBuildTime"));
-                    object_buildTime_formated = MngApi.convertToHours(object_buildTime.get());
+                    object_buildTime_formated = MngApi.convertToFormattedTime(object_buildTime.get());
                 quantity = new SimpleIntegerProperty(rs.getInt("ItemQuantity"));
                 printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));                
                 material_id = new SimpleIntegerProperty(rs.getInt("ItemMaterialID"));
@@ -456,7 +455,7 @@ public class OrderItem {
                 
                 //costs calculation
                     Double material_price, material_shipping, price_per_gram, total_weight, total_supportWeight, costs;
-                    int material_weight;
+                    double material_weight;
                 
                     Material material = Material.getMaterialByID(user, material_id);
                 
