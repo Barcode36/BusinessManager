@@ -788,22 +788,22 @@
                                     <Button fx:id="customer_btn_delete11" mnemonicParsing="false" prefWidth="150.0" text="Delete Material(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Button fx:id="customer_btn_edit11" mnemonicParsing="false" prefWidth="150.0" text="Edit Material" GridPane.rowIndex="1" />
                                     <Button fx:id="btnOrdersRefresh111" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-                                    <Label text="Average Roll Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="9">
+                                    <Label text="Average Roll Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="11">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Remaining/Spent Rolls:" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
+                                    <Label text="Remaining/Sold Rolls:" GridPane.halignment="RIGHT" GridPane.rowIndex="8">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Shipping/Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
+                                    <Label text="Shipping/Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="6">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="customer_label_custCount11" text="-/-" GridPane.columnSpan="2" GridPane.rowIndex="7">
+                                    <Label fx:id="materials_label_remainingSoldRolls" text="-/-" GridPane.columnSpan="2" GridPane.rowIndex="8">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -811,7 +811,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_NotSoldCostPrice111" text="0$" GridPane.columnSpan="2" GridPane.rowIndex="9">
+                                    <Label fx:id="materials_label_avgRollPrice" text="0$" GridPane.columnSpan="2" GridPane.rowIndex="11">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -819,12 +819,12 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Trash Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="11">
+                                    <Label text="Trash Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="10">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_TotalCostPrice111" text="0g" GridPane.columnSpan="2" GridPane.rowIndex="11">
+                                    <Label fx:id="materials_label_trashWeight" text="0g" GridPane.columnSpan="2" GridPane.rowIndex="10">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -832,7 +832,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label layoutX="117.0" layoutY="360.0" text="Total(0)" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+                                    <Label layoutX="117.0" layoutY="360.0" text="Total(0)" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="5">
                                        <font>
                                           <Font name="System Bold" size="20.0" />
                                        </font>
@@ -848,17 +848,17 @@
                                           <Insets top="10.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Weight/Support Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="16">
+                                    <Label text="Paid/Sold For:" GridPane.halignment="RIGHT" GridPane.rowIndex="16">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Costs/Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="15">
+                                    <Label text="Shipping/Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="15">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Items Printed:" GridPane.halignment="RIGHT" GridPane.rowIndex="17">
+                                    <Label text="Remaining/Sold Rolls:" GridPane.halignment="RIGHT" GridPane.rowIndex="17">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
@@ -868,7 +868,7 @@
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_SelectedCostsPrice111" text="-" GridPane.columnSpan="2" GridPane.rowIndex="15">
+                                    <Label fx:id="materials_label_shippingPrice_sel" text="-" GridPane.columnSpan="2" GridPane.rowIndex="15">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -876,7 +876,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_SelectedWeight111" text="-" GridPane.columnSpan="2" GridPane.rowIndex="16">
+                                    <Label fx:id="materials_label_paidSoldFor_sel" text="-" GridPane.columnSpan="2" GridPane.rowIndex="16">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -884,7 +884,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_SelectedItemsPrinted111" text="-" GridPane.columnSpan="2" GridPane.rowIndex="17">
+                                    <Label fx:id="materials_label_remainingSoldRolls_sel" text="-" GridPane.columnSpan="2" GridPane.rowIndex="17">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -892,7 +892,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_TotalBuildTime111" text="0" GridPane.columnSpan="2" GridPane.rowIndex="13">
+                                    <Label fx:id="materials_label_manufac" text="0" GridPane.columnSpan="2" GridPane.rowIndex="13">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -900,17 +900,17 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Total Paid/Profit:" GridPane.halignment="RIGHT" GridPane.rowIndex="6">
+                                    <Label text="Paid/Sold For:" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_TotalPricePerHour111" text="0 $/0 $ (0 $)" GridPane.columnSpan="2" GridPane.rowIndex="6">
+                                    <Label fx:id="materials_label_paidSoldFor" text="0 $/0 $ (0 $)" GridPane.columnSpan="2" GridPane.rowIndex="7">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
                                        <GridPane.margin>
-                                          <Insets left="135.0" />
+                                          <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
                                     <Label text="Colors/Types:" GridPane.halignment="RIGHT" GridPane.rowIndex="12">
@@ -918,7 +918,7 @@
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_TotalWeight111" text="0/0" GridPane.columnSpan="2" GridPane.rowIndex="12">
+                                    <Label fx:id="materials_label_colorsTypes" text="0/0" GridPane.columnSpan="2" GridPane.rowIndex="12">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -926,12 +926,12 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Remaining/Spent Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="8">
+                                    <Label text="Remaining/Sold Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="9">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_TotalItemsPrinted111" text="0/0" GridPane.columnSpan="2" GridPane.rowIndex="8">
+                                    <Label fx:id="materials_label_remainingSoldWeight" text="0/0" GridPane.columnSpan="2" GridPane.rowIndex="9">
                                        <font>
                                           <Font name="System Bold" size="11.0" />
                                        </font>
@@ -939,17 +939,17 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Price per Hour:" GridPane.halignment="RIGHT" GridPane.rowIndex="18">
+                                    <Label text="Remaining/Sold Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="18">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Build Time:" GridPane.halignment="RIGHT" GridPane.rowIndex="19">
+                                    <Label text="Trash Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="19">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_SelectedPricePerHour111" text="-" GridPane.columnSpan="2" GridPane.rowIndex="18">
+                                    <Label fx:id="materials_label_remainingSoldWeight_sel" text="-" GridPane.columnSpan="2" GridPane.rowIndex="18">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -957,7 +957,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_SelectedBuildTime111" text="-" GridPane.columnSpan="2" GridPane.rowIndex="19">
+                                    <Label fx:id="materials_label_trashWeight_sel" text="-" GridPane.columnSpan="2" GridPane.rowIndex="19">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -965,7 +965,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_OrderProfit111" text="0 $/0 $" GridPane.columnSpan="2" GridPane.rowIndex="5">
+                                    <Label fx:id="materials_label_shippingPrice" text="0 $/0 $" GridPane.columnSpan="2" GridPane.rowIndex="6">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -973,12 +973,12 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Weight:" GridPane.halignment="RIGHT" GridPane.rowIndex="10">
+                                    <Label text="Average Roll Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="20">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="label_NotSoldOrderProfit111" text="0$" GridPane.columnSpan="2" GridPane.rowIndex="10">
+                                    <Label fx:id="materials_label_avgRollPrice_sel" text="-" GridPane.columnSpan="2" GridPane.rowIndex="20">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
@@ -986,8 +986,34 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Button fx:id="customer_btn_edit111" layoutX="10.0" layoutY="45.0" mnemonicParsing="false" prefWidth="150.0" text="Mark As Spent" GridPane.rowIndex="2" />
-                                    <Button fx:id="customer_btn_edit1111" layoutX="10.0" layoutY="77.0" mnemonicParsing="false" prefWidth="150.0" text="Mark As Not Spent" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Button fx:id="customer_btn_edit111" layoutX="10.0" layoutY="45.0" mnemonicParsing="false" prefWidth="150.0" text="Mark As Spent/Not Spent" GridPane.rowIndex="2" />
+                                    <Button fx:id="customer_btn_edit1111" layoutX="10.0" layoutY="77.0" mnemonicParsing="false" prefWidth="150.0" text="Details" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Label text="Colors/Types:" GridPane.halignment="RIGHT" GridPane.rowIndex="21">
+                                       <GridPane.margin>
+                                          <Insets right="25.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label text="Manufacturers:" GridPane.halignment="RIGHT" GridPane.rowIndex="22">
+                                       <GridPane.margin>
+                                          <Insets right="25.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label fx:id="materials_label_colorsTypes_sel" text="-" GridPane.rowIndex="21">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                       <GridPane.margin>
+                                          <Insets left="130.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                    <Label fx:id="materials_label_manufac_sel" text="-" GridPane.rowIndex="22">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                       <GridPane.margin>
+                                          <Insets left="130.0" />
+                                       </GridPane.margin>
+                                    </Label>
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints minWidth="10.0" />

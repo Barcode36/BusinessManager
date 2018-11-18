@@ -613,9 +613,26 @@ public class MainController implements Initializable {
     private TableColumn<Material, Double> material_col_remaining, material_col_weight, material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit, material_col_diameter; 
     
     @FXML
+    private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_colorsTypes_sel, materials_label_manufac_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_manufac;
+    
+    @FXML
     private Button material_btn_new;
     
     /*****************************          MATERIALS - METHODS          *****************************/
+    
+    public void calculateMaterialStatistics(ObservableList<Material> materials){
+     
+        int total = 0, remainingRolls = 0, soldRolls = 0, colors = 0, types = 0, manufacturers;        
+        double shipping = 0, price = 0, paid = 0, soldFor = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0;
+        
+        int total_sel = 0, remainingRolls_sel = 0, soldRolls_sel = 0, colors_sel = 0, types_sel = 0, manufacturers_sel = 0;        
+        double shipping_sel = 0, price_sel = 0, paid_sel = 0, soldFor_sel = 0, remainingMaterial_sel = 0, soldMaterial_sel = 0, trash_sel = 0, avgRollPrice_sel = 0;
+        
+        
+        
+        
+        
+    }
     
     public void refreshMaterialsTable(User user){
         
