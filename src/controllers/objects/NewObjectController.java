@@ -61,6 +61,8 @@ public class NewObjectController implements Initializable {
                 return;
             }
             
+            MngApi.checkApostrophe(object_txtField_name, object_txtField_stlLink, object_txtField_comment);
+            
             if (Integer.parseInt(object_txtField_minutes.getText()) > 59){
                 object_label_info.setText("Max value allowed is 59.");
                 object_label_info.setTextFill(Color.web("#ff0000"));

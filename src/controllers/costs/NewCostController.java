@@ -64,6 +64,8 @@ public class NewCostController implements Initializable {
                 return;
             }
             
+            MngApi.checkApostrophe(cost_txtField_comment,cost_txtField_name);
+            
             SimpleIntegerProperty cost_id, cost_quantity, cost_printerID;
             SimpleStringProperty cost_name, cost_purchaseDate, cost_comment, cost_printer;
             SimpleDoubleProperty cost_shipping, cost_price;

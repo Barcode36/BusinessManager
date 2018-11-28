@@ -83,6 +83,8 @@ public class NewCustomerController implements Initializable {
                 return;
             }
             
+            MngApi.checkApostrophe(customer_txtField_firstName, customer_txtField_lastName, customer_txtField_phone, customer_txtField_mail, customer_txtField_address, customer_txtField_city, customer_txtField_zipCode, customer_txtField_comment);
+            
             SimpleStringProperty customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment;
             SimpleIntegerProperty customer_id, customer_id_company, customer_id_country, customer_orderCount;
             SimpleDoubleProperty customer_ordersPrice;

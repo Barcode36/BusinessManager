@@ -67,6 +67,8 @@ public class NewMaterialController implements Initializable {
                 return;
             }
             
+            MngApi.checkApostrophe(material_txtField_comment);
+            
             SimpleStringProperty material_comment, material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate;
             SimpleIntegerProperty material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
             SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit,material_remaining;

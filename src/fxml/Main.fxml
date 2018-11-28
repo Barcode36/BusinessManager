@@ -900,7 +900,7 @@
                                           <Insets left="130.0" />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label text="Paid/Sold For:" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
+                                    <Label text="Paid/Profit:" GridPane.halignment="RIGHT" GridPane.rowIndex="7">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
                                        </GridPane.margin>

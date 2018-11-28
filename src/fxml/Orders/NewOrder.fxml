@@ -155,8 +155,8 @@
                   <Insets right="5.0" />
                </GridPane.margin>
             </Label>
-            <DatePicker fx:id="datePicker_dateCreated" prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <DatePicker fx:id="datePicker_dueDate" prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
+            <DatePicker fx:id="datePicker_dateCreated" editable="false" prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <DatePicker fx:id="datePicker_dueDate" editable="false" prefHeight="25.0" prefWidth="103.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>

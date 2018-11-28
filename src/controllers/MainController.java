@@ -40,12 +40,14 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 
 /**
  * FXML Controller class
@@ -281,8 +283,7 @@ public class MainController implements Initializable {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
                         refreshOrdersTable(user);
-                        calculateOrderStatistics();
-                        
+                        calculateOrderStatistics();                        
                     });
                     return null;
                 }        
@@ -618,19 +619,48 @@ public class MainController implements Initializable {
     @FXML
     private Button material_btn_new;
     
-    /*****************************          MATERIALS - METHODS          *****************************/
-    
-    public void calculateMaterialStatistics(ObservableList<Material> materials){
-     
-        int total = 0, remainingRolls = 0, soldRolls = 0, colors = 0, types = 0, manufacturers;        
-        double shipping = 0, price = 0, paid = 0, soldFor = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0;
+    /*****************************          MATERIALS - METHODS
+     * @param materials *****************************/    
+    private void calculateMaterialStatistics(ObservableList<Material> materials){
+                     
+        int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0, manufacturers;        
+        double shipping = 0, price = 0, paid = 0, profit = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0;
         
         int total_sel = 0, remainingRolls_sel = 0, soldRolls_sel = 0, colors_sel = 0, types_sel = 0, manufacturers_sel = 0;        
         double shipping_sel = 0, price_sel = 0, paid_sel = 0, soldFor_sel = 0, remainingMaterial_sel = 0, soldMaterial_sel = 0, trash_sel = 0, avgRollPrice_sel = 0;
         
+        for (int i = 0; i < materials.size(); i++) {
+            
+            Material material = materials.get(i);
+            
+            //remaining and sold rolls/weight callculation
+            switch(material.getMaterial_finished().get()){
+                case "Yes":
+                    soldRolls += 1;                    
+                    break;
+                default:
+                    remainingRolls += 1;                     
+            }
+            
+            soldMaterial += material.getMaterial_used().get()/100*material.getMaterial_weight().get();
+            
+            
+//            remainingMaterial += material.getMaterial_weight().get() - material.getMaterial_used().get()*material.getMaterial_weight().get();
+//            trash = material.getMaterial_trash().get();
+//                    
+            shipping += material.getMaterial_shipping().get();
+            price += material.getMaterial_price().get();
+            profit += material.getMaterial_profit().get();
+           
+        }
         
-        
-        
+        paid = shipping + price;
+//        avgRollPrice = paid/(soldRolls + remainingRolls);
+//        colors = MngApi.performIntegerQuery("SELECT COUNT(ColorID) FROM MaterialColors", user);
+//        types = MngApi.performIntegerQuery("SELECT COUNT(MaterialTypeID) FROM MaterialTypes", user);
+//        manufacturers = MngApi.performIntegerQuery("SELECT COUNT(ManufacturerID) FROM MaterialManufacturers", user);
+        materials_label_shippingPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", shipping, price));
+        materials_label_paidSoldFor.setText(String.format(Locale.US, "%.2f $/%.2f $ (%.2f $)", paid, profit, profit - paid));
         
     }
     
@@ -658,7 +688,7 @@ public class MainController implements Initializable {
         material_col_soldFor.setCellValueFactory((param) -> {return param.getValue().getMaterial_soldFor().asObject();});
         material_col_trash.setCellValueFactory((param) -> {return param.getValue().getMaterial_trash().asObject();});
         material_col_used.setCellValueFactory((param) -> {return param.getValue().getMaterial_used().asObject();});
-
+        
         
         //Centering content
         material_col_color.setStyle("-fx-alignment: CENTER;");
@@ -693,6 +723,7 @@ public class MainController implements Initializable {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
                         refreshMaterialsTable(user);
+                        calculateMaterialStatistics(tv_materials.getItems());
                     });
                     
                     return null;

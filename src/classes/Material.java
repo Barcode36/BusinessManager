@@ -311,7 +311,8 @@ public class Material {
                 material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(user, material_id)/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
                 material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
-                material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get() - material_price.get(), 2));
+                double price_with_shipping = material_price.get() + material_shipping.get();
+                material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get(), 2));
                 material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
                 
                 Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining);
@@ -467,7 +468,7 @@ public class Material {
                 
         double used = 0;        
         
-        String query = "SELECT SUM(ItemWeight) AS ItemWeight FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
+        String query = "SELECT SUM(ItemWeight)+SUM(ItemSupportWeight) AS ItemWeight FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
         
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";

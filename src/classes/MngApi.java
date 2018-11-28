@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -361,6 +360,16 @@ public class MngApi {
         }
         
         return isEmpty;
+    }
+    
+    public static void checkApostrophe(TextField... textfields) {
+        
+        for (int i = 0; i < textfields.length; i++) {
+            TextField textfield = textfields[i];
+            String text = textfield.getText();            
+            if(text.contains("'"))textfield.setText(text.replace("'", "''"));            
+        }
+                
     }
     
     public static boolean isComboBoxEmpty(ComboBox... comboboxes) {

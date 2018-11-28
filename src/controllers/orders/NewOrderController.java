@@ -280,6 +280,11 @@ public class NewOrderController implements Initializable {
             label_info.setText("Price per hour has bad format.");
             label_info.setTextFill(Color.web("#ff0000"));
             
+        } catch (NullPointerException e){
+            
+            label_info.setText("Price per hour is empty.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            
         }
         
         
@@ -345,12 +350,15 @@ public class NewOrderController implements Initializable {
     
     private void createOrUpdateOrder(){
         try{           
-            System.out.println(selectedObjects.size());
-            System.out.println(selectedObjects.get(0).getPrinter_id().get());
+            
             //check empty order or items without assigned material, printer, etc.
             for (int i = 0; i < tv_selectedObjects.getItems().size(); i++) {
                 if(tv_selectedObjects.getItems().get(i).getPrinter_id().get() == 0 || tv_selectedObjects.getItems().isEmpty()) throw new NullPointerException();            
             }
+            
+            //chceck for inappropriate signs in text fields and mepty text fields
+            MngApi.checkApostrophe(txtField_comment);
+            
             //preparing order
             Order newOrder;            
             SimpleIntegerProperty order_id = new SimpleIntegerProperty(Integer.parseInt(label_orderID.getText()));
