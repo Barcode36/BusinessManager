@@ -125,7 +125,7 @@ public class SelectObjectController implements Initializable {
             object_id = listObject.getObject_id();
             object_buildTime = listObject.getObject_buildTime();
             quantity = new SimpleIntegerProperty();
-            printer_id = new SimpleIntegerProperty();
+            printer_id = new SimpleIntegerProperty(0);
             material_id = new SimpleIntegerProperty();
             
             

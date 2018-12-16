@@ -188,7 +188,7 @@ public class Object {
                object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, user));
                object_costs = new SimpleDoubleProperty(MngApi.round(MngApi.performDoubleQuery("SELECT SUM(ItemCosts) FROM OrderItems WHERE ObjectID=" + object_id.get(), user), 2));
                               
-               Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice,object_costs);                
+               Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice, object_costs);
                
                objectList.add(object);
             }

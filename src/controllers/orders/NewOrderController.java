@@ -165,10 +165,8 @@ public class NewOrderController implements Initializable {
                         stage.show();
                         //stage.setAlwaysOnTop(true);            
                         ctrl.setUser(user);            
-                        ctrl.setNewOrderController(this);                                  
-                        
-                        ctrl.setSelectedObject(tv_selectedObjects.getSelectionModel().getSelectedItem());
-                        ctrl.setElementValues();
+                        ctrl.setNewOrderController(this);                                               
+                        ctrl.setElementValues(tv_selectedObjects.getSelectionModel().getSelectedItem());
                     }catch (IOException e){
             
                     }

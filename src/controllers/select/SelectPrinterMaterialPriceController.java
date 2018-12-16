@@ -42,6 +42,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+
 /**
  * FXML Controller class
  *
@@ -76,8 +77,8 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         
         txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {             
             try{                
-                setTimeAndWeight(Integer.parseInt(newValue));
-                setCosts();            
+                if(txtField_quantity.isEditable())
+                    setCostsTimeWeight(Integer.parseInt(newValue));                          
             } catch(NumberFormatException e){
                 label_info.setText("Enter some positive, non-zero numeric value!");
                 label_info.setTextFill(Color.web("#ff0000"));
@@ -86,15 +87,17 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         });   
         
         txtField_weight.textProperty().addListener((observable, oldValue, newValue) -> {            
-           setCosts();           
+           //if(txtField_weight.isEditable())
+               setCosts();
         });
         
         txtField_supportWeight.textProperty().addListener((observable, oldValue, newValue) -> {            
-           setCosts();           
+             //if(txtField_supportWeight.isEditable())
+                 setCosts();
         });
         
         txtField_material.textProperty().addListener((observable, oldValue, newValue) -> {            
-           setCosts();           
+           setCosts();
         });
         
         btn_selectMaterial.setOnAction((event) -> {
@@ -192,6 +195,9 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             } catch (IndexOutOfBoundsException e){
                 label_info.setText("Not enough material!");
                 label_info.setTextFill(Color.web("#ff0000"));
+            } catch (NullPointerException e){
+                label_info.setText("Fill all the fields!");
+                label_info.setTextFill(Color.web("#ff0000"));
             }
             
         });
@@ -201,115 +207,6 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         });
     }    
     
-    public void setElementValues(){
-                
-        label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());        
-        txtField_quantity.setText(String.valueOf(selectedObject.getQuantity().get()));
-        if(txtField_quantity.getText().equals("0"))txtField_price.setText("1");        
-        txtField_weight.setText(String.valueOf(selectedObject.getObject_weight().get()));
-        txtField_supportWeight.setText(String.valueOf(selectedObject.getObject_supportWeight().get()));
-                
-        String[] buildTime_formatted = selectedObject.getObject_buildTime_formated().get().split(" ");
-        txtField_hours.setText(String.format(Locale.UK, "%s", buildTime_formatted[0].replaceAll("[^\\d.]", "")));
-        txtField_minutes.setText(String.format(Locale.UK, "%s", buildTime_formatted[1].replaceAll("[^\\d.]", "")));
-        
-        ObservableList<String> printers = FXCollections.observableArrayList(getPrinters(user));
-        comboBox_printer.setItems(printers);
-        comboBox_printer.setVisibleRowCount(7);
-        comboBox_printer.setValue(printers.get(0));
-        
-        if(selectedObject.getMaterial_id().get() != 0)setMaterialTxtField(Material.getMaterialByID(user, selectedObject.getMaterial_id()));
-        txtField_price.setText(String.format(Locale.UK, "%.2f", selectedObject.getPrice().get()));
-        txtField_costs.setText(String.format(Locale.UK, "%.2f", selectedObject.getCosts().get()));
-    }
-    
-    private void setTimeAndWeight(int quantity){
-        try{
-            
-            int time = quantity*MngApi.performIntegerQuery("SELECT BuildTime FROM Objects WHERE ObjectID=" + selectedObject.getObject_id().get(), user);
-            double weight = quantity*MngApi.performDoubleQuery("SELECT ObjectWeight FROM Objects WHERE ObjectID=" + selectedObject.getObject_id().get(), user);
-            double support_weight = (double) quantity*MngApi.performIntegerQuery("SELECT SupportWeight FROM Objects WHERE ObjectID=" + selectedObject.getObject_id().get(), user);
-                      
-            String hours, minutes, time_formatted = MngApi.convertToFormattedTime(time).get();
-        
-            hours = time_formatted.split(" ")[0];
-            minutes = time_formatted.split(" ")[1];
-        
-            hours = hours.replaceAll("\\D+","");
-            minutes = minutes.replaceAll("\\D+","");
-        
-            txtField_hours.setText(hours);
-            txtField_minutes.setText(minutes);
-            
-            txtField_weight.setText(String.valueOf(MngApi.round(weight, 2)));
-            txtField_supportWeight.setText(String.valueOf(MngApi.round(support_weight, 2)));
-            
-        } catch (NumberFormatException e){
-            
-            label_info.setText("Enter some positive, non-zero value!");
-            label_info.setTextFill(Color.web("#ff0000"));
-            
-        }
-        
-        
-    }
-    
-    private void setCosts(){
-        
-        if (MngApi.isTextFieldEmpty(txtField_quantity)){
-                
-            //txtField_quantity.setText("1");            
-                
-        } else {
-                
-            if(MngApi.isTextFieldEmpty(txtField_material)){
-                //return;
-            } else {   
-                try{
-                    double costs, price_per_gram, material_price, material_shipping, material_weight;
-                    //int quantity = Integer.parseInt(txtField_quantity.getText());
-        
-                    material_price = material.getMaterial_price().get();
-                    material_shipping = material.getMaterial_shipping().get();
-                    material_weight = material.getMaterial_weight().get();
-        
-                    price_per_gram = (material_price+material_shipping)/material_weight;
-        
-                    Double total_weight = Double.parseDouble(txtField_weight.getText()), total_supportWeight = Double.parseDouble(txtField_supportWeight.getText());
-                    total_weight = total_weight + total_supportWeight;
-                    
-                    costs = price_per_gram*total_weight;
-        
-                    txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
-                } catch (NumberFormatException e){
-                    label_info.setText("Wrong number format, please check your fields.");
-                    label_info.setTextFill(Color.web("#ff0000"));
-                    //e.printStackTrace();
-                }
-                    
-            }                
-        }
-        
-    }
-    
-    
-    public TextField getTxtField_quantity() {
-        return txtField_quantity;
-    }
-    
-    public void setUser(User user) {
-        this.user = user;
-    }
-    
-    public void setNewOrderController(NewOrderController newOrderController) {
-        this.newOrderController = newOrderController;
-    }
-
-    public void setSelectedObject(OrderItem selectedObject) {
-        this.selectedObject = selectedObject;
-    }
-
-    
     public void setMaterialTxtField(Material material){
         this.material = material;
         
@@ -318,9 +215,134 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         String manufacturer = this.material.getMaterial_manufacturer().get();
         String color = this.material.getMaterial_color().get();
         
-        txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);
+        txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);        
     }
     
+    //set values at window opening
+    public void setElementValues(OrderItem selectedObject){
+        this.selectedObject = selectedObject;
+
+        //set material values if there are some otherwise skip
+        if(selectedObject.getMaterial_id().get() != 0) {
+            this.material = Material.getMaterialByID(user, selectedObject.getMaterial_id());        
+            int id = material.getMaterial_id().get();
+            String type = material.getMaterial_manufacturer().get() + " " + this.material.getMaterial_type().get();
+            String manufacturer = material.getMaterial_manufacturer().get();
+            String color = material.getMaterial_color().get();        
+            txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);
+        }
+        
+        //if object id == 1 => it is 3D printing service so do not set weight, time etc
+        if(selectedObject.getObject_id().get() == 1){
+            txtField_quantity.setText("1");
+            txtField_quantity.setEditable(false);
+        //user doesnt need to interact with these fieldssince all values are loaded from database and just multiplied by quantity
+        } else {            
+            txtField_quantity.setText(String.valueOf(selectedObject.getQuantity().get()));
+            txtField_quantity.setEditable(true);
+            txtField_weight.setEditable(false);
+            txtField_supportWeight.setEditable(false);
+            txtField_minutes.setEditable(false);
+            txtField_hours.setEditable(false);
+            txtField_weight.setText(String.valueOf(selectedObject.getObject_weight().get()));
+            txtField_supportWeight.setText(String.valueOf(selectedObject.getObject_supportWeight().get()));
+            String[] buildTime_formatted = selectedObject.getObject_buildTime_formated().get().split(" ");
+            txtField_hours.setText(String.format(Locale.UK, "%s", buildTime_formatted[0].replaceAll("[^\\d.]", "")));
+            txtField_minutes.setText(String.format(Locale.UK, "%s", buildTime_formatted[1].replaceAll("[^\\d.]", "")));
+        }
+        
+        ObservableList<String> printers = FXCollections.observableArrayList(getPrinters(user));
+        comboBox_printer.setItems(printers);
+        comboBox_printer.setVisibleRowCount(7);
+        comboBox_printer.setValue(printers.get(0));
+        
+        label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());    
+        txtField_price.setText(String.format(Locale.UK, "%.2f", selectedObject.getPrice().get()));
+        txtField_costs.setText(String.format(Locale.UK, "%.2f", selectedObject.getCosts().get()));        
+    }
+    
+       
+    //sets costs, build time and wight when quantity is changed
+    private void setCostsTimeWeight(int quantity){
+        try{
+            double material_price, material_shipping, material_weight, price_per_gram, weight, support_weight, total_weight, price, costs;
+            int hours, minutes, build_time;
+            
+        
+            quantity = Integer.parseInt(txtField_quantity.getText());
+            if(quantity == 0){
+                txtField_quantity.setText("1");
+                quantity = 1;
+            }
+            
+            //set up weights
+            weight = quantity*selectedObject.getObject_weight().get();
+            support_weight = quantity*selectedObject.getObject_supportWeight().get();
+                total_weight = weight + support_weight;            
+            txtField_weight.setText(String.valueOf(weight));
+            txtField_supportWeight.setText(String.valueOf(support_weight));
+            
+            //set up build time            
+            build_time = quantity*selectedObject.getObject_buildTime().get();
+            minutes = build_time % 60;
+            hours = (build_time - minutes)/60;
+            txtField_hours.setText(String.valueOf(hours));
+            txtField_minutes.setText(String.valueOf(minutes));
+            
+            //set up costs
+            setCosts();
+                        
+        } catch (NumberFormatException e){
+            label_info.setText("Wrong number format, please check your fields.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            //e.printStackTrace();
+        }
+
+    }
+    
+    //calculating costs when wight is changed
+    private void setCosts(){
+        try{
+            double material_price, material_shipping, material_weight, price_per_gram, weight, support_weight, total_weight, costs;            
+            int quantity = Integer.parseInt(txtField_quantity.getText());
+            
+//            material_price = material.getMaterial_price().get();
+//            material_shipping = material.getMaterial_shipping().get();
+//            material_weight = material.getMaterial_weight().get();
+
+            material_price = material.getMaterial_price().get();
+            material_shipping = material.getMaterial_shipping().get();
+            material_weight = material.getMaterial_weight().get();
+                        
+           
+            weight = Double.parseDouble(txtField_weight.getText())*quantity;
+            support_weight = Double.parseDouble(txtField_supportWeight.getText())*quantity;
+                total_weight = weight + support_weight;                  
+            price_per_gram = (material_price+material_shipping)/material_weight;                
+            
+            costs = price_per_gram*total_weight*quantity;        
+            txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
+            
+        } catch (NumberFormatException e){
+            label_info.setText("Wrong number format, please check your fields.");
+            label_info.setTextFill(Color.web("#ff0000"));
+            //e.printStackTrace();
+        } catch (NullPointerException e) {
+            //It is okey if user is creating new order and material has not been set yet so there are missing data to calculate costs
+            //e.printStackTrace();
+        }
+
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
+    public void setNewOrderController(NewOrderController newOrderController) {
+        this.newOrderController = newOrderController;
+    }
+    
+        
     private static List<String> getPrinters(User user) {
         
         //Create list
