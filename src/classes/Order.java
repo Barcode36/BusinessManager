@@ -650,8 +650,6 @@ public class Order {
     
     public static void insertNewOrder(Order order, User user){
         
-        //String updateQuery = "INSERT INTO Orders VALUES (" + order.getOrder_id().get() + "," + order.getOrder_customerID().get() + "," + order.getOrder_price().get() + "," + order.getOrder_quantity().get() + ",'" + order.getOrder_dateCreated().get() + "','" + order.getOrder_status().get() + "','" + order.getOrder_dueDate().get() + "','" + order.getOrder_comment().get() + "'," + order.getOrder_costs().get() + "," + order.getOrder_weighht().get() + "," + order.getOrder_support_weight().get() + "," + order.getOrder_buildTime().get() + ")";        
-        
         String updateQuery = "INSERT INTO Orders (OrderID,CustomerID,OrderPrice,OrderQuantity,DateCreated,OrderStatus,DueDate,Comment,OrderCosts,OrderWeight,OrderSupportWeight,OrderBuildTime) " +
         "VALUES (" + 
                 order.getOrder_id().get() + "," + 

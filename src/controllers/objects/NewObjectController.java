@@ -122,7 +122,7 @@ public class NewObjectController implements Initializable {
         object_txtField_stlLink.setText(obj.getObject_stlLink().get());
         object_txtField_comment.setText(obj.getObject_comment().get());
         
-        object_btn_create.setText("Edit");
+        object_btn_create.setText("Update");
     }
     
     public void setUser(User user) {

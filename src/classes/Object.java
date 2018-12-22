@@ -388,7 +388,8 @@ public class Object {
                 updateQuery = "INSERT INTO Objects (ObjectID,ObjectName,ObjectWeight,SupportWeight,BuildTime,StlLink,Comment) VALUES (?,?,?,?,?,?,?) "
                     + "ON DUPLICATE KEY UPDATE ObjectID=?,ObjectName=?,ObjectWeight=?,SupportWeight=?,BuildTime=?,StlLink=?,Comment=?";    
                 stmt = conn.prepareStatement(updateQuery);
-                
+               
+                                
                 stmt.setInt(1, obj.getObject_id().get());
                 stmt.setString(2, obj.getObject_name().get());
                 stmt.setDouble(3, obj.getObject_weight().get());

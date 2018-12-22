@@ -7,6 +7,7 @@ package classes;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
@@ -1181,10 +1182,125 @@ public class Material {
     return materialDiameters;
     }
     
-    public static void insertNewMaterial(Material newMaterial, User user){
+//    public static void insertNewMaterial(Material newMaterial, User user){
+//        
+//        String updateQuery = "INSERT INTO Materials VALUES (null, " + newMaterial.getMaterial_id_manufacturer().get() + "," + newMaterial.getMaterial_id_materialType().get() + "," + newMaterial.getMaterial_id_color().get() + "," + newMaterial.getMaterial_id_weight().get()+ "," + newMaterial.getMaterial_price().get() + "," + newMaterial.getMaterial_shipping().get() + ",'" + newMaterial.getMaterial_purchaseDate().get() + "'," + newMaterial.getMaterial_id_seller().get() + ",'" + newMaterial.getMaterial_finished().get() + "'," + newMaterial.getMaterial_trash().get() + "," + newMaterial.getMaterial_id_diameter().get() + ",'" + newMaterial.getMaterial_comment().get() + "')";        
+//        MngApi.performUpdate(updateQuery, user);                
+//        
+//    }
+    
+     public static void insertNewMaterial(Material material, User user){
         
-        String updateQuery = "INSERT INTO Materials VALUES (null, " + newMaterial.getMaterial_id_manufacturer().get() + "," + newMaterial.getMaterial_id_materialType().get() + "," + newMaterial.getMaterial_id_color().get() + "," + newMaterial.getMaterial_id_weight().get()+ "," + newMaterial.getMaterial_price().get() + "," + newMaterial.getMaterial_shipping().get() + ",'" + newMaterial.getMaterial_purchaseDate().get() + "'," + newMaterial.getMaterial_id_seller().get() + ",'" + newMaterial.getMaterial_finished().get() + "'," + newMaterial.getMaterial_trash().get() + "," + newMaterial.getMaterial_id_diameter().get() + ",'" + newMaterial.getMaterial_comment().get() + "')";        
-        MngApi.performUpdate(updateQuery, user);                
+        //Create query
+        String updateQuery;
+
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
         
-    }
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            //STEP 4: Execute a query
+	    
+                updateQuery = "INSERT INTO Materials (MaterialID,ManufacturerID,MaterialTypeID,ColorID,WeightID,MaterialPrice,MaterialShipping,PurchaseDate,SellerID,Finished,Trash,DiameterID,Comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE MaterialID=?,ManufacturerID=?,MaterialTypeID=?,ColorID=?,WeightID=?,MaterialPrice=?,MaterialShipping=?,PurchaseDate=?,SellerID=?,Finished=?,Trash=?,DiameterID=?,Comment=?";                
+                stmt = conn.prepareStatement(updateQuery);
+                
+                int i = 1;
+                
+                stmt.setInt(i, material.getMaterial_id().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_manufacturer().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_materialType().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_color().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_weight().get());
+                i++;
+                stmt.setDouble(i, material.getMaterial_price().get());
+                i++;
+                stmt.setDouble(i, material.getMaterial_shipping().get());
+                i++;
+                stmt.setString(i, material.getMaterial_purchaseDate().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_seller().get());
+                i++;
+                stmt.setString(i, material.getMaterial_finished().get());
+                i++;
+                stmt.setDouble(i, material.getMaterial_trash().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_diameter().get());
+                i++;
+                stmt.setString(i, material.getMaterial_comment().get());
+                i++;
+                
+                stmt.setInt(i, material.getMaterial_id().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_manufacturer().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_materialType().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_color().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_weight().get());
+                i++;
+                stmt.setDouble(i, material.getMaterial_price().get());
+                i++;
+                stmt.setDouble(i, material.getMaterial_shipping().get());
+                i++;
+                stmt.setString(i, material.getMaterial_purchaseDate().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_seller().get());
+                i++;
+                stmt.setString(i, material.getMaterial_finished().get());
+                i++;
+                stmt.setDouble(i, material.getMaterial_trash().get());
+                i++;
+                stmt.setInt(i, material.getMaterial_id_diameter().get());
+                i++;
+                stmt.setString(i, material.getMaterial_comment().get());
+                i++;
+                
+                stmt.executeUpdate();
+            
+            stmt.close();
+            conn.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj2 = new MngApi();
+            obj2.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try         
+    }    
 }

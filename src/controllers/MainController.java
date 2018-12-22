@@ -613,21 +613,18 @@ public class MainController implements Initializable {
     private TableColumn<Material, Double> material_col_remaining, material_col_weight, material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit, material_col_diameter; 
     
     @FXML
-    private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_colorsTypes_sel, materials_label_manufac_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_manufac;
+    private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_totalWeight_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_totalWeight, materials_label_Selected, materials_label_Total;
     
     @FXML
-    private Button material_btn_new;
+    private Button material_btn_new, material_btn_edit;
     
     /*****************************          MATERIALS - METHODS
      * @param materials *****************************/    
     private void calculateMaterialStatistics(ObservableList<Material> materials){
                      
-        int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0, manufacturers;        
-        double shipping = 0, price = 0, paid = 0, profit = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0;
-        
-        int total_sel = 0, remainingRolls_sel = 0, soldRolls_sel = 0, colors_sel = 0, types_sel = 0, manufacturers_sel = 0;        
-        double shipping_sel = 0, price_sel = 0, paid_sel = 0, soldFor_sel = 0, remainingMaterial_sel = 0, soldMaterial_sel = 0, trash_sel = 0, avgRollPrice_sel = 0;
-        
+        int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0;        
+        double shipping = 0, price = 0, paid = 0, profit = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0, total_weight = 0;
+                
         for (int i = 0; i < materials.size(); i++) {
             
             Material material = materials.get(i);
@@ -641,12 +638,10 @@ public class MainController implements Initializable {
                     remainingRolls += 1;                     
             }
             
-            soldMaterial += material.getMaterial_used().get()/100*material.getMaterial_weight().get();
             
-            
-//            remainingMaterial += material.getMaterial_weight().get() - material.getMaterial_used().get()*material.getMaterial_weight().get();
-//            trash = material.getMaterial_trash().get();
-//                    
+            total_weight += material.getMaterial_weight().get();
+            soldMaterial += material.getMaterial_weight().get() - material.getMaterial_remaining().get();
+            trash += material.getMaterial_trash().get();                    
             shipping += material.getMaterial_shipping().get();
             price += material.getMaterial_price().get();
             profit += material.getMaterial_profit().get();
@@ -654,12 +649,60 @@ public class MainController implements Initializable {
         }
         
         paid = shipping + price;
-//        avgRollPrice = paid/(soldRolls + remainingRolls);
-//        colors = MngApi.performIntegerQuery("SELECT COUNT(ColorID) FROM MaterialColors", user);
-//        types = MngApi.performIntegerQuery("SELECT COUNT(MaterialTypeID) FROM MaterialTypes", user);
-//        manufacturers = MngApi.performIntegerQuery("SELECT COUNT(ManufacturerID) FROM MaterialManufacturers", user);
+        avgRollPrice = paid/(soldRolls + remainingRolls);
+        colors = MngApi.performIntegerQuery("SELECT COUNT(ColorID) FROM MaterialColors", user);
+        types = MngApi.performIntegerQuery("SELECT COUNT(MaterialTypeID) FROM MaterialTypes", user);
+
+        materials_label_Total.setText(String.format("Total(%d)", total));
         materials_label_shippingPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", shipping, price));
         materials_label_paidSoldFor.setText(String.format(Locale.US, "%.2f $/%.2f $ (%.2f $)", paid, profit, profit - paid));
+        materials_label_remainingSoldRolls.setText(String.format("%d/%d", soldRolls, remainingRolls));
+        materials_label_totalWeight.setText(String.format("%.2f kg", total_weight/1000));
+        materials_label_remainingSoldWeight.setText(String.format(Locale.US, "%.2f / %.2f kg",soldMaterial/1000 ,(total_weight - soldMaterial)/1000));
+        materials_label_trashWeight.setText(String.format(Locale.US, "%.2f g", trash));
+        materials_label_avgRollPrice.setText(String.format(Locale.US, "%.2f $", avgRollPrice));
+        materials_label_colorsTypes.setText(String.format("%d/%d", colors, types));
+    }
+    
+    private void calculateSelectedMaterialStatistics(ObservableList<Material> materials){
+                     
+        int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0;        
+        double shipping = 0, price = 0, paid = 0, profit = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0, total_weight = 0;
+                
+        for (int i = 0; i < materials.size(); i++) {
+            
+            Material material = materials.get(i);
+            
+            //remaining and sold rolls/weight callculation
+            switch(material.getMaterial_finished().get()){
+                case "Yes":
+                    soldRolls += 1;                    
+                    break;
+                default:
+                    remainingRolls += 1;                     
+            }
+            
+            
+            total_weight += material.getMaterial_weight().get();
+            soldMaterial += material.getMaterial_weight().get() - material.getMaterial_remaining().get();
+            trash += material.getMaterial_trash().get();                    
+            shipping += material.getMaterial_shipping().get();
+            price += material.getMaterial_price().get();
+            profit += material.getMaterial_profit().get();
+           
+        }
+        
+        paid = shipping + price;
+        avgRollPrice = paid/(soldRolls + remainingRolls);
+                
+        materials_label_Selected.setText(String.format("Selected(%d)", total));
+        materials_label_shippingPrice_sel.setText(String.format(Locale.US, "%.2f $/%.2f $", shipping, price));
+        materials_label_paidSoldFor_sel.setText(String.format(Locale.US, "%.2f $/%.2f $ (%.2f $)", paid, profit, profit - paid));
+        materials_label_remainingSoldRolls_sel.setText(String.format("%d/%d", soldRolls, remainingRolls));
+        materials_label_totalWeight_sel.setText(String.format("%.2f kg", total_weight/1000));
+        materials_label_remainingSoldWeight_sel.setText(String.format(Locale.US, "%.2f / %.2f kg",soldMaterial/1000 ,(total_weight - soldMaterial)/1000));
+        materials_label_trashWeight_sel.setText(String.format(Locale.US, "%.2f g", trash));
+        materials_label_avgRollPrice_sel.setText(String.format(Locale.US, "%.2f $", avgRollPrice));
         
     }
     
@@ -709,6 +752,7 @@ public class MainController implements Initializable {
         material_col_weight.setStyle("-fx-alignment: CENTER;");        
         material_col_diameter.setStyle("-fx-alignment: CENTER;");
         
+        tv_materials.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tv_materials.setItems(materialList);        
     }    
     
@@ -762,7 +806,54 @@ public class MainController implements Initializable {
     @FXML
     private Button cost_btn_newCost, cost_btn_refresh;
     
+    @FXML
+    private Label costs_label_totalPaid, costs_label_total, costs_label_price, costs_label_shipping, costs_label_quantity, costs_label_selected, costs_label_price_sel, costs_label_shipping_sel, costs_label_quantity_sel, costs_label_totalPaid_sel;
+    
     /*****************************          COSTS - METHODS         *****************************/
+    
+    private void calculateCostsStatistics(){
+        
+        double price = 0, shipping = 0;
+        int total = 0, quantity = 0;
+
+        for (int i = 0; i < tv_costs.getItems().size(); i++) {
+                        
+            Cost cost = tv_costs.getItems().get(i);
+            
+            price += cost.getCost_price().get();
+            shipping += cost.getCost_shipping().get();
+            quantity += cost.getCost_quantity().get();
+            
+        }
+        
+        costs_label_total.setText(String.format("Total(%d)", total));
+        costs_label_price.setText(String.format(Locale.US, "%.2f $", price));
+        costs_label_shipping.setText(String.format(Locale.US, "%.2f $", shipping));
+        costs_label_totalPaid.setText(String.format(Locale.US, "%.2f $", price + shipping));
+        costs_label_quantity.setText(quantity + "");
+    }
+    
+    private void calculateCostsStatistics(ObservableList<Cost> costs){
+        
+        double price = 0, shipping = 0;
+        int total = 0, quantity = 0;
+
+        for (int i = 0; i < costs.size(); i++) {
+                        
+            Cost cost = costs.get(i);
+            
+            price += cost.getCost_price().get();
+            shipping += cost.getCost_shipping().get();
+            quantity += cost.getCost_quantity().get();
+            
+        }
+        
+        costs_label_selected.setText(String.format("Total(%d)", total));
+        costs_label_price_sel.setText(String.format(Locale.US, "%.2f $", price));
+        costs_label_shipping_sel.setText(String.format(Locale.US, "%.2f $", shipping));
+        costs_label_totalPaid_sel.setText(String.format(Locale.US, "%.2f $", price + shipping));
+        costs_label_quantity_sel.setText(quantity + "");
+    }
     
     public void refreshCostsTable(User user){
         
@@ -794,6 +885,7 @@ public class MainController implements Initializable {
         cost_col_price.setStyle("-fx-alignment: CENTER;");
         cost_col_shipping.setStyle("-fx-alignment: CENTER;");
         
+        tv_costs.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tv_costs.setItems(costsList);
         
     }
@@ -807,7 +899,8 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);                 
-                        refreshCostsTable(user);                         
+                        refreshCostsTable(user);
+                        calculateCostsStatistics();
                     });
                                        
                     return null;
@@ -1106,10 +1199,21 @@ public class MainController implements Initializable {
             }
         });
     
+    tv_materials.setRowFactory(tv -> {
+            TableRow<Material> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                    material_btn_edit.fire();
+                }
+            });
+            return row;
+        });
     
+    tv_materials.getSelectionModel().getSelectedItems().addListener((Change<? extends Material> c) -> {        
+            calculateSelectedMaterialStatistics(tv_materials.getSelectionModel().getSelectedItems());
+        });
     
-    material_btn_new.setOnAction((event) -> {
-        
+    material_btn_new.setOnAction((event) -> {        
         try{            
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/materials/NewMaterial.fxml"));            
             Parent root1 = fxmlLoader.load();
@@ -1139,6 +1243,36 @@ public class MainController implements Initializable {
         }        
     });
     
+    material_btn_edit.setOnAction((event) -> {
+        
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/materials/NewMaterial.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewMaterialController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.setTitle("Edit Material");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            //stage.setMinHeight(440);
+            //stage.setMinWidth(400);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setUpdateMaterialFields(tv_materials.getSelectionModel().getSelectedItem());
+            
+            stage.show();                        
+            
+        }catch (IOException e){
+
+        }  
+        
+    });
+    
     /*
     *
     *
@@ -1155,6 +1289,10 @@ public class MainController implements Initializable {
                     runService(service_refreshCosts);
                 }
             }
+        });
+    
+    tv_costs.getSelectionModel().getSelectedItems().addListener((Change<? extends Cost> c) -> {        
+            calculateCostsStatistics(tv_costs.getSelectionModel().getSelectedItems());
         });
     
     cost_btn_newCost.setOnAction((event) -> {

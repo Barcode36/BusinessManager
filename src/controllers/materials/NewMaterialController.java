@@ -12,6 +12,7 @@ import classes.SimpleTableObject;
 import classes.User;
 import controllers.MainController;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -41,7 +42,7 @@ public class NewMaterialController implements Initializable {
     private MainController mainController;
     
     @FXML
-    private Label material_label_id, material_label_info;
+    private Label material_label_id, material_label_info, material_label_title;
     
     @FXML
     private DatePicker material_datePicker_purchaseDate;
@@ -59,7 +60,16 @@ public class NewMaterialController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         material_btn_create.setOnAction((event) -> {
-            boolean isEmpty = MngApi.isTextFieldEmpty(material_txtField_price, material_txtField_shipping, material_txtField_comment);
+           createMaterial();
+        });
+        
+        material_btn_cancel.setOnAction((event) -> {            
+            MngApi.closeWindow(material_btn_cancel);
+        });
+    }    
+    
+    private void createMaterial(){        
+        boolean isEmpty = MngApi.isTextFieldEmpty(material_txtField_price, material_txtField_shipping, material_txtField_comment);
             
             if (isEmpty == true || MngApi.isComboBoxEmpty(material_comboBox_diameter, material_comboBox_weight, material_comboBox_type, material_comboBox_color, material_comboBox_manufacturer, material_comboBox_distributor)){
                 material_label_info.setText("Fields cannot be empty.");
@@ -113,16 +123,165 @@ public class NewMaterialController implements Initializable {
             } catch (NumberFormatException e) {
                 material_label_info.setText("Wrong number format, please check your fields.");
                 material_label_info.setTextFill(Color.web("#ff0000"));
+            }        
+    }
+    
+    public void setUpdateMaterialFields(Material material){
+        setMaterial_label_id_value(material.getMaterial_id().get());
+        setComboBoxes(material);
+        material_label_title.setText("Edit Material");
+        
+        material_txtField_price.setText(String.valueOf(material.getMaterial_price().get()));
+        material_txtField_shipping.setText(String.valueOf(material.getMaterial_shipping().get()));
+        material_txtField_comment.setText(material.getMaterial_comment().get());
+        
+        LocalDate purchaseDate = LocalDate.parse(material.getMaterial_purchaseDate().get());
+        material_datePicker_purchaseDate.setValue(purchaseDate);
+        
+        material_btn_create.setText("Update");
+        
+    }
+    
+    public void setComboBoxes(Material material){
+        
+        String type = material.getMaterial_type().get();
+        String color = material.getMaterial_color().get();
+        String manufacturer = material.getMaterial_manufacturer().get();
+        String distributor = material.getMaterial_distributor().get();
+        String diameter = String.valueOf(material.getMaterial_diameter().get());
+        String weight = String.format("%d", (int) material.getMaterial_weight().get());
+        
+        System.out.println(weight);
+                
+        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(Material.getMaterialTypes(user));
+        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(user));
+        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(user));        
+        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(user));        
+        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(user));        
+        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(user));
+        
+        material_comboBox_type.setItems(types);
+        material_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
             }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+      
+        for (int i = 0; i < types.size(); i++) {
             
+            if (type.equals(types.get(i).getName().get()))material_comboBox_type.getSelectionModel().select(i);
             
-            
+        }
+        
+        material_comboBox_color.getItems().addAll(colors);
+        material_comboBox_color.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
         
-        material_btn_cancel.setOnAction((event) -> {            
-            MngApi.closeWindow(material_btn_cancel);
+        for (int i = 0; i < colors.size(); i++) {
+            
+            if (color.equals(colors.get(i).getName().get()))material_comboBox_color.getSelectionModel().select(i);
+            
+        }
+        
+        material_comboBox_diameter.getItems().addAll(diameters);
+        material_comboBox_diameter.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         });
-    }    
+        
+        for (int i = 0; i < diameters.size(); i++) {
+            
+            if (diameter.equals(diameters.get(i).getName().get()))material_comboBox_diameter.getSelectionModel().select(i);
+            
+        }
+        
+        material_comboBox_weight.getItems().addAll(weights);
+        material_comboBox_weight.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+        
+        for (int i = 0; i < weights.size(); i++) {
+            
+            if (weight.equals(weights.get(i).getName().get()))material_comboBox_weight.getSelectionModel().select(i);
+            
+        }
+        
+        material_comboBox_manufacturer.getItems().addAll(manufacturers);
+        material_comboBox_manufacturer.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+        
+        for (int i = 0; i < manufacturers.size(); i++) {
+            
+            if (manufacturer.equals(manufacturers.get(i).getName().get()))material_comboBox_manufacturer.getSelectionModel().select(i);
+            
+        }
+        
+        material_comboBox_distributor.getItems().addAll(distributors);
+        material_comboBox_distributor.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+        
+        for (int i = 0; i < distributors.size(); i++) {
+            
+            if (distributor.equals(distributors.get(i).getName().get()))material_comboBox_distributor.getSelectionModel().select(i);
+            
+        }
+        
+        material_comboBox_diameter.setVisibleRowCount(5);
+        material_comboBox_weight.setVisibleRowCount(5);
+        material_comboBox_type.setVisibleRowCount(5);
+        material_comboBox_color.setVisibleRowCount(5);
+        material_comboBox_manufacturer.setVisibleRowCount(5);
+        material_comboBox_distributor.setVisibleRowCount(5);
+        
+    }
     
     public void setComboBoxes(){
         
@@ -130,9 +289,7 @@ public class NewMaterialController implements Initializable {
         ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(user));
         ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(user));        
         ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(user));        
-        
-        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(user));
-        
+        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(user));        
         ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(user));
         
         material_comboBox_type.setItems(types);
