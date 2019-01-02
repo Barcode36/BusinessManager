@@ -386,7 +386,7 @@
                               <GridPane hgap="5.0" vgap="5.0">
                                  <children>
                                     <Button fx:id="customer_btn_new" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Customer" GridPane.columnSpan="2" />
-                                    <Button mnemonicParsing="false" prefWidth="150.0" text="Delete Customer(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Button fx:id="customer_btn_delete" mnemonicParsing="false" prefWidth="150.0" text="Delete Customer(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Button fx:id="customer_btn_edit" mnemonicParsing="false" prefWidth="150.0" text="Edit Customer" GridPane.rowIndex="1" />
                                     <Button fx:id="customer_btn_showDetails" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Show Details" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                                     <Label text="Total Customers:" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
@@ -608,9 +608,9 @@
                               <GridPane hgap="5.0" vgap="5.0">
                                  <children>
                                     <Button fx:id="object_btn_new" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Object" GridPane.columnSpan="2" />
-                                    <Button fx:id="customer_btn_delete1" mnemonicParsing="false" prefWidth="150.0" text="Delete Objects(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Button fx:id="object_btn_delete" mnemonicParsing="false" prefWidth="150.0" text="Delete Objects(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Button fx:id="object_btn_edit" mnemonicParsing="false" prefWidth="150.0" text="Edit Object" GridPane.rowIndex="1" />
-                                    <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                    <Button fx:id="object_btn_refresh" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                     <Label text="Total Objects:" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
@@ -785,9 +785,9 @@
                               <GridPane hgap="5.0" vgap="5.0">
                                  <children>
                                     <Button fx:id="material_btn_new" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Material" GridPane.columnSpan="2" />
-                                    <Button fx:id="customer_btn_delete11" mnemonicParsing="false" prefWidth="150.0" text="Delete Material(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Button fx:id="material_btn_delete" mnemonicParsing="false" prefWidth="150.0" text="Delete Material(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <Button fx:id="material_btn_edit" mnemonicParsing="false" prefWidth="150.0" text="Edit Material" GridPane.rowIndex="1" />
-                                    <Button fx:id="btnOrdersRefresh111" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                    <Button fx:id="material_btn_refresh" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                     <Label text="Average Roll Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="12">
                                        <GridPane.margin>
                                           <Insets right="25.0" />
@@ -1138,8 +1138,8 @@
                               <GridPane hgap="5.0" vgap="5.0">
                                  <children>
                                     <Button fx:id="cost_btn_newCost" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="New Cost" GridPane.columnSpan="2" />
-                                    <Button mnemonicParsing="false" prefWidth="150.0" text="Delete Cost(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <Button mnemonicParsing="false" prefWidth="150.0" text="Edit Cost" GridPane.rowIndex="1" />
+                                    <Button fx:id="cost_btn_delete" mnemonicParsing="false" prefWidth="150.0" text="Delete Cost(s)" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Button fx:id="cost_btn_editCost" mnemonicParsing="false" prefWidth="150.0" text="Edit Cost" GridPane.rowIndex="1" />
                                     <Button fx:id="cost_btn_refresh" mnemonicParsing="false" prefHeight="25.0" prefWidth="305.0" text="Refresh" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                                     <Label text="Price:" GridPane.halignment="RIGHT" GridPane.rowIndex="5">
                                        <GridPane.margin>

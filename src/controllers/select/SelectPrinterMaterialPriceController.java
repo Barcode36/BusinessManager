@@ -9,19 +9,13 @@ package controllers.select;
 import classes.Material;
 import classes.MngApi;
 import classes.OrderItem;
+import classes.Printer;
+import classes.SimpleTableObject;
 
 import classes.User;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLNonTransientConnectionException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -41,6 +35,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 
 /**
@@ -60,7 +55,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     
     @FXML
-    private ComboBox<String> comboBox_printer;
+    private ComboBox<SimpleTableObject> comboBox_printer;
     
     @FXML
     private TextField txtField_material, txtField_price, txtField_quantity, txtField_costs, txtField_weight, txtField_supportWeight, txtField_hours, txtField_minutes;
@@ -150,11 +145,9 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 
                     String buildTime_formatted = txtField_hours.getText() + "h " + txtField_minutes.getText() + "m";
                         buildTime = MngApi.convertToMinutes(buildTime_formatted);
-                
-                    String[] printer = comboBox_printer.getValue().split(";");
-                        String printer_id = printer[0];
-                            int printerID = Integer.parseInt(printer_id);
-                        String printer_name = printer[1];
+                                     
+                    int printerID = comboBox_printer.getValue().getId().get();
+                    String printer_name = comboBox_printer.getValue().getName().get();
             
                     String[] material2 = txtField_material.getText().split(";");
                         String material_id = material2[0];
@@ -251,11 +244,33 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             txtField_minutes.setText(String.format(Locale.UK, "%s", buildTime_formatted[1].replaceAll("[^\\d.]", "")));
         }
         
-        ObservableList<String> printers = FXCollections.observableArrayList(getPrinters(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
-        comboBox_printer.setValue(printers.get(0));
+        comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
         
+        
+        int printer_id = selectedObject.getPrinter_id().get();
+                
+        for (int i = 0; i < printers.size(); i++) {
+            
+            if (printer_id == printers.get(i).getId().get()){
+                comboBox_printer.getSelectionModel().select(i);
+            } else {
+             comboBox_printer.setValue(printers.get(0));   
+            }            
+        } 
+                
         label_editedObject.setText(selectedObject.getObject_id().get() + "; " + selectedObject.getObject_name().get());    
         txtField_price.setText(String.format(Locale.UK, "%.2f", selectedObject.getPrice().get()));
         txtField_costs.setText(String.format(Locale.UK, "%.2f", selectedObject.getCosts().get()));        
@@ -341,86 +356,5 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     public void setNewOrderController(NewOrderController newOrderController) {
         this.newOrderController = newOrderController;
     }
-    
         
-    private static List<String> getPrinters(User user) {
-        
-        //Create list
-        List<String> allPrinters = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT PrinterID, PrinterName FROM Printers ORDER BY PrinterID ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                SimpleIntegerProperty id;
-                SimpleStringProperty name;
-                
-                id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
-                name = new SimpleStringProperty(rs.getString("PrinterName"));
-                
-                String printer = id.get() + ";" + name.get();
-                
-                allPrinters.add(printer);
-            }
-
-            rs.close();
-        }catch (NullPointerException e){
-            //signIn(event);
-            e.printStackTrace();
-        }catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-    
-        
-    return allPrinters;
-    }
-    
 }

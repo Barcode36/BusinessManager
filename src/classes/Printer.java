@@ -40,8 +40,8 @@ public class Printer {
         this.printer_incomes = printer_incomes;
         this.printer_expenses = printer_expenses;
         this.printer_overallIncome = printer_overallIncome;
-    }
-
+    }    
+    
     public SimpleIntegerProperty getPrinter_id() {
         return printer_id;
     }
@@ -139,12 +139,11 @@ public class Printer {
     }
     
     
-    
-    
-    public static List<String> getPrinters(User user) {
+    //gets list of printer as simple table objects - thus only id and name
+    public static List<SimpleTableObject> getPrinters(User user) {
         
         //Create list
-        List<String> allPrinters = new ArrayList<>();
+        List<SimpleTableObject> allPrinters = new ArrayList<>();
         
         //Create query
         String query = "SELECT PrinterID, PrinterName FROM Printers ORDER BY PrinterID ASC";
@@ -184,9 +183,7 @@ public class Printer {
                 id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
                 name = new SimpleStringProperty(rs.getString("PrinterName"));
                 
-                String printer = id.get() + ";" + name.get();
-                
-                allPrinters.add(printer);
+                allPrinters.add(new SimpleTableObject(id, name));
             }
 
             rs.close();
@@ -220,4 +217,6 @@ public class Printer {
         
     return allPrinters;
     }
+    
+    
 }

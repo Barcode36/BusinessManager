@@ -7,6 +7,7 @@ package classes;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
@@ -16,6 +17,7 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 
 
 /**
@@ -204,12 +206,95 @@ public class Cost {
     return allCostsList;
     }
     
-    public static void insertNewCost(Cost newCost, User user){
+    public static void insertNewCost(Cost cost, User user){
         
         //Create query
-        String updateQuery = "INSERT INTO Costs VALUES (null, '" + newCost.getCost_name().get() + "', " + newCost.getCost_quantity().get() + ", " + newCost.getCost_shipping().get() + ", '" + newCost.getCost_purchaseDate().get() + "','" + newCost.getCost_comment().get() + " '," + newCost.getCost_price().get() + ","+ newCost.getCost_printerID().get() + ")";
-        MngApi.performUpdate(updateQuery, user);
+        String updateQuery;
 
+        // JDBC driver name and database URL
+        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
+
+        //  Database credentials
+        String USER = user.getName();
+        String PASS = user.getPass();
+
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            //STEP 4: Execute a query
+	    
+                
+                updateQuery = "INSERT INTO Costs (CostID,CostName,CostQuantity,CostShipping,Comment,CostPrice,PrinterID) VALUES (?,?,?,?,?,?,?) "
+                    + "ON DUPLICATE KEY UPDATE CostID=?,CostName=?,CostQuantity=?,CostShipping=?,Comment=?,CostPrice=?,PrinterID=?";    
+                stmt = conn.prepareStatement(updateQuery);
+               
+                                
+                stmt.setInt(1, cost.getCost_id().get());//Cost id
+                stmt.setString(2, cost.getCost_name().get());//Cost name
+                stmt.setInt(3, cost.getCost_quantity().get());//quantity
+                stmt.setDouble(4,cost.getCost_shipping().get());//shipping
+                stmt.setString(5, cost.getCost_comment().get());//comment
+                stmt.setDouble(6, cost.getCost_price().get());//price
+                stmt.setInt(7, cost.getCost_printerID().get());//printerId
+                                
+                stmt.setInt(8, cost.getCost_id().get());//id
+                stmt.setString(9, cost.getCost_name().get());//name
+                stmt.setInt(10, cost.getCost_quantity().get());//quantity
+                stmt.setDouble(11,cost.getCost_shipping().get());//shipping
+                stmt.setString(12, cost.getCost_comment().get());//comment
+                stmt.setDouble(13, cost.getCost_price().get());//price
+                stmt.setInt(14, cost.getCost_printerID().get());//printer ID
+                                                
+                stmt.executeUpdate();
+            
+            stmt.close();
+            conn.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj2 = new MngApi();
+            obj2.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try        
+        
+    }    
+    
+    public static void deleteCosts(ObservableList<Cost> costs, User user){
+        
+        for (int i = 0; i < costs.size(); i++) {
+            
+            int id = costs.get(i).getCost_id().get();
+            String query = "DELETE FROM Costs WHERE CostID=" + id;
+            MngApi.performUpdate(query, user);
+            
+        }
+        
     }
     
 }

@@ -8,9 +8,11 @@ package controllers.costs;
 import classes.Cost;
 import classes.MngApi;
 import classes.Printer;
+import classes.SimpleTableObject;
 import classes.User;
 import controllers.MainController;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -26,6 +28,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.util.StringConverter;
 
 /**
  * FXML Controller class
@@ -51,7 +54,7 @@ public class NewCostController implements Initializable {
     private Button cost_btn_create, cost_btn_cancel;
     
     @FXML
-    private ComboBox<String> comboBox_printer;
+    private ComboBox<SimpleTableObject> comboBox_printer;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -75,11 +78,9 @@ public class NewCostController implements Initializable {
             try {
             cost_id = new SimpleIntegerProperty(getCost_label_id_value());
             cost_quantity = new SimpleIntegerProperty(Integer.parseInt(cost_txtField_quantity.getText()));
-            
-            String[] printer = comboBox_printer.getValue().split(";");
-            
-            cost_printerID = new SimpleIntegerProperty(Integer.parseInt(printer[0]));
-            cost_printer = new SimpleStringProperty(printer[1]);
+                        
+            cost_printerID = new SimpleIntegerProperty(comboBox_printer.getValue().getId().get());
+            cost_printer = new SimpleStringProperty(comboBox_printer.getValue().getName().get());
             
             cost_name = new SimpleStringProperty(cost_txtField_name.getText());            
             cost_purchaseDate = new SimpleStringProperty(cost_datePicker_purchaseDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
@@ -117,13 +118,56 @@ public class NewCostController implements Initializable {
         this.user = user;
     }
     
-    public void setCost_label_id_value(int id) {
+    public void setFieldsValues() {
+        
+        int id = MngApi.getCurrentAutoIncrementValue(user, "Costs");
         this.cost_label_id.setText(String.valueOf(id));
 
-        ObservableList<String> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setValue(printers.get(0));        
+    }
+    
+    public void setUpdateCostFields(Cost cost) {
+        
+        int id = cost.getCost_id().get();
+        this.cost_label_id.setText(String.valueOf(id));
+
+        cost_btn_create.setText("Update");
+        
+        cost_txtField_name.setText(cost.getCost_name().get());
+        cost_txtField_quantity.setText(String.valueOf(cost.getCost_quantity().get()));
+        cost_txtField_price.setText(String.valueOf(cost.getCost_price().get()));
+        cost_txtField_shipping.setText(String.valueOf(cost.getCost_shipping().get()));
+        cost_txtField_comment.setText(cost.getCost_comment().get());
+        
+        LocalDate purchaseDate = LocalDate.parse(cost.getCost_purchaseDate().get());
+        cost_datePicker_purchaseDate.setValue(purchaseDate);        
+        
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
+        comboBox_printer.setItems(printers);
+        comboBox_printer.setVisibleRowCount(7);        
+        comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+        
+        
+        int printer_id = cost.getCost_printerID().get();
+                
+        for (int i = 0; i < printers.size(); i++) {
+            
+            if (printer_id == printers.get(i).getId().get())comboBox_printer.getSelectionModel().select(i);
+                    
+        }  
     }
     
     public int getCost_label_id_value(){

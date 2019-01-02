@@ -17,6 +17,7 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -1182,13 +1183,6 @@ public class Material {
     return materialDiameters;
     }
     
-//    public static void insertNewMaterial(Material newMaterial, User user){
-//        
-//        String updateQuery = "INSERT INTO Materials VALUES (null, " + newMaterial.getMaterial_id_manufacturer().get() + "," + newMaterial.getMaterial_id_materialType().get() + "," + newMaterial.getMaterial_id_color().get() + "," + newMaterial.getMaterial_id_weight().get()+ "," + newMaterial.getMaterial_price().get() + "," + newMaterial.getMaterial_shipping().get() + ",'" + newMaterial.getMaterial_purchaseDate().get() + "'," + newMaterial.getMaterial_id_seller().get() + ",'" + newMaterial.getMaterial_finished().get() + "'," + newMaterial.getMaterial_trash().get() + "," + newMaterial.getMaterial_id_diameter().get() + ",'" + newMaterial.getMaterial_comment().get() + "')";        
-//        MngApi.performUpdate(updateQuery, user);                
-//        
-//    }
-    
      public static void insertNewMaterial(Material material, User user){
         
         //Create query
@@ -1221,59 +1215,33 @@ public class Material {
                 
                 int i = 1;
                 
-                stmt.setInt(i, material.getMaterial_id().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_manufacturer().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_materialType().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_color().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_weight().get());
-                i++;
-                stmt.setDouble(i, material.getMaterial_price().get());
-                i++;
-                stmt.setDouble(i, material.getMaterial_shipping().get());
-                i++;
-                stmt.setString(i, material.getMaterial_purchaseDate().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_seller().get());
-                i++;
-                stmt.setString(i, material.getMaterial_finished().get());
-                i++;
-                stmt.setDouble(i, material.getMaterial_trash().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_diameter().get());
-                i++;
-                stmt.setString(i, material.getMaterial_comment().get());
-                i++;
+                stmt.setInt(i, material.getMaterial_id().get());i++;
+                stmt.setInt(i, material.getMaterial_id_manufacturer().get());i++;
+                stmt.setInt(i, material.getMaterial_id_materialType().get());i++;
+                stmt.setInt(i, material.getMaterial_id_color().get());i++;
+                stmt.setInt(i, material.getMaterial_id_weight().get());i++;
+                stmt.setDouble(i, material.getMaterial_price().get());i++;
+                stmt.setDouble(i, material.getMaterial_shipping().get());i++;
+                stmt.setString(i, material.getMaterial_purchaseDate().get());i++;
+                stmt.setInt(i, material.getMaterial_id_seller().get());i++;
+                stmt.setString(i, material.getMaterial_finished().get());i++;
+                stmt.setDouble(i, material.getMaterial_trash().get());i++;
+                stmt.setInt(i, material.getMaterial_id_diameter().get());i++;
+                stmt.setString(i, material.getMaterial_comment().get());i++;
                 
-                stmt.setInt(i, material.getMaterial_id().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_manufacturer().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_materialType().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_color().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_weight().get());
-                i++;
-                stmt.setDouble(i, material.getMaterial_price().get());
-                i++;
-                stmt.setDouble(i, material.getMaterial_shipping().get());
-                i++;
-                stmt.setString(i, material.getMaterial_purchaseDate().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_seller().get());
-                i++;
-                stmt.setString(i, material.getMaterial_finished().get());
-                i++;
-                stmt.setDouble(i, material.getMaterial_trash().get());
-                i++;
-                stmt.setInt(i, material.getMaterial_id_diameter().get());
-                i++;
-                stmt.setString(i, material.getMaterial_comment().get());
-                i++;
+                stmt.setInt(i, material.getMaterial_id().get());i++;
+                stmt.setInt(i, material.getMaterial_id_manufacturer().get());i++;
+                stmt.setInt(i, material.getMaterial_id_materialType().get());i++;
+                stmt.setInt(i, material.getMaterial_id_color().get());i++;
+                stmt.setInt(i, material.getMaterial_id_weight().get());i++;
+                stmt.setDouble(i, material.getMaterial_price().get());i++;
+                stmt.setDouble(i, material.getMaterial_shipping().get());i++;
+                stmt.setString(i, material.getMaterial_purchaseDate().get());i++;
+                stmt.setInt(i, material.getMaterial_id_seller().get());i++;
+                stmt.setString(i, material.getMaterial_finished().get());i++;
+                stmt.setDouble(i, material.getMaterial_trash().get());i++;
+                stmt.setInt(i, material.getMaterial_id_diameter().get());i++;
+                stmt.setString(i, material.getMaterial_comment().get());i++;
                 
                 stmt.executeUpdate();
             
@@ -1302,5 +1270,17 @@ public class Material {
                 se.printStackTrace();
             }//end finally try
         }//end try         
-    }    
+    }
+     
+     public static void deleteMaterials(ObservableList<Material> materials, User user){
+         
+         for (int i = 0; i < materials.size(); i++) {
+            
+            int id = materials.get(i).getMaterial_id().get();
+            String query = "DELETE FROM Materials WHERE MaterialID=" + id;
+            MngApi.performUpdate(query, user);
+            
+        }
+         
+     }
 }

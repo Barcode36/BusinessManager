@@ -129,17 +129,7 @@ public class MainController implements Initializable {
     @FXML
     private Label label_order_SelectedCostsPrice, label_order_SelectedWeight, label_order_SelectedItemsPrinted, label_order_SelectedPricePerHour, label_order_SelectedBuildTime, label_order_SelectedOrders;
     
-    /*****************************          ORDERS TAB - METHODS        *****************************/
-    
-    private void deleteOrder(Order order){        
-        int order_id = order.getOrder_id().get();
-        String query = "DELETE FROM OrderItems WHERE OrderID=" + order_id;
-        MngApi.performUpdate(query, user);
-        query = "DELETE FROM Orders WHERE OrderID=" + order_id;        
-        MngApi.performUpdate(query, user);           
-    }
-    
-    
+    /*****************************          ORDERS TAB - METHODS        *****************************/    
     private void calculateOrderStatistics(){
         
         int sold_orders = 0, notSold_orders = 0, total_orders, total_itemsSold = 0, total_buildTime = 0;        
@@ -324,7 +314,7 @@ public class MainController implements Initializable {
     private TableColumn<Customer, Double> customer_col_ordersPrice;
     
     @FXML
-    private Button customer_btn_new,customer_btn_refresh, customer_btn_showDetails, customer_btn_edit;
+    private Button customer_btn_new,customer_btn_refresh, customer_btn_showDetails, customer_btn_edit, customer_btn_delete;
     
     @FXML
     private Label label_customer_selected, label_customers_custCount, label_customers_selectedOrders, label_customers_selectedItems, label_customers_selectedPrice, label_customers_selectedCosts, label_customers_selectedWeight, label_customers_selectedSupportWeight, label_customers_selectedBuildTime, label_customers_selectedPricePerHour;
@@ -494,7 +484,7 @@ public class MainController implements Initializable {
     private TableColumn<classes.Object, Double> object_col_weight, object_col_supportWeight, object_col_soldPrice, object_col_objectCosts;
     
     @FXML
-    private Button object_btn_new, object_btn_edit;
+    private Button object_btn_new, object_btn_edit, object_btn_refresh, object_btn_delete;
     
     @FXML
     private Label object_label_objCount,object_label_Selected,object_label_TimesPrinted,object_label_PriceCosts,object_label_PricePerHour,object_label_BuildTime, object_label_ItemSupportWeight;
@@ -616,7 +606,7 @@ public class MainController implements Initializable {
     private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_totalWeight_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_totalWeight, materials_label_Selected, materials_label_Total;
     
     @FXML
-    private Button material_btn_new, material_btn_edit;
+    private Button material_btn_new, material_btn_edit, material_btn_refresh, material_btn_delete;
     
     /*****************************          MATERIALS - METHODS
      * @param materials *****************************/    
@@ -804,7 +794,7 @@ public class MainController implements Initializable {
     private TableColumn<Cost, Double> cost_col_price, cost_col_shipping;
     
     @FXML
-    private Button cost_btn_newCost, cost_btn_refresh;
+    private Button cost_btn_newCost, cost_btn_editCost, cost_btn_refresh, cost_btn_delete;
     
     @FXML
     private Label costs_label_totalPaid, costs_label_total, costs_label_price, costs_label_shipping, costs_label_quantity, costs_label_selected, costs_label_price_sel, costs_label_shipping_sel, costs_label_quantity_sel, costs_label_totalPaid_sel;
@@ -1010,7 +1000,7 @@ public class MainController implements Initializable {
         });
         
         order_btn_delete.setOnAction((event) -> {            
-            deleteOrder(tv_orders.getSelectionModel().getSelectedItem());            
+            Order.deleteOrders(tv_orders.getSelectionModel().getSelectedItems(), user);            
         });
         
     /*
@@ -1105,7 +1095,19 @@ public class MainController implements Initializable {
         }        
     });
     
+    customer_btn_delete.setOnAction((event) -> {        
+        Customer.deleteCustomers(tv_customers.getSelectionModel().getSelectedItems(), user);        
+    });
+    
     /*****************************          INITIALIZE OBJECTS TAB          *****************************/
+    
+    object_btn_refresh.setOnAction((event) -> {
+        runService(service_refreshCustomers);
+    });
+            
+    object_btn_delete.setOnAction((event) -> {
+        classes.Object.deleteObjects(tv_objects.getSelectionModel().getSelectedItems(), user);
+    });
     
     tv_objects.getSelectionModel().getSelectedItems().addListener((Change<? extends classes.Object> c) -> {        
             calculateSelectedObjectsStatistics(tv_objects.getSelectionModel().getSelectedItems());
@@ -1273,6 +1275,14 @@ public class MainController implements Initializable {
         
     });
     
+    material_btn_refresh.setOnAction((event) -> {
+        runService(service_refreshMaterials);
+    });
+    
+    material_btn_delete.setOnAction((event) -> {
+        Material.deleteMaterials(tv_materials.getSelectionModel().getSelectedItems(),user);
+    });
+    
     /*
     *
     *
@@ -1282,6 +1292,16 @@ public class MainController implements Initializable {
     */
      /*****************************          INITIALIZE COSTS TAB          *****************************/
     
+    tv_costs.setRowFactory( tv -> {
+        TableRow<Cost> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                cost_btn_editCost.fire();
+            }
+        });
+    return row;
+    });
+     
     tab_costs.setOnSelectionChanged(new EventHandler<Event>() {
             @Override
             public void handle(Event t) {
@@ -1314,13 +1334,48 @@ public class MainController implements Initializable {
             //passing credentials to main controller
             ctrl.setUser(user);
             ctrl.setMainController(this);
-            ctrl.setCost_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Costs"));
+            ctrl.setFieldsValues();
             stage.show();                        
             
         }catch (IOException e){
             
         }
     });//end new cost button  setOnAction
+    
+    cost_btn_editCost.setOnAction((event) -> {
+        
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/costs/NewCost.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewCostController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Edit Cost");
+            stage.setMinHeight(440);
+            stage.setMinWidth(400);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setUpdateCostFields(tv_costs.getSelectionModel().getSelectedItems().get(0));
+            stage.show();                        
+            
+        }catch (IOException e){
+            
+        }
+        
+    });
+    
+    cost_btn_delete.setOnAction((event) -> {
+        
+        Cost.deleteCosts(tv_costs.getSelectionModel().getSelectedItems(), user);
+        
+    });
     
     cost_btn_refresh.setOnAction((event) -> {
         //refreshCostsTable(user);

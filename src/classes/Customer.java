@@ -17,6 +17,7 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -596,4 +597,15 @@ public class Customer  {
         MngApi.performUpdate(updateQuery, user);                
         
     }
+     
+    public static void deleteCustomers(ObservableList<Customer> customers, User user){
+        
+        for (int i = 0; i < customers.size(); i++) {
+            
+            int id = customers.get(i).getCustomer_id().get();
+            String query = "DELETE FROM Customers WHERE CustomerID=" + id;
+            MngApi.performUpdate(query, user);   
+            
+        }        
+    } 
 }
