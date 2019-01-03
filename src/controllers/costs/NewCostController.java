@@ -126,6 +126,17 @@ public class NewCostController implements Initializable {
         ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
+        comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
+            @Override
+            public String toString(SimpleTableObject object) {
+                return object.getName().get();
+            }
+
+            @Override
+            public SimpleTableObject fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
         comboBox_printer.setValue(printers.get(0));        
     }
     
