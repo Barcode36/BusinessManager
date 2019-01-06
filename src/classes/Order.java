@@ -163,8 +163,7 @@ public class Order {
         //Create list
         List<Order> orderList = new ArrayList<>();
         
-        //Create query
-        //String query = "SELECT Orders.OrderID, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
+        //Create query        
         String query = "SELECT Orders.OrderID, Orders.OrderQuantity, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment, Orders.OrderCosts,Orders.OrderWeight,Orders.OrderSupportWeight,Orders.OrderBuildTime FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
 
         

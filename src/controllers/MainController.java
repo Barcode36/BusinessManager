@@ -12,11 +12,13 @@ import classes.Material;
 import classes.MngApi;
 import classes.Object;
 import classes.Order;
+import classes.Printer;
 import classes.User;
 import controllers.customers.NewCustomerController;
 import controllers.materials.NewMaterialController;
 import controllers.objects.NewObjectController;
 import controllers.orders.NewOrderController;
+import controllers.printers.NewPrinterController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
@@ -570,7 +572,7 @@ public class MainController implements Initializable {
                         
         }
         
-        object_label_Selected.setText(String.valueOf(selectedObjects.size()));
+        object_label_Selected.setText(String.format("Selected(%d)", selectedObjects.size()));
         object_label_TimesPrinted.setText(String.valueOf(timesPrinted));
         object_label_BuildTime.setText(String.valueOf(buildTime));
         object_label_PriceCosts.setText(String.format(Locale.US, "%.2f $/%.2f $", price, costs));        
@@ -692,7 +694,12 @@ public class MainController implements Initializable {
         materials_label_totalWeight_sel.setText(String.format("%.2f kg", total_weight/1000));
         materials_label_remainingSoldWeight_sel.setText(String.format(Locale.US, "%.2f / %.2f kg",soldMaterial/1000 ,(total_weight - soldMaterial)/1000));
         materials_label_trashWeight_sel.setText(String.format(Locale.US, "%.2f g", trash));
-        materials_label_avgRollPrice_sel.setText(String.format(Locale.US, "%.2f $", avgRollPrice));
+        if(avgRollPrice == 0){
+            materials_label_avgRollPrice_sel.setText(String.format(Locale.US, "%.2f $", avgRollPrice));
+        } else {
+            
+        }
+        
         
     }
     
@@ -804,7 +811,7 @@ public class MainController implements Initializable {
     private void calculateCostsStatistics(){
         
         double price = 0, shipping = 0;
-        int total = 0, quantity = 0;
+        int total = tv_costs.getItems().size(), quantity = 0;
 
         for (int i = 0; i < tv_costs.getItems().size(); i++) {
                         
@@ -826,7 +833,7 @@ public class MainController implements Initializable {
     private void calculateCostsStatistics(ObservableList<Cost> costs){
         
         double price = 0, shipping = 0;
-        int total = 0, quantity = 0;
+        int total = costs.size(), quantity = 0;
 
         for (int i = 0; i < costs.size(); i++) {
                         
@@ -838,7 +845,7 @@ public class MainController implements Initializable {
             
         }
         
-        costs_label_selected.setText(String.format("Total(%d)", total));
+        costs_label_selected.setText(String.format("Selected(%d)", total));
         costs_label_price_sel.setText(String.format(Locale.US, "%.2f $", price));
         costs_label_shipping_sel.setText(String.format(Locale.US, "%.2f $", shipping));
         costs_label_totalPaid_sel.setText(String.format(Locale.US, "%.2f $", price + shipping));
@@ -912,7 +919,184 @@ public class MainController implements Initializable {
     *
     *    
     */
+    /*****************************          PRINTERS - VARIALES          *****************************/
     
+    @FXML
+    private Tab tab_printers;
+    
+    @FXML
+    private TableView<Printer> tv_printers;
+    
+    @FXML
+    private TableColumn<Printer, Integer> printer_col_id, pinter_col_itemsSold;
+    
+    @FXML
+    private TableColumn<Printer, String> printer_col_name, printer_col_purchaseDate, printer_col_type, printer_col_comment;
+    
+    @FXML
+    private TableColumn<Printer, Double> printer_col_price, printer_col_shipping, printer_col_incomes, printer_col_expenses, printer_col_overallIncome, printer_col_duty, printer_col_tax;
+    
+    @FXML
+    private Button printer_btn_new, printer_btn_edit, printer_btn_delete, printer_btn_details, printer_btn_refresh;
+    
+    @FXML
+    private Label printer_label_total, printer_label_priceShipping, printer_label_sum, printer_label_expenses, printer_label_totalPaid, printer_label_itemsSold, printer_label_incomes, printer_label_difference, printer_label_dutyTax;
+    @FXML
+    private Label printer_label_total_sel, printer_label_priceShipping_sel, printer_label_sum_sel, printer_label_expenses_sel, printer_label_totalPaid_sel, printer_label_itemsSold_sel, printer_label_incomes_sel, printer_label_difference_sel, printer_label_dutyTax_sel;
+    
+    
+    /*****************************          PRINTERS - METHODS         *****************************/
+    
+    private void calculatePrintersStatistics(){
+        
+        ObservableList<Printer> printers = tv_printers.getItems();
+        
+        int items_sold = 0, total = printers.size();
+        double price = 0, shipping = 0, duty = 0, tax = 0, expenses = 0, incomes = 0;
+        double sum, totalPaid, difference;
+        
+        for (int i = 0; i < printers.size(); i++) {
+            
+           Printer printer = printers.get(i);
+           
+           items_sold += printer.getPrinter_itemsSold().get();
+           price += printer.getPrinter_price().get();
+           shipping += printer.getPrinter_shipping().get();
+           duty += printer.getPrinter_duty().get();
+           tax += printer.getPrinter_tax().get();
+           expenses += printer.getPrinter_expenses().get();
+           incomes += printer.getPrinter_incomes().get();
+            
+        }
+        
+        sum = price + shipping + duty + tax;
+        totalPaid = sum + expenses;
+        difference = totalPaid - incomes;
+        
+        printer_label_total.setText(String.format("Total(%d)", total));
+        printer_label_priceShipping.setText(String.format(Locale.US, "%.2f $/%.2f $", price, shipping));
+        printer_label_dutyTax.setText(String.format(Locale.US, "%.2f $/%.2f $", duty, tax));
+        printer_label_sum.setText(String.format(Locale.US, "%.2f $", sum));
+        printer_label_expenses.setText(String.format(Locale.US, "%.2f $", expenses));
+        printer_label_totalPaid.setText(String.format(Locale.US, "%.2f $", totalPaid));
+        printer_label_itemsSold.setText("" + items_sold);
+        printer_label_incomes.setText(String.format(Locale.US, "%.2f $", incomes));
+        printer_label_difference.setText(String.format(Locale.US, "%.2f $", difference));
+        
+    }
+    
+    private void calculateSelectedPrintersStatistics(ObservableList<Printer> printers){
+                
+        int items_sold = 0, total = printers.size();
+        double price = 0, shipping = 0, duty = 0, tax = 0, expenses = 0, incomes = 0;
+        double sum, totalPaid, difference;
+        
+        for (int i = 0; i < printers.size(); i++) {
+            
+           Printer printer = printers.get(i);
+           
+           items_sold += printer.getPrinter_itemsSold().get();
+           price += printer.getPrinter_price().get();
+           shipping += printer.getPrinter_shipping().get();
+           duty += printer.getPrinter_duty().get();
+           tax += printer.getPrinter_tax().get();
+           expenses += printer.getPrinter_expenses().get();
+           incomes += printer.getPrinter_incomes().get();
+            
+        }
+        
+        sum = price + shipping + duty + tax;
+        totalPaid = sum + expenses;
+        difference = totalPaid - incomes;
+        
+        printer_label_total_sel.setText(String.format("Selected(%d)", total));
+        printer_label_priceShipping_sel.setText(String.format(Locale.US, "%.2f $/%.2f $", price, shipping));
+        printer_label_dutyTax_sel.setText(String.format(Locale.US, "%.2f $/%.2f $", duty, tax));
+        printer_label_sum_sel.setText(String.format(Locale.US, "%.2f $", sum));
+        printer_label_expenses_sel.setText(String.format(Locale.US, "%.2f $", expenses));
+        printer_label_totalPaid_sel.setText(String.format(Locale.US, "%.2f $", totalPaid));
+        printer_label_itemsSold_sel.setText("" + items_sold);
+        printer_label_incomes_sel.setText(String.format(Locale.US, "%.2f $", incomes));
+        printer_label_difference_sel.setText(String.format(Locale.US, "%.2f $", difference));
+        
+    }
+    
+    public void refreshPrintersTable(User user){
+        
+        //Create list of orders
+        ObservableList<Printer> printersList = FXCollections.observableArrayList(Printer.getPrintersLong(user));
+        
+        printer_col_name.setCellValueFactory((param) -> {return param.getValue().getPrinter_name();});
+        printer_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getPrinter_purchaseDate();});           
+        printer_col_type.setCellValueFactory((param) -> {return param.getValue().getPrinter_type();});
+        printer_col_comment.setCellValueFactory((param) -> {return param.getValue().getPrinter_comment();});
+        
+        printer_col_id.setCellValueFactory((param) -> {return param.getValue().getPrinter_id().asObject();});        
+        pinter_col_itemsSold.setCellValueFactory((param) -> {return param.getValue().getPrinter_itemsSold().asObject();});
+                
+        printer_col_price.setCellValueFactory((param) -> {return param.getValue().getPrinter_price().asObject();});
+        printer_col_shipping.setCellValueFactory((param) -> {return param.getValue().getPrinter_shipping().asObject();});
+        printer_col_incomes.setCellValueFactory((param) -> {return param.getValue().getPrinter_incomes().asObject();});
+        printer_col_expenses.setCellValueFactory((param) -> {return param.getValue().getPrinter_expenses().asObject();});
+        printer_col_overallIncome.setCellValueFactory((param) -> {return param.getValue().getPrinter_overallIncome().asObject();});
+        printer_col_duty.setCellValueFactory((param) -> {return param.getValue().getPrinter_duty().asObject();});
+        printer_col_tax.setCellValueFactory((param) -> {return param.getValue().getPrinter_tax().asObject();});
+        
+        
+        //Centering content
+        printer_col_name.setStyle("-fx-alignment: CENTER;");
+        printer_col_purchaseDate.setStyle("-fx-alignment: CENTER;");
+        printer_col_type.setStyle("-fx-alignment: CENTER;");
+        printer_col_comment.setStyle("-fx-alignment: CENTER;");
+        
+        printer_col_id.setStyle("-fx-alignment: CENTER;");
+        pinter_col_itemsSold.setStyle("-fx-alignment: CENTER;");
+        
+        printer_col_price.setStyle("-fx-alignment: CENTER;");
+        printer_col_shipping.setStyle("-fx-alignment: CENTER;");
+        printer_col_incomes.setStyle("-fx-alignment: CENTER;");
+        printer_col_expenses.setStyle("-fx-alignment: CENTER;");
+        printer_col_overallIncome.setStyle("-fx-alignment: CENTER;");        
+        printer_col_duty.setStyle("-fx-alignment: CENTER;");
+        printer_col_tax.setStyle("-fx-alignment: CENTER;");
+        
+        tv_printers.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        tv_printers.setItems(printersList);
+        
+    }
+    
+    // Create the service
+    private final Service<Void> service_refreshPrinters = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshPrintersTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);                 
+                        refreshPrintersTable(user);
+                        calculatePrintersStatistics();
+                    });
+                                       
+                    return null;
+                }        
+            };
+        return task_refreshPrintersTable;
+        }
+    };
+    
+    public Service<Void> getService_refreshPrinters() {
+        return service_refreshPrinters;
+    }
+    
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
@@ -1113,6 +1297,16 @@ public class MainController implements Initializable {
             calculateSelectedObjectsStatistics(tv_objects.getSelectionModel().getSelectedItems());
         });
     
+    tv_objects.setRowFactory( tv -> {
+        TableRow<classes.Object> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                object_btn_edit.fire();
+            }
+        });
+    return row;
+    });
+    
     tab_objects.setOnSelectionChanged(new EventHandler<Event>() {
             @Override
             public void handle(Event t) {
@@ -1290,7 +1484,7 @@ public class MainController implements Initializable {
     *
     *    
     */
-     /*****************************          INITIALIZE COSTS TAB          *****************************/
+    /*****************************          INITIALIZE COSTS TAB          *****************************/
     
     tv_costs.setRowFactory( tv -> {
         TableRow<Cost> row = new TableRow<>();
@@ -1371,14 +1565,11 @@ public class MainController implements Initializable {
         
     });
     
-    cost_btn_delete.setOnAction((event) -> {
-        
-        Cost.deleteCosts(tv_costs.getSelectionModel().getSelectedItems(), user);
-        
+    cost_btn_delete.setOnAction((event) -> {        
+        Cost.deleteCosts(tv_costs.getSelectionModel().getSelectedItems(), user);        
     });
     
-    cost_btn_refresh.setOnAction((event) -> {
-        //refreshCostsTable(user);
+    cost_btn_refresh.setOnAction((event) -> {        
         runService(service_refreshCosts);
     });
     
@@ -1389,7 +1580,104 @@ public class MainController implements Initializable {
     *
     *    
     */
+    /*****************************          INITIALIZE PRINTERS TAB          *****************************/
     
+    tab_printers.setOnSelectionChanged(new EventHandler<Event>() {
+            @Override
+            public void handle(Event t) {
+                if (tab_printers.isSelected()) {
+                    runService(service_refreshPrinters);
+                }
+            }
+        });
+    
+    tv_printers.setRowFactory( tv -> {
+        TableRow<Printer> row = new TableRow<>();
+        row.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                printer_btn_edit.fire();
+            }
+        });
+    return row;
+    });
+    
+    tv_printers.getSelectionModel().getSelectedItems().addListener((Change<? extends Printer> c) -> {        
+            calculateSelectedPrintersStatistics(tv_printers.getSelectionModel().getSelectedItems());
+        });
+    
+    printer_btn_new.setOnAction((event) -> {        
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/printers/NewPrinter.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewPrinterController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.setTitle("New Printer");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            //stage.setMinHeight(440);
+            //stage.setMinWidth(400);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setComboBox();            
+            
+            stage.show();                        
+            
+        }catch (IOException e){
+
+        }        
+    });
+    
+    printer_btn_edit.setOnAction((event) -> {
+        
+        try{            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/printers/NewPrinter.fxml"));            
+            Parent root1 = fxmlLoader.load();
+            NewPrinterController ctrl = fxmlLoader.getController();
+            Stage stage = new Stage();
+            stage.setTitle("New Printer");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            //stage.setMinHeight(440);
+            //stage.setMinWidth(400);
+           
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            
+            
+            //passing credentials to main controller
+            ctrl.setUser(user);
+            ctrl.setMainController(this);
+            ctrl.setComboBox(tv_printers.getSelectionModel().getSelectedItems().get(0));            
+            ctrl.setUpdatePrinterFields(tv_printers.getSelectionModel().getSelectedItems().get(0));
+            stage.show();                        
+            
+        }catch (IOException e){
+
+        }   
+        
+    });
+    
+    printer_btn_delete.setOnAction((event) -> {
+        Printer.deletePrinters(tv_printers.getSelectionModel().getSelectedItems(), user);        
+    });
+    
+    printer_btn_refresh.setOnAction((event) -> {        
+        runService(service_refreshPrinters);
+    });
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
     }//end initialize    
         
 }//end MainController

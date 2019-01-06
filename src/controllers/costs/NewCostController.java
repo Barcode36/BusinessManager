@@ -42,7 +42,7 @@ public class NewCostController implements Initializable {
     private MainController mainController;
     
     @FXML
-    private Label cost_label_id, cost_label_info;
+    private Label cost_label_id, cost_label_info, cost_label_title;
     
     @FXML
     private TextField cost_txtField_name, cost_txtField_quantity, cost_txtField_price, cost_txtField_shipping, cost_txtField_comment;
@@ -123,7 +123,7 @@ public class NewCostController implements Initializable {
         int id = MngApi.getCurrentAutoIncrementValue(user, "Costs");
         this.cost_label_id.setText(String.valueOf(id));
 
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
@@ -146,6 +146,7 @@ public class NewCostController implements Initializable {
         this.cost_label_id.setText(String.valueOf(id));
 
         cost_btn_create.setText("Update");
+        cost_label_title.setText("Edit Cost");
         
         cost_txtField_name.setText(cost.getCost_name().get());
         cost_txtField_quantity.setText(String.valueOf(cost.getCost_quantity().get()));
@@ -156,7 +157,7 @@ public class NewCostController implements Initializable {
         LocalDate purchaseDate = LocalDate.parse(cost.getCost_purchaseDate().get());
         cost_datePicker_purchaseDate.setValue(purchaseDate);        
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);        
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {

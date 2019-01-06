@@ -244,7 +244,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             txtField_minutes.setText(String.format(Locale.UK, "%s", buildTime_formatted[1].replaceAll("[^\\d.]", "")));
         }
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinters(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(user));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
