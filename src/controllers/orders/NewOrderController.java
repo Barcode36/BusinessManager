@@ -196,7 +196,7 @@ public class NewOrderController implements Initializable {
         });
         
         btn_create.setOnAction((event) -> {
-            createOrUpdateOrder();
+            createOrUpdateOrder(mainController.getMain_label_info());
         });
         
         btn_cancel.setOnAction((event) -> {            
@@ -346,7 +346,7 @@ public class NewOrderController implements Initializable {
         return btn_create;
     }
     
-    private void createOrUpdateOrder(){
+    private void createOrUpdateOrder(Label info){
         try{           
             
             //check empty order or items without assigned material, printer, etc.
@@ -390,7 +390,7 @@ public class NewOrderController implements Initializable {
             totalSupportWeight = new SimpleDoubleProperty(Double.parseDouble(totalSupportWeightFormatted[0]));
             
             newOrder = new Order(null, status, comment, dateCreated, dueDate, totalBuildTimeFormatted, order_id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
-            Order.insertNewOrder(newOrder, user);
+            Order.insertNewOrder(newOrder, info, user);
             
             //We will now add assign order to objects, but first, we have to assign OrderID to items belonging to current order
             //we also have to assing correct orderItemID. We have to keep OrderItemID the same if it is old order item or assign new OrderItemID
@@ -415,7 +415,7 @@ public class NewOrderController implements Initializable {
                 }
             
             originalObjects.removeAll(newObjects);            
-            OrderItem.deleteOrderItem(originalObjects, user);
+            OrderItem.deleteOrderItem(originalObjects, info, user);
             
             //2. Determine updated original objects and update them in DB table
             /*

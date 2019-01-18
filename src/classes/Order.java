@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 /**
  *
  * @author Erik PC
@@ -169,8 +170,9 @@ public class Order {
         
         // JDBC driver name and database URL
         String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
+        String DB_URL = "jdbc:mariadb://" + user.getAddress() + ":3306/" + user.getDbName();
+              
+        
         //  Database credentials
         String USER = user.getName();
         String PASS = user.getPass();
@@ -648,7 +650,7 @@ public class Order {
         return totalSupportWeight;
     }
     
-    public static void insertNewOrder(Order order, User user){
+    public static void insertNewOrder(Order order, Label info, User user){
         
         String updateQuery = "INSERT INTO Orders (OrderID,CustomerID,OrderPrice,OrderQuantity,DateCreated,OrderStatus,DueDate,Comment,OrderCosts,OrderWeight,OrderSupportWeight,OrderBuildTime) " +
         "VALUES (" + 
@@ -679,19 +681,19 @@ public class Order {
                 ",OrderSupportWeight=" + order.getOrder_support_weight().get() + 
                 ",OrderBuildTime=" + order.getOrder_buildTime().get();
         
-        MngApi.performUpdate(updateQuery, user);                
+        MngApi.performUpdateQuary(updateQuery, info, user);                
         
     }    
     
-    public static void deleteOrders(ObservableList<Order> orders, User user){      
+    public static void deleteOrders(ObservableList<Order> orders, Label info, User user){      
     
         for (int i = 0; i < orders.size(); i++) {
             
             int id = orders.get(i).getOrder_id().get();
             String query = "DELETE FROM OrderItems WHERE OrderID=" + id;
-            MngApi.performUpdate(query, user);
+            MngApi.performUpdateQuary(query, info, user);
             query = "DELETE FROM Orders WHERE OrderID=" + id;        
-            MngApi.performUpdate(query, user);    
+            MngApi.performUpdateQuary(query, info, user);    
             
         }        
     }

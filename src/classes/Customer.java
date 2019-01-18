@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 
 /**
  *
@@ -591,20 +592,20 @@ public class Customer  {
     return countries;
     }
     
-     public static void insertNewCustomer(Customer newCustomer, User user){
+     public static void insertNewCustomer(Customer newCustomer, Label info, User user){
         
         String updateQuery = "INSERT INTO Customers VALUES (null,'" + newCustomer.getCustomer_firstName().get() + "','" + newCustomer.getCustomer_lastName().get() + "','" + newCustomer.getCustomer_dateCreated().get() + "','" + newCustomer.getCustomer_comment().get() + "','" + newCustomer.getCustomer_phone().get() + "','" + newCustomer.getCustomer_address().get() + "','" + newCustomer.getCustomer_city().get() + "','" + newCustomer.getCustomer_mail().get() + "','" + newCustomer.getCustomer_zipCode().get() + "'," + newCustomer.getCustomer_id_country().get() + "," + newCustomer.getCustomer_id_company().get() + ")";
-        MngApi.performUpdate(updateQuery, user);                
+        MngApi.performUpdateQuary(updateQuery, info, user);                
         
     }
      
-    public static void deleteCustomers(ObservableList<Customer> customers, User user){
+    public static void deleteCustomers(ObservableList<Customer> customers, Label info, User user){
         
         for (int i = 0; i < customers.size(); i++) {
             
             int id = customers.get(i).getCustomer_id().get();
             String query = "DELETE FROM Customers WHERE CustomerID=" + id;
-            MngApi.performUpdate(query, user);   
+            MngApi.performUpdateQuary(query, info, user);   
             
         }        
     } 

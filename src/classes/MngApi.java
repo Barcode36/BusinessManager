@@ -18,6 +18,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 
 
@@ -216,7 +218,7 @@ public class MngApi {
         return currentAutoIncrementValue;
     }
     
-    public static void performUpdate(String query, User user){
+    public static void performUpdateQuary(String query, Label info,User user){
         //Create query
         String updateQuery = query;
 
@@ -248,6 +250,14 @@ public class MngApi {
             
             stmt.executeUpdate(updateQuery);
                        
+            
+        } catch (SQLIntegrityConstraintViolationException e){
+            
+            String[] message = e.getMessage().split("`");
+            String table = message[3];
+            table = table.replaceAll("\\d+", "").replaceAll("(.)([A-Z])", "$1 $2");
+            info.setText("Remove related " + table + " first.");
+            info.setTextFill(Color.web("#ff0000"));
             
         } catch (SQLNonTransientConnectionException se) {
             MngApi obj = new MngApi();

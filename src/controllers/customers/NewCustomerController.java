@@ -61,10 +61,10 @@ public class NewCustomerController implements Initializable {
         customer_btn_create.setOnAction((event) -> {
             switch(mode){
                 case "create":
-                    createCustomer();
+                    createCustomer(mainController.getMain_label_info());
                     return;
                 case "edit":
-                    editCustomer();
+                    editCustomer(mainController.getMain_label_info());
             }
             
         });
@@ -74,7 +74,7 @@ public class NewCustomerController implements Initializable {
         });
     }    
     
-    private void createCustomer(){
+    private void createCustomer(Label info){
         boolean isEmpty = MngApi.isTextFieldEmpty(customer_txtField_firstName, customer_txtField_lastName);
             
             if (isEmpty == true || MngApi.isComboBoxEmpty(customer_comboBox_country, customer_comboBox_company)){
@@ -113,7 +113,7 @@ public class NewCustomerController implements Initializable {
                 
                 Customer newCustomer = new Customer(customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment, customer_id, customer_id_company, customer_id_country, customer_orderCount, customer_ordersPrice);
                 
-                Customer.insertNewCustomer(newCustomer, user);
+                Customer.insertNewCustomer(newCustomer, info, user);
             
             MngApi.closeWindow(customer_btn_create);            
             mainController.runService(mainController.getService_refreshCustomers());
@@ -124,7 +124,7 @@ public class NewCustomerController implements Initializable {
             }
     }
     
-    private void editCustomer(){
+    private void editCustomer(Label info){
         boolean isEmpty = MngApi.isTextFieldEmpty(customer_txtField_firstName, customer_txtField_lastName);
             
             if (isEmpty == true || MngApi.isComboBoxEmpty(customer_comboBox_country, customer_comboBox_company)){
@@ -163,7 +163,7 @@ public class NewCustomerController implements Initializable {
                 
                 String updateQuery = "UPDATE Customers SET FirstName='" + customer_firstName.get() + "', LastName='" + customer_lastName.get() + "', DateCreated='" + customer_dateCreated.get() + "', Comment='" + customer_comment.get() + "', Phone='" + customer_phone.get() + "', Address='" +  customer_address.get() + "', City='" + customer_city.get() + "', Mail='" + customer_mail.get() + "', ZipCode='" + customer_zipCode.get() + "', CountryID=" + customer_id_country.get() + ", CompanyID=" + customer_id_company.get() + " WHERE CustomerID=" + customer_id.get();
                 
-                MngApi.performUpdate(updateQuery, user);
+                MngApi.performUpdateQuary(updateQuery, info, user);
             
             MngApi.closeWindow(customer_btn_create);            
             mainController.runService(mainController.getService_refreshCustomers());

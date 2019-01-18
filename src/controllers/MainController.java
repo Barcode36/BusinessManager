@@ -68,6 +68,9 @@ public class MainController implements Initializable {
     @FXML
     private ProgressBar progressBar;
     
+    @FXML
+    private Label label_main_info;
+    
     
     
     /*****************************          GENERAL - METHODS         *****************************/          
@@ -95,6 +98,16 @@ public class MainController implements Initializable {
                 System.out.print(service.getState().toString());
             });
     }
+
+    public Label getMain_label_info() {
+        return label_main_info;
+    }
+
+    public void setMain_label_info(Label main_label_info) {
+        this.label_main_info = main_label_info;
+    }
+    
+    
     /*
     *
     *
@@ -123,7 +136,7 @@ public class MainController implements Initializable {
     private Button order_btn_new, order_btn_edit, order_btn_refresh, order_btn_delete;
     
     @FXML
-    private Label label_order_SoldOrders, label_order_SoldCostPrice, label_order_OrderProfit, label_order_NotSoldOrders, label_order_NotSoldCostPrice, label_order_NotSoldOrderProfit, label_order_info;
+    private Label label_order_SoldOrders, label_order_SoldCostPrice, label_order_OrderProfit, label_order_NotSoldOrders, label_order_NotSoldCostPrice, label_order_NotSoldOrderProfit;
     
     @FXML
     private Label label_order_totalOrders, label_order_TotalCostPrice, label_order_TotalPricePerHour, label_order_TotalWeight, label_order_TotalBuildTime, label_order_TotalItemsPrinted;
@@ -783,7 +796,7 @@ public class MainController implements Initializable {
     *
     *    
     */
-    /*****************************          COSTS - VARIALES          *****************************/
+    /*****************************          COSTS - VARIABLES          *****************************/
     
     @FXML
     private Tab tab_costs;
@@ -919,7 +932,7 @@ public class MainController implements Initializable {
     *
     *    
     */
-    /*****************************          PRINTERS - VARIALES          *****************************/
+    /*****************************          PRINTERS - VARIABLES          *****************************/
     
     @FXML
     private Tab tab_printers;
@@ -1088,6 +1101,102 @@ public class MainController implements Initializable {
     public Service<Void> getService_refreshPrinters() {
         return service_refreshPrinters;
     }
+       
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    /*****************************          STATISTICS - VARIABLES          *****************************/
+    
+    @FXML
+    private Tab tab_statistics;
+    
+    @FXML
+    private Label statistics_label_order_totalOrders,statistics_label_order_TotalSoldNotSold,statistics_label_order_TotalBuildTime,statistics_label_order_TotalPricePerHour,statistics_label_order_TotalWeight,statistics_label_order_TotalItemsPrinted,statistics_label_order_TotalCostPrice;
+    
+    @FXML
+    private Label statistics_materials_label_remainingSoldRolls,statistics_materials_label_avgRollPrice,statistics_materials_label_trashWeight,statistics_materials_label_Total,statistics_materials_label_totalWeight,statistics_materials_label_paidSoldFor,statistics_materials_label_colorsTypes,statistics_materials_label_remainingSoldWeight,statistics_materials_label_shippingPrice;
+    
+    @FXML
+    private Label statistics_costs_label_price,statistics_costs_label_total,statistics_costs_label_shipping,statistics_costs_label_quantity,statistics_costs_label_totalPaid;
+    
+    @FXML
+    private Label statistics_printer_label_priceShipping,statistics_printer_label_total,statistics_printer_label_itemsSold,statistics_printer_label_incomes,statistics_printer_label_sum,statistics_printer_label_totalPaid,statistics_printer_label_expenses,statistics_printer_label_difference,statistics_printer_label_dutyTax;
+    
+    
+    
+    /*****************************          PRINTERS - METHODS         *****************************/
+    
+    private void calculateOverallStatistics(){
+        
+        ObservableList<Printer> printers = tv_printers.getItems();
+        
+        int items_sold = 0, total = printers.size();
+        double price = 0, shipping = 0, duty = 0, tax = 0, expenses = 0, incomes = 0;
+        double sum, totalPaid, difference;
+        
+        for (int i = 0; i < printers.size(); i++) {
+            
+           Printer printer = printers.get(i);
+           
+           items_sold += printer.getPrinter_itemsSold().get();
+           price += printer.getPrinter_price().get();
+           shipping += printer.getPrinter_shipping().get();
+           duty += printer.getPrinter_duty().get();
+           tax += printer.getPrinter_tax().get();
+           expenses += printer.getPrinter_expenses().get();
+           incomes += printer.getPrinter_incomes().get();
+            
+        }
+        
+        sum = price + shipping + duty + tax;
+        totalPaid = sum + expenses;
+        difference = totalPaid - incomes;
+        
+        printer_label_total.setText(String.format("Total(%d)", total));
+        printer_label_priceShipping.setText(String.format(Locale.US, "%.2f $/%.2f $", price, shipping));
+        printer_label_dutyTax.setText(String.format(Locale.US, "%.2f $/%.2f $", duty, tax));
+        printer_label_sum.setText(String.format(Locale.US, "%.2f $", sum));
+        printer_label_expenses.setText(String.format(Locale.US, "%.2f $", expenses));
+        printer_label_totalPaid.setText(String.format(Locale.US, "%.2f $", totalPaid));
+        printer_label_itemsSold.setText("" + items_sold);
+        printer_label_incomes.setText(String.format(Locale.US, "%.2f $", incomes));
+        printer_label_difference.setText(String.format(Locale.US, "%.2f $", difference));
+        
+    }
+    
+    
+    
+    public void refreshStatisticsLabels(User user){
+        
+    }
+    
+    // Create the service
+    private final Service<Void> service_refreshStatistics = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshPrintersTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);                 
+                        refreshStatisticsLabels(user);                        
+                    });
+                                       
+                    return null;
+                }        
+            };
+        return task_refreshPrintersTable;
+        }
+    };
+    
+    public Service<Void> getService_refreshStatistics() {
+        return service_refreshStatistics;
+    }
     
     
     /*
@@ -1097,6 +1206,7 @@ public class MainController implements Initializable {
     *
     *    
     */    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
@@ -1178,13 +1288,14 @@ public class MainController implements Initializable {
             } catch (IOException e){
                 e.printStackTrace();
             } catch (NullPointerException e){
-                label_order_info.setText("Info: Select one order");
-                label_order_info.setTextFill(Color.web("#ff0000"));
+                label_main_info.setText("Info: Select one order");
+                label_main_info.setTextFill(Color.web("#ff0000"));
             }            
         });
         
         order_btn_delete.setOnAction((event) -> {            
-            Order.deleteOrders(tv_orders.getSelectionModel().getSelectedItems(), user);            
+            Order.deleteOrders(tv_orders.getSelectionModel().getSelectedItems(), label_main_info, user);
+            runService(service_refreshOrders);
         });
         
     /*
@@ -1280,7 +1391,8 @@ public class MainController implements Initializable {
     });
     
     customer_btn_delete.setOnAction((event) -> {        
-        Customer.deleteCustomers(tv_customers.getSelectionModel().getSelectedItems(), user);        
+        Customer.deleteCustomers(tv_customers.getSelectionModel().getSelectedItems(), label_main_info, user);
+        runService(service_refreshCustomers);
     });
     
     /*****************************          INITIALIZE OBJECTS TAB          *****************************/
@@ -1290,7 +1402,8 @@ public class MainController implements Initializable {
     });
             
     object_btn_delete.setOnAction((event) -> {
-        classes.Object.deleteObjects(tv_objects.getSelectionModel().getSelectedItems(), user);
+        classes.Object.deleteObjects(tv_objects.getSelectionModel().getSelectedItems(), label_main_info, user);
+        runService(service_refreshObjects);
     });
     
     tv_objects.getSelectionModel().getSelectedItems().addListener((Change<? extends classes.Object> c) -> {        
@@ -1474,7 +1587,8 @@ public class MainController implements Initializable {
     });
     
     material_btn_delete.setOnAction((event) -> {
-        Material.deleteMaterials(tv_materials.getSelectionModel().getSelectedItems(),user);
+        Material.deleteMaterials(tv_materials.getSelectionModel().getSelectedItems(), label_main_info, user);
+        runService(service_refreshMaterials);
     });
     
     /*
@@ -1566,7 +1680,8 @@ public class MainController implements Initializable {
     });
     
     cost_btn_delete.setOnAction((event) -> {        
-        Cost.deleteCosts(tv_costs.getSelectionModel().getSelectedItems(), user);        
+        Cost.deleteCosts(tv_costs.getSelectionModel().getSelectedItems(), label_main_info, user);
+        runService(service_refreshCosts);
     });
     
     cost_btn_refresh.setOnAction((event) -> {        
@@ -1664,12 +1779,24 @@ public class MainController implements Initializable {
     });
     
     printer_btn_delete.setOnAction((event) -> {
-        Printer.deletePrinters(tv_printers.getSelectionModel().getSelectedItems(), user);        
+        Printer.deletePrinters(tv_printers.getSelectionModel().getSelectedItems(), label_main_info, user);
+        runService(service_refreshPrinters);
     });
     
     printer_btn_refresh.setOnAction((event) -> {        
         runService(service_refreshPrinters);
     });
+    
+    /*
+    *
+    *
+    *
+    *
+    *    
+    */
+    /*****************************          INITIALIZE STATISTICS TAB          *****************************/
+    
+    
     
     /*
     *

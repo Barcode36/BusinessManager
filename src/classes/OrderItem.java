@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 
 /**
  *
@@ -301,12 +302,12 @@ public class OrderItem {
         }//end try        
     }
     
-    public static void deleteOrderItem(OrderItem orderItem, User user){
+    public static void deleteOrderItem(OrderItem orderItem, Label info, User user){
         String query = "DELETE FROM OrderItems WHERE OrderItemID=" + orderItem.getOrderItem_id().get();
-        MngApi.performUpdate(query, user);
+        MngApi.performUpdateQuary(query, info, user);
     }
     
-    public static void deleteOrderItem(List<Integer> orderItemIDs, User user){
+    public static void deleteOrderItem(List<Integer> orderItemIDs, Label info, User user){
         //check if list is empty
         if(orderItemIDs.size() > 0){
             String query = "DELETE FROM OrderItems WHERE ";
@@ -319,7 +320,7 @@ public class OrderItem {
                 }
             }
             
-            MngApi.performUpdate(query, user);            
+            MngApi.performUpdateQuary(query, info, user);            
         }
     }
     

@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 
 /**
  *
@@ -1272,13 +1273,13 @@ public class Material {
         }//end try         
     }
      
-     public static void deleteMaterials(ObservableList<Material> materials, User user){
+     public static void deleteMaterials(ObservableList<Material> materials, Label info, User user){
          
          for (int i = 0; i < materials.size(); i++) {
             
             int id = materials.get(i).getMaterial_id().get();
             String query = "DELETE FROM Materials WHERE MaterialID=" + id;
-            MngApi.performUpdate(query, user);
+            MngApi.performUpdateQuary(query, info, user);
             
         }
          

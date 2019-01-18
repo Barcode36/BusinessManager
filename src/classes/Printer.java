@@ -18,6 +18,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 
 /**
  *
@@ -502,13 +503,13 @@ public class Printer {
         
     }
     
-    public static void deletePrinters(ObservableList<Printer> printers, User user){
+    public static void deletePrinters(ObservableList<Printer> printers, Label info, User user){
         
         for (int i = 0; i < printers.size(); i++) {
             
             int id = printers.get(i).getPrinter_id().get();
             String query = "DELETE FROM Printers WHERE PrinterID=" + id;
-            MngApi.performUpdate(query, user);
+            MngApi.performUpdateQuary(query, info, user);
             
         }
         
