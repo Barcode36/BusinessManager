@@ -19,7 +19,7 @@ public class LoginController {
     private PasswordField uPasswd;
     @FXML
     private Button btn_login;    
-
+    
     //signs in user into database and displays application's main window with loaded "Orders" table
     public void signIn(ActionEvent event) {
         MngApi.closeWindow(btn_login); //closes parent window of specified node

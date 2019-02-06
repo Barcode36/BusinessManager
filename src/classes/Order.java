@@ -211,19 +211,15 @@ public class Order {
                 id = new SimpleIntegerProperty(rs.getInt("OrderID"));
                 customer_id = new SimpleIntegerProperty(rs.getInt("CustomerID"));
                 
-                //totalQuantity = new SimpleIntegerProperty(getTotalOrderQuantity(id, user));
-                totalQuantity = new SimpleIntegerProperty(rs.getInt("OrderQuantity"));
-                //totalBuildTime = new SimpleIntegerProperty(getTotalBuildTime(id, user));
+                
+                totalQuantity = new SimpleIntegerProperty(rs.getInt("OrderQuantity"));                
                 totalBuildTime = new SimpleIntegerProperty(rs.getInt("OrderBuildTime"));
                 buildTime_formated = MngApi.convertToFormattedTime(totalBuildTime.get());
                 
-                //totalCosts = new SimpleDoubleProperty(getTotalCosts(id, user));
+                
                 totalCosts = new SimpleDoubleProperty(rs.getDouble("OrderCosts"));
-                //totalPrice= new SimpleDoubleProperty(getTotalPrice(id, user));
                 totalPrice = new SimpleDoubleProperty(rs.getDouble("OrderPrice"));
-                //totalWeight = new SimpleDoubleProperty(getTotalWeight(id, user));
-                totalWeight = new SimpleDoubleProperty(rs.getDouble("OrderWeight"));
-                //totalSupportWeight = new SimpleDoubleProperty(getTotalSupportWeight(id, user));
+                totalWeight = new SimpleDoubleProperty(rs.getDouble("OrderWeight"));                
                 totalSupportWeight = new SimpleDoubleProperty(rs.getDouble("OrderSupportWeight"));
                 
                 Order order = new Order(customer, status, comment, dateCreated, dueDate, buildTime_formated, id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
