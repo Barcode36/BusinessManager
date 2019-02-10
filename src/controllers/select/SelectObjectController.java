@@ -6,9 +6,9 @@
 package controllers.select;
 
 import classes.MngApi;
-import classes.User;
 import classes.Object;
 import classes.OrderItem;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.orders.NewOrderController;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -32,7 +32,7 @@ import javafx.scene.control.TextField;
  */
 public class SelectObjectController implements Initializable {
 
-    private User user;
+    private HikariDataSource ds;
     
     private NewOrderController newOrderController;
     
@@ -148,7 +148,7 @@ public class SelectObjectController implements Initializable {
     public void displayObjects(){
         
         //Create list of orders
-        ObservableList<classes.Object> objectList = FXCollections.observableArrayList(classes.Object.getObjects(user));
+        ObservableList<classes.Object> objectList = FXCollections.observableArrayList(classes.Object.getObjects(ds));
         
         object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
         object_col_buildTime_formated.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
@@ -175,8 +175,8 @@ public class SelectObjectController implements Initializable {
         
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
 
     public void setNewOrderController(NewOrderController newOrderController) {

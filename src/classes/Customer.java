@@ -6,6 +6,7 @@
 package classes;
 
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -177,22 +178,13 @@ public class Customer  {
         this.customer_ordersPrice = customer_ordersPrice;
     }
 
-    public static List<Customer> getCustomers(User user){
+    public static List<Customer> getCustomers(HikariDataSource ds){
             
         //Create list
         List<Customer> customersList = new ArrayList<>();
         
         //Create query
         String query = "SELECT Customers.DateCreated, Customers.LastName, Customers.FirstName, Customers.Comment, Customers.Mail, Customers.Phone, Customers.Address, Customers.City, Customers.CompanyID, Customers.ZipCode, Countries.CountryID, Countries.CountryName, Companies.CompanyName, Customers.CustomerID FROM Customers JOIN Countries ON Customers.CountryID=Countries.CountryID JOIN Companies ON Customers.CompanyID = Companies.CompanyID ORDER BY Customers.CustomerID ASC";
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -204,7 +196,7 @@ public class Customer  {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -233,9 +225,9 @@ public class Customer  {
                 customer_id = new SimpleIntegerProperty(rs.getInt("CustomerID"));
                 customer_id_company = new SimpleIntegerProperty(rs.getInt("CompanyID"));
                 customer_id_country = new SimpleIntegerProperty(rs.getInt("CountryID"));                
-                customer_orderCount = new SimpleIntegerProperty(getOrderCount(customer_id, user));
+                customer_orderCount = new SimpleIntegerProperty(getOrderCount(customer_id, ds));
                 
-                customer_ordersPrice = new SimpleDoubleProperty(getOrdersPrice(customer_id, user));                
+                customer_ordersPrice = new SimpleDoubleProperty(getOrdersPrice(customer_id, ds));                
                 
                 Customer customer = new Customer(customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment, customer_id, customer_id_company, customer_id_country, customer_orderCount, customer_ordersPrice);
                 
@@ -274,11 +266,11 @@ public class Customer  {
         return customersList;
     }
 
-    public static Double[] getCustomerStats(int customer_id, User user){
+    public static Double[] getCustomerStats(int customer_id, HikariDataSource ds){
         Double[] statistics = new Double[7];
         
         
-        if (MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user) == 0){
+        if (MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds) == 0){
             statistics[0] = 0.0;
             statistics[1] = 0.0;
             statistics[2] = 0.0;
@@ -287,33 +279,24 @@ public class Customer  {
             statistics[5] = 0.0;
             statistics[6] = 0.0;
         } else {
-            statistics[0] = MngApi.round(MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
-            statistics[1] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
-            statistics[2] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
-            statistics[3] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, user), 2); 
-            statistics[4] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
-            statistics[5] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
-            statistics[6] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, user), 2);
+            statistics[0] = MngApi.round(MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+            statistics[1] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+            statistics[2] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+            statistics[3] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, ds), 2); 
+            statistics[4] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+            statistics[5] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+            statistics[6] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
         }        
         
         return statistics;
     }
     
-    private static int getOrderCount(SimpleIntegerProperty id, User user) {
+    private static int getOrderCount(SimpleIntegerProperty id, HikariDataSource ds) {
         int orderCount = 0;
         
         //Create query
         String query = "SELECT Orders.OrderID FROM Orders WHERE CustomerID=" + id.get();
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
+ 
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -324,7 +307,7 @@ public class Customer  {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -363,20 +346,11 @@ public class Customer  {
         return orderCount;
     }
 
-    private static double getOrdersPrice(SimpleIntegerProperty id, User user) {
+    private static double getOrdersPrice(SimpleIntegerProperty id, HikariDataSource ds) {
         double ordersPrice = 0;
         
         //Create query
         String query = "SELECT SUM(OrderPrice) AS 'OrderPrice' FROM Orders WHERE CustomerID=" + id.get();
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -388,7 +362,7 @@ public class Customer  {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -427,22 +401,13 @@ public class Customer  {
         return ordersPrice;
     }
     
-    public static List<SimpleTableObject> getCompanies(User user) {
+    public static List<SimpleTableObject> getCompanies(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> companies = new ArrayList<>();
         
         //Create query
         String query = "SELECT * FROM Companies ORDER BY CompanyID ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -454,7 +419,7 @@ public class Customer  {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -509,22 +474,13 @@ public class Customer  {
     return companies;
     }
     
-    public static List<SimpleTableObject> getCountries(User user) {
+    public static List<SimpleTableObject> getCountries(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> countries = new ArrayList<>();
         
         //Create query
         String query = "SELECT CountryId, CountryName FROM Countries ORDER BY CountryName ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -536,7 +492,7 @@ public class Customer  {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -592,20 +548,20 @@ public class Customer  {
     return countries;
     }
     
-     public static void insertNewCustomer(Customer newCustomer, Label info, User user){
+     public static void insertNewCustomer(Customer newCustomer, Label info, HikariDataSource ds){
         
         String updateQuery = "INSERT INTO Customers VALUES (null,'" + newCustomer.getCustomer_firstName().get() + "','" + newCustomer.getCustomer_lastName().get() + "','" + newCustomer.getCustomer_dateCreated().get() + "','" + newCustomer.getCustomer_comment().get() + "','" + newCustomer.getCustomer_phone().get() + "','" + newCustomer.getCustomer_address().get() + "','" + newCustomer.getCustomer_city().get() + "','" + newCustomer.getCustomer_mail().get() + "','" + newCustomer.getCustomer_zipCode().get() + "'," + newCustomer.getCustomer_id_country().get() + "," + newCustomer.getCustomer_id_company().get() + ")";
-        MngApi.performUpdateQuary(updateQuery, info, user);                
+        MngApi.performUpdateQuery(updateQuery, info, ds);                
         
     }
      
-    public static void deleteCustomers(ObservableList<Customer> customers, Label info, User user){
+    public static void deleteCustomers(ObservableList<Customer> customers, Label info, HikariDataSource ds){
         
         for (int i = 0; i < customers.size(); i++) {
             
             int id = customers.get(i).getCustomer_id().get();
             String query = "DELETE FROM Customers WHERE CustomerID=" + id;
-            MngApi.performUpdateQuary(query, info, user);   
+            MngApi.performUpdateQuery(query, info, ds);   
             
         }        
     } 

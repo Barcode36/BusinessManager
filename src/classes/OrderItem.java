@@ -5,6 +5,7 @@
  */
 package classes;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -177,48 +178,9 @@ public class OrderItem {
         this.costs = costs;
     }
 
-//    public static void insertNewOrderItem(OrderItem orderItem, User user){        
-//        String updateQuery = "INSERT INTO OrderItems (OrderItemID,OrderID,ObjectID,ItemMaterialID,ItemWeight,ItemSupportWeight,ItemBuildTime,ItemPrice,ItemQuantity,PrinterID) " +
-//        "VALUES (" +
-//		orderItem.getOrderItem_id().get() + "," +
-//		orderItem.getOrder_id().get() + "," +
-//		orderItem.getObject_id().get() + "," + 
-//		orderItem.getMaterial_id().get() + "," + 
-//		orderItem.getObject_weight().get() + "," + 
-//		orderItem.getObject_supportWeight().get() + "," + 
-//		orderItem.getObject_buildTime().get() + "," + 
-//		orderItem.getPrice().get() + "," +
-//		orderItem.getQuantity().get() + "," +	
-//		orderItem.getPrinter_id().get() + "," + 
-//        ") " +	
-//        "ON DUPLICATE KEY UPDATE " + 
-//		//",OrderItemID=" + orderItem.getOrderItem_id().get() + "," +
-//		",OrderID=" + orderItem.getOrder_id().get() + "," +
-//		",ObjectID=" + orderItem.getObject_id().get() + "," + 
-//		",ItemMaterialID=" + orderItem.getMaterial_id().get() + "," + 
-//		",ItemWeight=" + orderItem.getObject_weight().get() + "," + 
-//		",ItemSupportWeight=" + orderItem.getObject_supportWeight().get() + "," + 
-//		",ItemBuildTime=" + orderItem.getObject_buildTime().get() + "," + 
-//		",ItemPrice=" +  orderItem.getPrice().get() + "," + 
-//		",ItemQuantity=" + orderItem.getQuantity().get() + "," +	
-//		",PrinterID=" + orderItem.getPrinter_id().get();
-//        
-//        MngApi.performUpdate(updateQuery, user);  
-//        
-//    }
-    
-    public static void insertNewOrderItems(ObservableList<OrderItem> orderItems, User user){ 
+    public static void insertNewOrderItems(ObservableList<OrderItem> orderItems, HikariDataSource ds){ 
         //Create query
         String updateQuery;
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -230,14 +192,14 @@ public class OrderItem {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            conn = ds.getConnection();
             //STEP 4: Execute a query
 	    for (int i = 0; i < orderItems.size(); i++) {
                 
                 OrderItem orderItem = orderItems.get(i);
                                
                 if(orderItem.getOrderItem_id().get() == 0){
-                    updateQuery = "SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA ='" + user.getName() + "' AND   TABLE_NAME   ='OrderItems'";
+                    updateQuery = "SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA ='" + ds.getUsername()+ "' AND   TABLE_NAME   ='OrderItems'";
                     stmt = conn.prepareStatement(updateQuery);
                     ResultSet rs = stmt.executeQuery(updateQuery);
                 
@@ -302,12 +264,12 @@ public class OrderItem {
         }//end try        
     }
     
-    public static void deleteOrderItem(OrderItem orderItem, Label info, User user){
+    public static void deleteOrderItem(OrderItem orderItem, Label info, HikariDataSource ds){
         String query = "DELETE FROM OrderItems WHERE OrderItemID=" + orderItem.getOrderItem_id().get();
-        MngApi.performUpdateQuary(query, info, user);
+        MngApi.performUpdateQuery(query, info, ds);
     }
     
-    public static void deleteOrderItem(List<Integer> orderItemIDs, Label info, User user){
+    public static void deleteOrderItem(List<Integer> orderItemIDs, Label info, HikariDataSource ds){
         //check if list is empty
         if(orderItemIDs.size() > 0){
             String query = "DELETE FROM OrderItems WHERE ";
@@ -320,26 +282,17 @@ public class OrderItem {
                 }
             }
             
-            MngApi.performUpdateQuary(query, info, user);            
+            MngApi.performUpdateQuery(query, info, ds);            
         }
     }
     
-    public static List<Integer> getListOfIOrderItemIDs(Order order, User user){
+    public static List<Integer> getListOfIOrderItemIDs(Order order, HikariDataSource ds){
         
         //Create list
         List<Integer> orderItemsIDs = new ArrayList<>();
         
         //Create query
         String query = "SELECT OrderItemID FROM OrderItems WHERE OrderID=" + order.getOrder_id().get();
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -351,7 +304,7 @@ public class OrderItem {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -395,22 +348,13 @@ public class OrderItem {
         return orderItemsIDs;
     }
     
-    public static List<OrderItem> getOrderItems(int order_id, User user){
+    public static List<OrderItem> getOrderItems(int order_id, HikariDataSource ds){
         
         //Create list
         List<OrderItem> itemList = new ArrayList<>();
         
         //Create query
         String query = "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.ItemQuantity, Printers.PrinterID, Printers.PrinterName, OrderItems.OrderID, OrderItems.OrderItemID, OrderItems.ItemBuildTime, OrderItems.ItemMaterialID, MaterialTypes.MaterialType, MaterialColors.ColorName, OrderItems.ItemWeight, OrderItems.ItemSupportWeight, OrderItems.ItemPrice FROM OrderItems JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID JOIN Materials ON Materials.MaterialID = OrderItems.ItemMaterialID JOIN MaterialTypes ON Materials.MaterialTypeID = MaterialTypes.MaterialTypeID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -422,7 +366,7 @@ public class OrderItem {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -458,7 +402,7 @@ public class OrderItem {
                     Double material_price, material_shipping, price_per_gram, total_weight, total_supportWeight, costs;
                     double material_weight;
                 
-                    Material material = Material.getMaterialByID(user, material_id);
+                    Material material = Material.getMaterialByID(ds, material_id);
                 
                     material_price = material.getMaterial_price().get();
                     material_shipping = material.getMaterial_shipping().get();

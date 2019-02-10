@@ -5,6 +5,7 @@
  */
 package classes;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -242,22 +243,13 @@ public class Material {
 
     
     //this method get list of materials - ONLY materials, without statistics
-    public static List<Material> getMaterials(User user) {
+    public static List<Material> getMaterials(HikariDataSource ds) {
         
         //Create list
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
         String query = "SELECT Materials.Comment, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID ORDER BY Materials.MaterialID DESC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -269,7 +261,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -310,10 +302,10 @@ public class Material {
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                double material_used_absolute = getMaterialUsed(user, material_id);
-                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(user, material_id)/material_weight.get()*100, 2));
+                double material_used_absolute = getMaterialUsed(ds, material_id);
+                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(ds, material_id)/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
-                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
+                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(ds, material_id));
                 double price_with_shipping = material_price.get() + material_shipping.get();
                 material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get(), 2));
                 material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
@@ -355,22 +347,13 @@ public class Material {
     return allMaterialsList;
     }
     
-    public static List<Material> getNotSpentMaterials(User user) {
+    public static List<Material> getNotSpentMaterials(HikariDataSource ds) {
         
         //Create list
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
         String query = "SELECT Materials.MaterialShipping, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID WHERE Materials.Finished='No' ORDER BY Materials.MaterialID DESC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -382,7 +365,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj2 = new MngApi();
@@ -423,8 +406,8 @@ public class Material {
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                double material_used_absolute = getMaterialUsed(user, material_id);
-                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(user, material_id)/material_weight.get()*100, 2));
+                double material_used_absolute = getMaterialUsed(ds, material_id);
+                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(ds, material_id)/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(0);                    
                 material_soldFor = new SimpleDoubleProperty(0);
                 material_profit = new SimpleDoubleProperty(0);
@@ -466,20 +449,11 @@ public class Material {
     return allMaterialsList;
     }
     
-    public static double getMaterialUsed(User user, SimpleIntegerProperty materialID) {        
+    public static double getMaterialUsed(HikariDataSource ds, SimpleIntegerProperty materialID) {        
                 
         double used = 0;        
         
         String query = "SELECT SUM(ItemWeight)+SUM(ItemSupportWeight) AS ItemWeight FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -491,7 +465,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -528,20 +502,11 @@ public class Material {
     return used;
     }
     
-    public static Double getMaterialSoldFor(User user, SimpleIntegerProperty materialID) {        
+    public static Double getMaterialSoldFor(HikariDataSource ds, SimpleIntegerProperty materialID) {        
                 
         double soldFor = 0;        
         
         String query = "SELECT SUM(ItemPrice) AS 'SoldFor' FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -553,7 +518,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -592,22 +557,13 @@ public class Material {
     return soldFor;
     }
         
-    public static List<SimpleTableObject> getMaterialTypes(User user) {
+    public static List<SimpleTableObject> getMaterialTypes(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> materialTypes = new ArrayList<>();
         
         //Create query
         String query = "SELECT MaterialTypeID, MaterialType FROM MaterialTypes ORDER BY MaterialType ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -619,7 +575,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -672,22 +628,13 @@ public class Material {
     return materialTypes;
     }
     
-    public static List<SimpleTableObject> getMaterialManufacturers(User user) {
+    public static List<SimpleTableObject> getMaterialManufacturers(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> materialManufacturers = new ArrayList<>();
         
         //Create query
         String query = "SELECT ManufacturerID, ManufacturerName FROM MaterialManufacturers ORDER BY ManufacturerName ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -699,7 +646,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -753,22 +700,13 @@ public class Material {
     return materialManufacturers;
     }
     
-    public static List<SimpleTableObject> getMaterialSellers(User user) {
+    public static List<SimpleTableObject> getMaterialSellers(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> materialSellers = new ArrayList<>();
         
         //Create query
         String query = "SELECT SellerID, SellerName FROM MaterialSellers ORDER BY SellerName ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -780,7 +718,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -833,22 +771,13 @@ public class Material {
     return materialSellers;
     }
     
-    public static List<SimpleTableObject> getMaterialColors(User user) {
+    public static List<SimpleTableObject> getMaterialColors(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> materialColors = new ArrayList<>();
         
         //Create query
         String query = "SELECT ColorID, ColorName FROM MaterialColors ORDER BY ColorName ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -860,7 +789,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -912,21 +841,12 @@ public class Material {
     return materialColors;
     }
     
-     public static Material getMaterialByID(User user, SimpleIntegerProperty material_id) {
+     public static Material getMaterialByID(HikariDataSource ds, SimpleIntegerProperty material_id) {
         
         Material material = null;
         
         //Create query
         String query = "SELECT Materials.Comment, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID WHERE MaterialID="+ material_id.get() + " ORDER BY Materials.MaterialID DESC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -938,7 +858,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -979,10 +899,10 @@ public class Material {
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));                
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                double material_used_absolute = getMaterialUsed(user, material_id);
-                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(user, material_id)/material_weight.get()*100, 2));
+                double material_used_absolute = getMaterialUsed(ds, material_id);
+                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(ds, material_id)/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
-                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(user, material_id));
+                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(ds, material_id));
                 material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get() - material_price.get(), 2));
                 material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
                 
@@ -1021,22 +941,13 @@ public class Material {
     return material;
     }
     
-    public static List<SimpleTableObject> getMaterialWeights(User user) {
+    public static List<SimpleTableObject> getMaterialWeights(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> materialWeights = new ArrayList<>();
         
         //Create query
         String query = "SELECT WeightID, WeightValue FROM MaterialWeights ORDER BY WeightValue ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -1048,7 +959,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -1102,22 +1013,13 @@ public class Material {
     return materialWeights;
     }
     
-    public static List<SimpleTableObject> getMaterialDiameters(User user) {
+    public static List<SimpleTableObject> getMaterialDiameters(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> materialDiameters = new ArrayList<>();
         
         //Create query
         String query = "SELECT DiameterID, DiameterValue FROM MaterialDiameters ORDER BY DiameterValue ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -1129,7 +1031,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
                 MngApi obj = new MngApi();
@@ -1184,19 +1086,10 @@ public class Material {
     return materialDiameters;
     }
     
-     public static void insertNewMaterial(Material material, User user){
+     public static void insertNewMaterial(Material material, HikariDataSource ds){
         
         //Create query
         String updateQuery;
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -1208,7 +1101,7 @@ public class Material {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            conn = ds.getConnection();
             //STEP 4: Execute a query
 	    
                 updateQuery = "INSERT INTO Materials (MaterialID,ManufacturerID,MaterialTypeID,ColorID,WeightID,MaterialPrice,MaterialShipping,PurchaseDate,SellerID,Finished,Trash,DiameterID,Comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE MaterialID=?,ManufacturerID=?,MaterialTypeID=?,ColorID=?,WeightID=?,MaterialPrice=?,MaterialShipping=?,PurchaseDate=?,SellerID=?,Finished=?,Trash=?,DiameterID=?,Comment=?";                
@@ -1273,13 +1166,13 @@ public class Material {
         }//end try         
     }
      
-     public static void deleteMaterials(ObservableList<Material> materials, Label info, User user){
+     public static void deleteMaterials(ObservableList<Material> materials, Label info, HikariDataSource ds){
          
          for (int i = 0; i < materials.size(); i++) {
             
             int id = materials.get(i).getMaterial_id().get();
             String query = "DELETE FROM Materials WHERE MaterialID=" + id;
-            MngApi.performUpdateQuary(query, info, user);
+            MngApi.performUpdateQuery(query, info, ds);
             
         }
          

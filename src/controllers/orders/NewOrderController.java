@@ -9,7 +9,7 @@ import classes.Customer;
 import classes.MngApi;
 import classes.Order;
 import classes.OrderItem;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import controllers.select.SelectCustomerController;
 import controllers.select.SelectObjectController;
@@ -53,7 +53,7 @@ import javafx.stage.Stage;
  */
 public class NewOrderController implements Initializable {
     
-    private User user;
+    private HikariDataSource ds;
     
     private MainController mainController;
     
@@ -111,7 +111,7 @@ public class NewOrderController implements Initializable {
             
             stage.show();
             //stage.setAlwaysOnTop(true);            
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setNewOrderController(this);
             
             ctrl.displayCustomers();
@@ -135,7 +135,7 @@ public class NewOrderController implements Initializable {
             stage.centerOnScreen();            
             
             stage.show();        
-            ctrl.setUser(user);            
+            ctrl.setDs(ds);            
             ctrl.setNewOrderController(this);
             ctrl.getTv_objects().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);            
             
@@ -164,7 +164,7 @@ public class NewOrderController implements Initializable {
             
                         stage.show();
                         //stage.setAlwaysOnTop(true);            
-                        ctrl.setUser(user);            
+                        ctrl.setDs(ds);            
                         ctrl.setNewOrderController(this);                                               
                         ctrl.setElementValues(tv_selectedObjects.getSelectionModel().getSelectedItem());
                     }catch (IOException e){
@@ -390,7 +390,7 @@ public class NewOrderController implements Initializable {
             totalSupportWeight = new SimpleDoubleProperty(Double.parseDouble(totalSupportWeightFormatted[0]));
             
             newOrder = new Order(null, status, comment, dateCreated, dueDate, totalBuildTimeFormatted, order_id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
-            Order.insertNewOrder(newOrder, info, user);
+            Order.insertNewOrder(newOrder, info, ds);
             
             //We will now add assign order to objects, but first, we have to assign OrderID to items belonging to current order
             //we also have to assing correct orderItemID. We have to keep OrderItemID the same if it is old order item or assign new OrderItemID
@@ -407,7 +407,7 @@ public class NewOrderController implements Initializable {
             because they are not in new OrderItems.
             */
             
-            List<Integer> originalObjects = OrderItem.getListOfIOrderItemIDs(newOrder, user);                
+            List<Integer> originalObjects = OrderItem.getListOfIOrderItemIDs(newOrder, ds);                
             List<Integer> newObjects = new ArrayList<>();
                 for (int j = 0; j < selectedObjects.size(); j++) {
                     OrderItem item = selectedObjects.get(j);
@@ -415,7 +415,7 @@ public class NewOrderController implements Initializable {
                 }
             
             originalObjects.removeAll(newObjects);            
-            OrderItem.deleteOrderItem(originalObjects, info, user);
+            OrderItem.deleteOrderItem(originalObjects, info, ds);
             
             //2. Determine updated original objects and update them in DB table
             /*
@@ -429,7 +429,7 @@ public class NewOrderController implements Initializable {
             method. Correct orderItemID will be assigned within this method
             */
             
-            OrderItem.insertNewOrderItems(selectedObjects, user);
+            OrderItem.insertNewOrderItems(selectedObjects, ds);
             
             mainController.runService(mainController.getService_refreshOrders());                
             MngApi.closeWindow(btn_create);
@@ -452,8 +452,8 @@ public class NewOrderController implements Initializable {
         txtField_customer.setText(selectedCustomer.getCustomer_id().get() + ";" + selectedCustomer.getCustomer_lastName().get() + ";" + selectedCustomer.getCustomer_firstName().get());
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
     
     public void setMainController(MainController mainController) {
@@ -462,7 +462,7 @@ public class NewOrderController implements Initializable {
     
     public void setNewOrderFields(){
        
-        label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(user, "Orders")));
+        label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(ds, "Orders")));
         tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);        
         txtField_pricePerHour.setText("2.5");        
         datePicker_dateCreated.setValue(LocalDate.now());
@@ -485,7 +485,7 @@ public class NewOrderController implements Initializable {
         txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());        
         txtField_comment.setText(order.getOrder_comment().get());        
         
-        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(order.getOrder_id().get(), user));        
+        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(order.getOrder_id().get(), ds));        
         selectedObjects.addAll(itemList);        
         setSelectedObjects();
         refreshSelectedObjects();        

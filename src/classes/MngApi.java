@@ -5,6 +5,7 @@
  */
 package classes;
 
+import com.zaxxer.hikari.HikariDataSource;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -154,21 +155,12 @@ public class MngApi {
     }
     
     
-    public static int getCurrentAutoIncrementValue(User user, String tableName){
+    public static int getCurrentAutoIncrementValue(HikariDataSource ds, String tableName){
         int currentAutoIncrementValue = 0;
         
         //Create query
-        String query = "SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA ='" + user.getName() + "' AND   TABLE_NAME   ='" + tableName + "'";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
+        String query = "SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA ='" + ds.getUsername() + "' AND   TABLE_NAME   ='" + tableName + "'";
+        
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -179,7 +171,7 @@ public class MngApi {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -218,18 +210,9 @@ public class MngApi {
         return currentAutoIncrementValue;
     }
     
-    public static void performUpdateQuary(String query, Label info,User user){
+    public static void performUpdateQuery(String query, Label info, HikariDataSource ds){
         //Create query
         String updateQuery = query;
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -241,7 +224,7 @@ public class MngApi {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             if(conn.isValid(15) == false) {
                 System.out.print("Connection Lost");
             }
@@ -284,17 +267,8 @@ public class MngApi {
         }//end try
     }
     
-    public static void performMultipleUpdates(ObservableList<String> updateQueries, User user){
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName() + "?allowMultiQueries=true";
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
+    public static void performMultipleUpdates(ObservableList<String> updateQueries, HikariDataSource ds){
+ 
         Connection conn = null;
         Statement stmt = null;
         
@@ -304,8 +278,7 @@ public class MngApi {
             Class.forName("org.mariadb.jdbc.Driver");
 
             //STEP 3: Open a connection
-
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             if(conn.isValid(15) == false) {
                 System.out.print("Connection Lost");
             }
@@ -408,18 +381,8 @@ public class MngApi {
     }
     
     //performs query which resul is integer and returns result
-    public static int performIntegerQuery(String query, User user){
+    public static int performIntegerQuery(String query, HikariDataSource ds){
         int result = 0;
-        
-       
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -431,7 +394,7 @@ public class MngApi {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -477,17 +440,8 @@ public class MngApi {
     }
     
     //performs query which resul is integer and returns result
-    public static String performStringQuery(String query, User user){
+    public static String performStringQuery(String query, HikariDataSource ds){
         String result = null;
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -499,7 +453,7 @@ public class MngApi {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -545,18 +499,9 @@ public class MngApi {
     }
     
     //performs query which resul is integer and returns result
-    public static double performDoubleQuery(String query, User user){
+    public static double performDoubleQuery(String query, HikariDataSource ds){
         double result = 0;
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
+        
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -567,7 +512,7 @@ public class MngApi {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             

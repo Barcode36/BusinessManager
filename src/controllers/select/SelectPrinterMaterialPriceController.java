@@ -11,8 +11,7 @@ import classes.MngApi;
 import classes.OrderItem;
 import classes.Printer;
 import classes.SimpleTableObject;
-
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
@@ -45,7 +44,7 @@ import javafx.util.StringConverter;
  */
 public class SelectPrinterMaterialPriceController implements Initializable {
     
-    private User user;
+    private HikariDataSource ds;
     
     private NewOrderController newOrderController;
     
@@ -111,7 +110,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             
                 stage.show();
                 //stage.setAlwaysOnTop(true);            
-                ctrl.setUser(user);
+                ctrl.setDs(ds);
                 ctrl.setSelectPrinterMaterialPriceController(this);
             
                 ctrl.displayMaterials();
@@ -124,7 +123,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         btn_assign.setOnAction((event) -> {
             try {
                 int quantity, buildTime;
-                double weight, supportWeight, material_remaining = MngApi.performDoubleQuery("SELECT MaterialWeights.WeightValue FROM MaterialWeights JOIN Materials ON MaterialWeights.WeightID = Materials.WeightID WHERE MaterialID=" + material.getMaterial_id().get(), user) - MngApi.performDoubleQuery("SELECT SUM(ItemWeight) FROM OrderItems WHERE ItemMaterialID=" + material.getMaterial_id().get(), user);
+                double weight, supportWeight, material_remaining = MngApi.performDoubleQuery("SELECT MaterialWeights.WeightValue FROM MaterialWeights JOIN Materials ON MaterialWeights.WeightID = Materials.WeightID WHERE MaterialID=" + material.getMaterial_id().get(), ds) - MngApi.performDoubleQuery("SELECT SUM(ItemWeight) FROM OrderItems WHERE ItemMaterialID=" + material.getMaterial_id().get(), ds);
             
                 double price, costs;
                 
@@ -217,7 +216,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
 
         //set material values if there are some otherwise skip
         if(selectedObject.getMaterial_id().get() != 0) {
-            this.material = Material.getMaterialByID(user, selectedObject.getMaterial_id());        
+            this.material = Material.getMaterialByID(ds, selectedObject.getMaterial_id());        
             int id = material.getMaterial_id().get();
             String type = material.getMaterial_manufacturer().get() + " " + this.material.getMaterial_type().get();
             String manufacturer = material.getMaterial_manufacturer().get();
@@ -244,7 +243,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             txtField_minutes.setText(String.format(Locale.UK, "%s", buildTime_formatted[1].replaceAll("[^\\d.]", "")));
         }
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(ds));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
@@ -349,8 +348,8 @@ public class SelectPrinterMaterialPriceController implements Initializable {
 
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
     
     public void setNewOrderController(NewOrderController newOrderController) {

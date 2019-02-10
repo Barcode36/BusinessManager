@@ -8,7 +8,7 @@ package controllers.customers;
 import classes.Customer;
 import classes.MngApi;
 import classes.SimpleTableObject;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
@@ -36,7 +36,7 @@ import javafx.util.StringConverter;
  */
 public class NewCustomerController implements Initializable {
 
-    private User user;    
+    private HikariDataSource ds;    
     private MainController mainController; 
     private String mode;
     
@@ -113,7 +113,7 @@ public class NewCustomerController implements Initializable {
                 
                 Customer newCustomer = new Customer(customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment, customer_id, customer_id_company, customer_id_country, customer_orderCount, customer_ordersPrice);
                 
-                Customer.insertNewCustomer(newCustomer, info, user);
+                Customer.insertNewCustomer(newCustomer, info, ds);
             
             MngApi.closeWindow(customer_btn_create);            
             mainController.runService(mainController.getService_refreshCustomers());
@@ -163,7 +163,7 @@ public class NewCustomerController implements Initializable {
                 
                 String updateQuery = "UPDATE Customers SET FirstName='" + customer_firstName.get() + "', LastName='" + customer_lastName.get() + "', DateCreated='" + customer_dateCreated.get() + "', Comment='" + customer_comment.get() + "', Phone='" + customer_phone.get() + "', Address='" +  customer_address.get() + "', City='" + customer_city.get() + "', Mail='" + customer_mail.get() + "', ZipCode='" + customer_zipCode.get() + "', CountryID=" + customer_id_country.get() + ", CompanyID=" + customer_id_company.get() + " WHERE CustomerID=" + customer_id.get();
                 
-                MngApi.performUpdateQuary(updateQuery, info, user);
+                MngApi.performUpdateQuery(updateQuery, info, ds);
             
             MngApi.closeWindow(customer_btn_create);            
             mainController.runService(mainController.getService_refreshCustomers());
@@ -177,8 +177,8 @@ public class NewCustomerController implements Initializable {
     public void setComboBoxes(){
         mode = "create";
         
-        ObservableList<SimpleTableObject> countries = FXCollections.observableArrayList(Customer.getCountries(user));
-        ObservableList<SimpleTableObject> companies = FXCollections.observableArrayList(Customer.getCompanies(user));
+        ObservableList<SimpleTableObject> countries = FXCollections.observableArrayList(Customer.getCountries(ds));
+        ObservableList<SimpleTableObject> companies = FXCollections.observableArrayList(Customer.getCompanies(ds));
         
         customer_comboBox_country.setItems(countries);
         customer_comboBox_country.getSelectionModel().select(229);
@@ -253,8 +253,8 @@ public class NewCustomerController implements Initializable {
         return this.customer_datePicker_dateCreated;
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
 
     public void setCustomer_label_id_value(int id) {

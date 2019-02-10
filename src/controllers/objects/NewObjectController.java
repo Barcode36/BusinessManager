@@ -6,7 +6,7 @@
 package controllers.objects;
 
 import classes.MngApi;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -26,7 +26,7 @@ import javafx.scene.paint.Color;
  */
 public class NewObjectController implements Initializable {
 
-    private User user;
+    private HikariDataSource ds;
     
     private MainController mainController;
     
@@ -94,7 +94,7 @@ public class NewObjectController implements Initializable {
             
                 newObject = new classes.Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_weight, new SimpleDoubleProperty(0));
             
-                classes.Object.insertNewObject(newObject, user);
+                classes.Object.insertNewObject(newObject, ds);
                 
                 MngApi.closeWindow(object_btn_create);            
                 mainController.runService(mainController.getService_refreshObjects());
@@ -125,8 +125,8 @@ public class NewObjectController implements Initializable {
         object_btn_create.setText("Update");
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
     
     public void setMainController(MainController mainController) {

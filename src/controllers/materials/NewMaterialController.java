@@ -9,7 +9,7 @@ package controllers.materials;
 import classes.Material;
 import classes.MngApi;
 import classes.SimpleTableObject;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
@@ -37,7 +37,7 @@ import javafx.util.StringConverter;
  */
 public class NewMaterialController implements Initializable {
 
-    private User user;
+    private HikariDataSource ds;
     
     private MainController mainController;
     
@@ -115,7 +115,7 @@ public class NewMaterialController implements Initializable {
                 
                 Material newMaterial = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_profit, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining);
                 
-                Material.insertNewMaterial(newMaterial, user);
+                Material.insertNewMaterial(newMaterial, ds);
             
             MngApi.closeWindow(material_btn_create);            
             mainController.runService(mainController.getService_refreshMaterials());
@@ -153,12 +153,12 @@ public class NewMaterialController implements Initializable {
         
         System.out.println(weight);
                 
-        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(Material.getMaterialTypes(user));
-        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(user));
-        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(user));        
-        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(user));        
-        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(user));        
-        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(user));
+        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(Material.getMaterialTypes(ds));
+        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(ds));
+        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(ds));        
+        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(ds));        
+        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(ds));        
+        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(ds));
         
         material_comboBox_type.setItems(types);
         material_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
@@ -285,12 +285,12 @@ public class NewMaterialController implements Initializable {
     
     public void setComboBoxes(){
         
-        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(Material.getMaterialTypes(user));
-        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(user));
-        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(user));        
-        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(user));        
-        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(user));        
-        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(user));
+        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(Material.getMaterialTypes(ds));
+        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(ds));
+        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(ds));        
+        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(ds));        
+        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(ds));        
+        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(ds));
         
         material_comboBox_type.setItems(types);
         material_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
@@ -385,8 +385,8 @@ public class NewMaterialController implements Initializable {
         return material_datePicker_purchaseDate;
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
 
     public void setMaterial_label_id_value(int id) {

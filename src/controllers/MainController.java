@@ -12,7 +12,7 @@ import classes.MngApi;
 import classes.Object;
 import classes.Order;
 import classes.Printer;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.customers.NewCustomerController;
 import controllers.materials.NewMaterialController;
 import controllers.objects.NewObjectController;
@@ -59,7 +59,8 @@ public class MainController implements Initializable {
     
     /*****************************          GENERAL - VARIABLES       *****************************/      
         
-    private User user = null;    
+    //private User ds = null;    
+    private HikariDataSource ds;
     
     @FXML
     private TabPane tp_main;
@@ -73,8 +74,8 @@ public class MainController implements Initializable {
     
     
     /*****************************          GENERAL - METHODS         *****************************/          
-    public void setUser(User user){
-        this.user = user;        
+    public void setDataSource(HikariDataSource ds){
+        this.ds = ds;        
     }
     
     public void runService(Service service){
@@ -227,10 +228,10 @@ public class MainController implements Initializable {
         
     }
     
-    public void refreshOrdersTable(User user) {
+    public void refreshOrdersTable(HikariDataSource ds) {
         
         //Create list of orders
-        ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(user));
+        ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(ds));
         
         //set cell value factory for columns by type
         
@@ -285,7 +286,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {                                        
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
-                        refreshOrdersTable(user);
+                        refreshOrdersTable(ds);
                         calculateOrderStatistics();                        
                     });
                     return null;
@@ -347,7 +348,7 @@ public class MainController implements Initializable {
             for (int i = 0; i < selectedCustomers.size(); i++) {
                 
                 int customer_id = selectedCustomers.get(i).getCustomer_id().get();
-                Double[] statistics = Customer.getCustomerStats(customer_id, user);
+                Double[] statistics = Customer.getCustomerStats(customer_id, ds);
                 
                 double d_orders = statistics[0];
                 double d_items = statistics[1];
@@ -392,9 +393,9 @@ public class MainController implements Initializable {
         
     }
     
-    public void refreshCustomersTable(User user) {
+    public void refreshCustomersTable(HikariDataSource ds) {
         //Create list of orders
-        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(user));
+        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(ds));
         
         
         //set cell value factory for columns by type
@@ -461,7 +462,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
-                        refreshCustomersTable(user);                    
+                        refreshCustomersTable(ds);                    
                     });                    
                     
                     return null;
@@ -505,10 +506,10 @@ public class MainController implements Initializable {
     
     /*****************************          OBJECTS - METHODS         *****************************/
     
-    public void refreshObjectsTable(User user){
+    public void refreshObjectsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.getObjects(user));
+        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.getObjects(ds));
         
         object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
         object_col_stlLink.setCellValueFactory((param) -> {return param.getValue().getObject_stlLink();});           
@@ -550,7 +551,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {                     
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
-                        refreshObjectsTable(user);
+                        refreshObjectsTable(ds);
                         calculateOrderStatistics();
                     });
                     
@@ -654,8 +655,8 @@ public class MainController implements Initializable {
         
         paid = shipping + price;
         avgRollPrice = paid/(soldRolls + remainingRolls);
-        colors = MngApi.performIntegerQuery("SELECT COUNT(ColorID) FROM MaterialColors", user);
-        types = MngApi.performIntegerQuery("SELECT COUNT(MaterialTypeID) FROM MaterialTypes", user);
+        colors = MngApi.performIntegerQuery("SELECT COUNT(ColorID) FROM MaterialColors", ds);
+        types = MngApi.performIntegerQuery("SELECT COUNT(MaterialTypeID) FROM MaterialTypes", ds);
 
         materials_label_Total.setText(String.format("Total(%d)", total));
         materials_label_shippingPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", shipping, price));
@@ -715,10 +716,10 @@ public class MainController implements Initializable {
         
     }
     
-    public void refreshMaterialsTable(User user){
+    public void refreshMaterialsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(user));
+        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(ds));
         
         material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
         material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});           
@@ -774,7 +775,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
-                        refreshMaterialsTable(user);
+                        refreshMaterialsTable(ds);
                         calculateMaterialStatistics(tv_materials.getItems());
                     });
                     
@@ -864,10 +865,10 @@ public class MainController implements Initializable {
         costs_label_quantity_sel.setText(quantity + "");
     }
     
-    public void refreshCostsTable(User user){
+    public void refreshCostsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Cost> costsList = FXCollections.observableArrayList(Cost.getCosts(user));
+        ObservableList<Cost> costsList = FXCollections.observableArrayList(Cost.getCosts(ds));
         
         cost_col_comment.setCellValueFactory((param) -> {return param.getValue().getCost_comment();});
         cost_col_name.setCellValueFactory((param) -> {return param.getValue().getCost_name();});           
@@ -908,7 +909,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);                 
-                        refreshCostsTable(user);
+                        refreshCostsTable(ds);
                         calculateCostsStatistics();
                     });
                                        
@@ -1033,10 +1034,10 @@ public class MainController implements Initializable {
         
     }
     
-    public void refreshPrintersTable(User user){
+    public void refreshPrintersTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Printer> printersList = FXCollections.observableArrayList(Printer.getPrintersLong(user));
+        ObservableList<Printer> printersList = FXCollections.observableArrayList(Printer.getPrintersLong(ds));
         
         printer_col_name.setCellValueFactory((param) -> {return param.getValue().getPrinter_name();});
         printer_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getPrinter_purchaseDate();});           
@@ -1086,7 +1087,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);                 
-                        refreshPrintersTable(user);
+                        refreshPrintersTable(ds);
                         calculatePrintersStatistics();
                     });
                                        
@@ -1170,7 +1171,7 @@ public class MainController implements Initializable {
     
     
     
-    public void refreshStatisticsLabels(User user){
+    public void refreshStatisticsLabels(HikariDataSource ds){
         
     }
     
@@ -1183,7 +1184,7 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);                 
-                        refreshStatisticsLabels(user);                        
+                        refreshStatisticsLabels(ds);                        
                     });
                                        
                     return null;
@@ -1254,7 +1255,7 @@ public class MainController implements Initializable {
             
             stage.show();
             
-            ctrl.setUser(user);            
+            ctrl.setDs(ds);            
             ctrl.setMainController(this);
             ctrl.setNewOrderFields();            
             
@@ -1280,7 +1281,7 @@ public class MainController implements Initializable {
                 
                 stage.show();
             
-                ctrl.setUser(user);            
+                ctrl.setDs(ds);            
                 ctrl.setMainController(this);
                 ctrl.setUpdateOrderFields(tv_orders.getSelectionModel().getSelectedItems());            
             
@@ -1293,7 +1294,7 @@ public class MainController implements Initializable {
         });
         
         order_btn_delete.setOnAction((event) -> {            
-            Order.deleteOrders(tv_orders.getSelectionModel().getSelectedItems(), label_main_info, user);
+            Order.deleteOrders(tv_orders.getSelectionModel().getSelectedItems(), label_main_info, ds);
             runService(service_refreshOrders);
         });
         
@@ -1352,9 +1353,9 @@ public class MainController implements Initializable {
             stage.centerOnScreen();
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
-            ctrl.setCustomer_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Customers"));
+            ctrl.setCustomer_label_id_value(MngApi.getCurrentAutoIncrementValue(ds, "Customers"));
             ctrl.setComboBoxes();
             stage.show();
             MngApi.setActualDate(ctrl.getCustomer_datePicker_dateCreated());
@@ -1379,7 +1380,7 @@ public class MainController implements Initializable {
             stage.centerOnScreen();
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);            
             ctrl.setUpdateCustomerFields(tv_customers.getSelectionModel().getSelectedItems());
             stage.show();
@@ -1390,7 +1391,7 @@ public class MainController implements Initializable {
     });
     
     customer_btn_delete.setOnAction((event) -> {        
-        Customer.deleteCustomers(tv_customers.getSelectionModel().getSelectedItems(), label_main_info, user);
+        Customer.deleteCustomers(tv_customers.getSelectionModel().getSelectedItems(), label_main_info, ds);
         runService(service_refreshCustomers);
     });
     
@@ -1401,7 +1402,7 @@ public class MainController implements Initializable {
     });
             
     object_btn_delete.setOnAction((event) -> {
-        classes.Object.deleteObjects(tv_objects.getSelectionModel().getSelectedItems(), label_main_info, user);
+        classes.Object.deleteObjects(tv_objects.getSelectionModel().getSelectedItems(), label_main_info, ds);
         runService(service_refreshObjects);
     });
     
@@ -1445,9 +1446,9 @@ public class MainController implements Initializable {
             
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
-            ctrl.setObject_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Objects"));
+            ctrl.setObject_label_id_value(MngApi.getCurrentAutoIncrementValue(ds, "Objects"));
             stage.show();  
             //stage.setAlwaysOnTop(true);
             
@@ -1475,7 +1476,7 @@ public class MainController implements Initializable {
             classes.Object obj = tv_objects.getSelectionModel().getSelectedItems().get(0);
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
             ctrl.setObject_label_id_value(obj.getObject_id().get());
             ctrl.setEditFields(obj);
@@ -1538,10 +1539,10 @@ public class MainController implements Initializable {
             
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
             ctrl.setComboBoxes();
-            ctrl.setMaterial_label_id_value(MngApi.getCurrentAutoIncrementValue(user, "Materials"));
+            ctrl.setMaterial_label_id_value(MngApi.getCurrentAutoIncrementValue(ds, "Materials"));
             MngApi.setActualDate(ctrl.getMaterial_datePicker_purchaseDate());
             
             stage.show();                        
@@ -1569,7 +1570,7 @@ public class MainController implements Initializable {
             
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
             ctrl.setUpdateMaterialFields(tv_materials.getSelectionModel().getSelectedItem());
             
@@ -1586,7 +1587,7 @@ public class MainController implements Initializable {
     });
     
     material_btn_delete.setOnAction((event) -> {
-        Material.deleteMaterials(tv_materials.getSelectionModel().getSelectedItems(), label_main_info, user);
+        Material.deleteMaterials(tv_materials.getSelectionModel().getSelectedItems(), label_main_info, ds);
         runService(service_refreshMaterials);
     });
     
@@ -1639,7 +1640,7 @@ public class MainController implements Initializable {
             
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
             ctrl.setFieldsValues();
             stage.show();                        
@@ -1667,7 +1668,7 @@ public class MainController implements Initializable {
             
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
             ctrl.setUpdateCostFields(tv_costs.getSelectionModel().getSelectedItems().get(0));
             stage.show();                        
@@ -1679,7 +1680,7 @@ public class MainController implements Initializable {
     });
     
     cost_btn_delete.setOnAction((event) -> {        
-        Cost.deleteCosts(tv_costs.getSelectionModel().getSelectedItems(), label_main_info, user);
+        Cost.deleteCosts(tv_costs.getSelectionModel().getSelectedItems(), label_main_info, ds);
         runService(service_refreshCosts);
     });
     
@@ -1736,7 +1737,7 @@ public class MainController implements Initializable {
             
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
             ctrl.setComboBox();            
             
@@ -1765,7 +1766,7 @@ public class MainController implements Initializable {
             
             
             //passing credentials to main controller
-            ctrl.setUser(user);
+            ctrl.setDs(ds);
             ctrl.setMainController(this);
             ctrl.setComboBox(tv_printers.getSelectionModel().getSelectedItems().get(0));            
             ctrl.setUpdatePrinterFields(tv_printers.getSelectionModel().getSelectedItems().get(0));
@@ -1778,7 +1779,7 @@ public class MainController implements Initializable {
     });
     
     printer_btn_delete.setOnAction((event) -> {
-        Printer.deletePrinters(tv_printers.getSelectionModel().getSelectedItems(), label_main_info, user);
+        Printer.deletePrinters(tv_printers.getSelectionModel().getSelectedItems(), label_main_info, ds);
         runService(service_refreshPrinters);
     });
     

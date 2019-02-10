@@ -6,6 +6,7 @@
 package classes;
 
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -159,24 +160,13 @@ public class Order {
     }
 
     
-    public static List<Order> getOrders(User user) {
+    public static List<Order> getOrders(HikariDataSource ds) {
         
         //Create list
         List<Order> orderList = new ArrayList<>();
         
         //Create query        
         String query = "SELECT Orders.OrderID, Orders.OrderQuantity, Orders.CustomerID, CONCAT(Customers.LastName, ' ', Customers.FirstName) AS Customer, Orders.OrderPrice, Orders.DueDate, Orders.DateCreated, Orders.OrderStatus, Orders.Comment, Orders.OrderCosts,Orders.OrderWeight,Orders.OrderSupportWeight,Orders.OrderBuildTime FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID ORDER BY Orders.OrderID DESC";
-
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + ":3306/" + user.getDbName();
-              
-        
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -187,7 +177,7 @@ public class Order {
             Class.forName("org.mariadb.jdbc.Driver");
 
             //STEP 3: Open a connection            
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             //STEP 4: Execute a query
             stmt = conn.createStatement();
@@ -259,7 +249,7 @@ public class Order {
         return orderList;
     } 
 
-    private static int getTotalOrderQuantity(SimpleIntegerProperty order_id, User user) {
+    private static int getTotalOrderQuantity(SimpleIntegerProperty order_id, HikariDataSource ds) {
         int itemQuantity = 1;
         
         //Create query
@@ -267,15 +257,6 @@ public class Order {
         
         //Create list
         List<Order> orderList = new ArrayList<>();
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -287,7 +268,7 @@ public class Order {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -323,7 +304,7 @@ public class Order {
         return itemQuantity;
     }
     
-    private static int getTotalBuildTime(SimpleIntegerProperty order_id, User user) {
+    private static int getTotalBuildTime(SimpleIntegerProperty order_id, HikariDataSource ds) {
         int itemBuildTime = 1;
         
         //Create query
@@ -332,15 +313,6 @@ public class Order {
         //Create list
         List<Order> orderList = new ArrayList<>();
         
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -351,7 +323,7 @@ public class Order {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -387,7 +359,7 @@ public class Order {
         return itemBuildTime;
     }
     
-    private static double getTotalCosts(SimpleIntegerProperty order_id, User user) {
+    private static double getTotalCosts(SimpleIntegerProperty order_id, HikariDataSource ds) {
         double itemCosts = 0;
         
         //Create query
@@ -396,15 +368,6 @@ public class Order {
         
         //Create list
         List<Order> orderList = new ArrayList<>();
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -417,7 +380,7 @@ public class Order {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -454,7 +417,7 @@ public class Order {
         return MngApi.round(itemCosts, 2);
     }
     
-    private static double getTotalPrice(SimpleIntegerProperty order_id, User user) {
+    private static double getTotalPrice(SimpleIntegerProperty order_id, HikariDataSource ds) {
         double totalprice = 0;
         
         //Create query
@@ -462,15 +425,6 @@ public class Order {
         
         //Create list
         List<Order> orderList = new ArrayList<>();
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -482,7 +436,7 @@ public class Order {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -518,7 +472,7 @@ public class Order {
         return totalprice;
     }
     
-    private static double getTotalWeight(SimpleIntegerProperty order_id, User user) {
+    private static double getTotalWeight(SimpleIntegerProperty order_id, HikariDataSource ds) {
         double totalWeight = 0;
         
         //Create query
@@ -526,15 +480,6 @@ public class Order {
         
         //Create list
         List<Order> orderList = new ArrayList<>();
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -546,7 +491,7 @@ public class Order {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -582,7 +527,7 @@ public class Order {
         return totalWeight;
     }
     
-    private static double getTotalSupportWeight(SimpleIntegerProperty order_id, User user) {
+    private static double getTotalSupportWeight(SimpleIntegerProperty order_id, HikariDataSource ds) {
         double totalSupportWeight = 0;
         
         //Create query
@@ -590,15 +535,6 @@ public class Order {
         
         //Create list
         List<Order> orderList = new ArrayList<>();
-        
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -610,7 +546,7 @@ public class Order {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -646,7 +582,7 @@ public class Order {
         return totalSupportWeight;
     }
     
-    public static void insertNewOrder(Order order, Label info, User user){
+    public static void insertNewOrder(Order order, Label info, HikariDataSource ds){
         
         String updateQuery = "INSERT INTO Orders (OrderID,CustomerID,OrderPrice,OrderQuantity,DateCreated,OrderStatus,DueDate,Comment,OrderCosts,OrderWeight,OrderSupportWeight,OrderBuildTime) " +
         "VALUES (" + 
@@ -677,19 +613,19 @@ public class Order {
                 ",OrderSupportWeight=" + order.getOrder_support_weight().get() + 
                 ",OrderBuildTime=" + order.getOrder_buildTime().get();
         
-        MngApi.performUpdateQuary(updateQuery, info, user);                
+        MngApi.performUpdateQuery(updateQuery, info, ds);                
         
     }    
     
-    public static void deleteOrders(ObservableList<Order> orders, Label info, User user){      
+    public static void deleteOrders(ObservableList<Order> orders, Label info, HikariDataSource ds){      
     
         for (int i = 0; i < orders.size(); i++) {
             
             int id = orders.get(i).getOrder_id().get();
             String query = "DELETE FROM OrderItems WHERE OrderID=" + id;
-            MngApi.performUpdateQuary(query, info, user);
+            MngApi.performUpdateQuery(query, info, ds);
             query = "DELETE FROM Orders WHERE OrderID=" + id;        
-            MngApi.performUpdateQuary(query, info, user);    
+            MngApi.performUpdateQuery(query, info, ds);    
             
         }        
     }

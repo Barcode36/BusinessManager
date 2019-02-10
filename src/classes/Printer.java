@@ -5,6 +5,7 @@
  */
 package classes;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -160,23 +161,14 @@ public class Printer {
     }
 
     //gets list of printer types as simple table objects - thus only id and name
-    public static List<SimpleTableObject> getPrinterTypes(User user) {
+    public static List<SimpleTableObject> getPrinterTypes(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> allPrinterTypes = new ArrayList<>();
         
         //Create query
         String query = "SELECT PrinterTypeID, PrinterType FROM PrinterTypes ORDER BY PrinterTypeID ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
+       
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -187,7 +179,7 @@ public class Printer {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -239,22 +231,13 @@ public class Printer {
     }
     
     //gets list of printer as simple table objects - thus only id and name
-    public static List<SimpleTableObject> getPrintersShort(User user) {
+    public static List<SimpleTableObject> getPrintersShort(HikariDataSource ds) {
         
         //Create list
         List<SimpleTableObject> allPrinters = new ArrayList<>();
         
         //Create query
         String query = "SELECT PrinterID, PrinterName FROM Printers ORDER BY PrinterID ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -266,7 +249,7 @@ public class Printer {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -317,24 +300,14 @@ public class Printer {
     return allPrinters;
     }
     
-    public static List<Printer> getPrintersLong(User user) {
+    public static List<Printer> getPrintersLong(HikariDataSource ds) {
         
         //Create list
         List<Printer> printerList = new ArrayList<>();
         
         //Create query        
         String query = "SELECT Printers.PrinterID, Printers.PrinterName, Printers.PrinterPrice, Printers.Comment, Printers.PrinterShipping, Printers.PrinterTypeID, Printers.PurchaseDate, Printers.Duty, Printers.Tax, PrinterTypes.PrinterType FROM Printers  JOIN PrinterTypes ON Printers.PrinterTypeID = PrinterTypes.PrinterTypeID";
-
         
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
-
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -344,7 +317,7 @@ public class Printer {
             Class.forName("org.mariadb.jdbc.Driver");
 
             //STEP 3: Open a connection            
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             
             //STEP 4: Execute a query
             stmt = conn.createStatement();
@@ -360,7 +333,7 @@ public class Printer {
                 SimpleDoubleProperty printer_shipping, printer_price, printer_duty, printer_tax, printer_incomes, printer_expenses, printer_overallIncome;
                 
                 printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
-                printer_itemsSold = new SimpleIntegerProperty(MngApi.performIntegerQuery("SELECT SUM(ItemQuantity) FROM OrderItems WHERE PrinterID=" + printer_id.get(), user));
+                printer_itemsSold = new SimpleIntegerProperty(MngApi.performIntegerQuery("SELECT SUM(ItemQuantity) FROM OrderItems WHERE PrinterID=" + printer_id.get(), ds));
                 printer_type_id = new SimpleIntegerProperty(rs.getInt("PrinterTypeID"));
                 
                 printer_name = new SimpleStringProperty(rs.getString("PrinterName"));
@@ -372,12 +345,12 @@ public class Printer {
                 printer_price = new SimpleDoubleProperty(MngApi.round(rs.getDouble("PrinterPrice"), 2));
                 printer_duty = new SimpleDoubleProperty(MngApi.round(rs.getDouble("Duty"), 2));
                 printer_tax = new SimpleDoubleProperty(MngApi.round(rs.getDouble("Tax"), 2));
-                printer_incomes = new SimpleDoubleProperty(MngApi.round(MngApi.performDoubleQuery("SELECT SUM(ItemPrice) FROM OrderItems WHERE PrinterID=" + printer_id.get(), user), 2));
+                printer_incomes = new SimpleDoubleProperty(MngApi.round(MngApi.performDoubleQuery("SELECT SUM(ItemPrice) FROM OrderItems WHERE PrinterID=" + printer_id.get(), ds), 2));
                 
                 double material_expenses, cost_expenses, printer_totalPrice;
                 
-                material_expenses = MngApi.performDoubleQuery("SELECT SUM(ItemCosts) FROM OrderItems WHERE PrinterID=" + printer_id.get(), user);
-                cost_expenses = MngApi.performDoubleQuery("SELECT SUM(CostPrice) FROM Costs WHERE PrinterID=" + printer_id.get(), user);
+                material_expenses = MngApi.performDoubleQuery("SELECT SUM(ItemCosts) FROM OrderItems WHERE PrinterID=" + printer_id.get(), ds);
+                cost_expenses = MngApi.performDoubleQuery("SELECT SUM(CostPrice) FROM Costs WHERE PrinterID=" + printer_id.get(), ds);
                 printer_totalPrice = printer_price.get() + printer_tax.get() + printer_duty.get();
                 
                 printer_expenses = new SimpleDoubleProperty(MngApi.round(material_expenses + cost_expenses + printer_totalPrice, 2));
@@ -421,19 +394,10 @@ public class Printer {
         return printerList;
     } 
     
-    public static void insertNewPrinter(Printer printer, User user){
+    public static void insertNewPrinter(Printer printer, HikariDataSource ds){
      
         //Create query
         String updateQuery;
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -445,7 +409,7 @@ public class Printer {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            conn = ds.getConnection();            
             //STEP 4: Execute a query
 	    
                 int i =1;
@@ -503,13 +467,13 @@ public class Printer {
         
     }
     
-    public static void deletePrinters(ObservableList<Printer> printers, Label info, User user){
+    public static void deletePrinters(ObservableList<Printer> printers, Label info, HikariDataSource ds){
         
         for (int i = 0; i < printers.size(); i++) {
             
             int id = printers.get(i).getPrinter_id().get();
             String query = "DELETE FROM Printers WHERE PrinterID=" + id;
-            MngApi.performUpdateQuary(query, info, user);
+            MngApi.performUpdateQuery(query, info, ds);
             
         }
         

@@ -5,6 +5,7 @@
  */
 package classes;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -134,22 +135,13 @@ public class Object {
 
    
 
-    public static List<Object> getObjects(User user){
+    public static List<Object> getObjects(HikariDataSource ds){
         
         //Create list
         List<Object> objectList = new ArrayList<>();
         
         //Create query
         String query = "SELECT * FROM Objects";
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -161,7 +153,7 @@ public class Object {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -183,12 +175,12 @@ public class Object {
                object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
                object_buildTime_formated = MngApi.convertToFormattedTime(object_buildTime.get());
                
-               object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, user));               
+               object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, ds));               
                
                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
                object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
-               object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, user));
-               object_costs = new SimpleDoubleProperty(MngApi.round(MngApi.performDoubleQuery("SELECT SUM(ItemCosts) FROM OrderItems WHERE ObjectID=" + object_id.get(), user), 2));
+               object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, ds));
+               object_costs = new SimpleDoubleProperty(MngApi.round(MngApi.performDoubleQuery("SELECT SUM(ItemCosts) FROM OrderItems WHERE ObjectID=" + object_id.get(), ds), 2));
                               
                Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice, object_costs);
                
@@ -226,22 +218,13 @@ public class Object {
         return objectList;        
     }
     
-    private static int getSoldCount(SimpleIntegerProperty object_id, User user){
+    private static int getSoldCount(SimpleIntegerProperty object_id, HikariDataSource ds){
         
         //Create list
         int soldCount = 0;
         
         //Create query
         String query = "SELECT SUM(ItemQuantity) AS 'SoldCount' FROM OrderItems WHERE ObjectID=" + object_id.get();
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -253,7 +236,7 @@ public class Object {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -293,21 +276,12 @@ public class Object {
         
     }
     
-    private static double getSoldPrice(SimpleIntegerProperty object_id, User user){
+    private static double getSoldPrice(SimpleIntegerProperty object_id, HikariDataSource ds){
         //Create list
         double soldPrice = 0;
         
         //Create query
         String query = "SELECT SUM(ItemPrice) AS 'SoldPrice' FROM OrderItems WHERE ObjectID=" + object_id.get();
-                
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -319,7 +293,7 @@ public class Object {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -359,19 +333,10 @@ public class Object {
         
     }
     
-    public static void insertNewObject(classes.Object obj, User user){
+    public static void insertNewObject(classes.Object obj, HikariDataSource ds){
         
         //Create query
         String updateQuery;
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -383,7 +348,7 @@ public class Object {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            conn = ds.getConnection();
             //STEP 4: Execute a query
 	    
                 
@@ -438,13 +403,13 @@ public class Object {
         
     }
   
-    public static void deleteObjects(ObservableList<classes.Object> objects, Label info, User user){
+    public static void deleteObjects(ObservableList<classes.Object> objects, Label info, HikariDataSource ds){
         
         for (int i = 0; i < objects.size(); i++) {
             
             int id = objects.get(i).getObject_id().get();
             String query = "DELETE FROM Objects WHERE ObjectID=" + id;
-            MngApi.performUpdateQuary(query, info, user);
+            MngApi.performUpdateQuery(query, info, ds);
             
         }        
     }

@@ -7,7 +7,7 @@ package controllers.select;
 
 import classes.Customer;
 import classes.MngApi;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.orders.NewOrderController;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -28,7 +28,7 @@ import javafx.scene.control.TextField;
  */
 public class SelectCustomerController implements Initializable {
 
-    private User user;
+    private HikariDataSource ds;
     
     private NewOrderController newOrderController;
     
@@ -80,14 +80,14 @@ public class SelectCustomerController implements Initializable {
     }    
     
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }    
     
     public void displayCustomers() {        
         
         //Create list of orders
-        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(user));
+        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(ds));
         
         //set cell value factory for columns by type
         // customer_col_company, customer_col_comment;

@@ -5,6 +5,7 @@
  */
 package classes;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -117,22 +118,13 @@ public class Cost {
 
     
     
-    public static List<Cost> getCosts(User user) {
+    public static List<Cost> getCosts(HikariDataSource ds) {
         
         //Create list
         List<Cost> allCostsList = new ArrayList<>();
         
         //Create query
         String query = "SELECT Costs.CostID, Costs.CostName, Costs.CostQuantity, Costs.CostShipping, Costs.PurchaseDate, Costs.Comment, Costs.CostPrice, Costs.PrinterID, Printers.PrinterName FROM Costs JOIN Printers ON Costs.PrinterID = Printers.PrinterID ORDER BY Costs.CostID ASC";
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         Statement stmt = null;
@@ -144,7 +136,7 @@ public class Cost {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = ds.getConnection();
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -207,19 +199,10 @@ public class Cost {
     return allCostsList;
     }
     
-    public static void insertNewCost(Cost cost, User user){
+    public static void insertNewCost(Cost cost, HikariDataSource ds){
         
         //Create query
         String updateQuery;
-
-        // JDBC driver name and database URL
-        String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-        String DB_URL = "jdbc:mariadb://" + user.getAddress() + "/" + user.getDbName();
-
-        //  Database credentials
-        String USER = user.getName();
-        String PASS = user.getPass();
-
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -231,7 +214,7 @@ public class Cost {
 
             //STEP 3: Open a connection
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);            
+            conn = ds.getConnection();            
             //STEP 4: Execute a query
 	    
                 
@@ -286,13 +269,13 @@ public class Cost {
         
     }    
     
-    public static void deleteCosts(ObservableList<Cost> costs, Label info, User user){
+    public static void deleteCosts(ObservableList<Cost> costs, Label info, HikariDataSource ds){
         
         for (int i = 0; i < costs.size(); i++) {
             
             int id = costs.get(i).getCost_id().get();
             String query = "DELETE FROM Costs WHERE CostID=" + id;
-            MngApi.performUpdateQuary(query, info, user);
+            MngApi.performUpdateQuery(query, info, ds);
             
         }
         

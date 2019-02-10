@@ -9,7 +9,7 @@ import classes.Cost;
 import classes.MngApi;
 import classes.Printer;
 import classes.SimpleTableObject;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
@@ -37,7 +37,7 @@ import javafx.util.StringConverter;
  */
 public class NewCostController implements Initializable {
 
-    private User user;
+    private HikariDataSource ds;
     
     private MainController mainController;
     
@@ -91,7 +91,7 @@ public class NewCostController implements Initializable {
             
             newCost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_printer, cost_shipping, cost_price);
             
-            Cost.insertNewCost(newCost, user);
+            Cost.insertNewCost(newCost, ds);
             
             MngApi.closeWindow(cost_btn_create);            
             mainController.runService(mainController.getService_refreshCosts());
@@ -114,16 +114,16 @@ public class NewCostController implements Initializable {
         return cost_datePicker_purchaseDate;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
     
     public void setFieldsValues() {
         
-        int id = MngApi.getCurrentAutoIncrementValue(user, "Costs");
+        int id = MngApi.getCurrentAutoIncrementValue(ds, "Costs");
         this.cost_label_id.setText(String.valueOf(id));
 
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(ds));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
@@ -157,7 +157,7 @@ public class NewCostController implements Initializable {
         LocalDate purchaseDate = LocalDate.parse(cost.getCost_purchaseDate().get());
         cost_datePicker_purchaseDate.setValue(purchaseDate);        
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(ds));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);        
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {

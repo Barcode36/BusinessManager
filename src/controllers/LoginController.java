@@ -2,6 +2,7 @@ package controllers;
 
 import classes.MngApi;
 import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -20,11 +21,23 @@ public class LoginController {
     @FXML
     private Button btn_login;    
     
-    //signs in user into database and displays application's main window with loaded "Orders" table
-    public void signIn(ActionEvent event) {
-        MngApi.closeWindow(btn_login); //closes parent window of specified node
+    private HikariDataSource ds = new HikariDataSource();
+    
 
-        try{            
+    
+    //signs in user into database and displays application's main window with loaded "Orders" table
+    public void signIn(ActionEvent event) {       
+        try{
+            
+            MngApi.closeWindow(btn_login); //closes parent window of specified node
+                    
+            ds.setJdbcUrl("jdbc:mariadb://" + ipAddress.getText() + ":3306/" + uName.getText());
+            ds.setUsername(uName.getText());
+            ds.setPassword(uPasswd.getText());
+            ds.addDataSourceProperty("cachePrepStmts", "true");
+            ds.addDataSourceProperty("prepStmtCacheSize", "250");
+            ds.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));            
             Parent root1 = fxmlLoader.load();
             MainController ctrl = fxmlLoader.getController();
@@ -36,11 +49,8 @@ public class LoginController {
             stage.setScene(new Scene(root1));
             stage.setMaximized(true);
             
-            //creating user
-            User user = new User(uName.getText(), uPasswd.getText(), ipAddress.getText(), uName.getText());
-            
             //passing credentials to main controller
-            ctrl.setUser(user);            
+            ctrl.setDataSource(ds);            
             stage.show();            
             
             //when we first open up main windows, we need to load all orders - that's default view

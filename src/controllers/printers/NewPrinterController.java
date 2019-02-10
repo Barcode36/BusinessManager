@@ -5,11 +5,10 @@
  */
 package controllers.printers;
 
-import classes.Material;
 import classes.MngApi;
 import classes.Printer;
 import classes.SimpleTableObject;
-import classes.User;
+import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
@@ -36,7 +35,7 @@ import javafx.util.StringConverter;
  */
 public class NewPrinterController implements Initializable {
     
-    private User user;
+    private HikariDataSource ds;
     
     private MainController mainController;
     
@@ -102,7 +101,7 @@ public class NewPrinterController implements Initializable {
                 
                 Printer newPrinter = new Printer(printer_id, printer_itemsSold, printer_type_id, printer_name, printer_purchaseDate, printer_comment, printer_type, printer_shipping, printer_price, printer_incomes, printer_expenses, printer_overallIncome, printer_duty, printer_tax);
                 
-                Printer.insertNewPrinter(newPrinter, user);
+                Printer.insertNewPrinter(newPrinter, ds);
             
             MngApi.closeWindow(printer_btn_create);            
             mainController.runService(mainController.getService_refreshMaterials());
@@ -135,10 +134,10 @@ public class NewPrinterController implements Initializable {
     
     public void setComboBox(){
         
-        setPrinter_label_id(MngApi.getCurrentAutoIncrementValue(user, "Printers"));
+        setPrinter_label_id(MngApi.getCurrentAutoIncrementValue(ds, "Printers"));
         MngApi.setActualDate(printer_datePicker_purchaseDate);
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinterTypes(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinterTypes(ds));
         
         printer_comboBox_type.setItems(printers);
         printer_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
@@ -167,7 +166,7 @@ public class NewPrinterController implements Initializable {
         
         String printer_type = printer.getPrinter_type().get();
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinterTypes(user));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinterTypes(ds));
         
         printer_comboBox_type.setItems(printers);
         printer_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
@@ -191,8 +190,8 @@ public class NewPrinterController implements Initializable {
         printer_comboBox_type.setVisibleRowCount(5);
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setDs(HikariDataSource ds) {
+        this.ds = ds;
     }
 
     public void setPrinter_label_id(int printer_id) {
