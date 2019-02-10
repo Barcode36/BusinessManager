@@ -1,7 +1,6 @@
 package controllers;
 
 import classes.MngApi;
-import classes.User;
 import com.zaxxer.hikari.HikariDataSource;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -37,7 +36,8 @@ public class LoginController {
             ds.addDataSourceProperty("cachePrepStmts", "true");
             ds.addDataSourceProperty("prepStmtCacheSize", "250");
             ds.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        
+            ds.setMaximumPoolSize(5);
+            
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));            
             Parent root1 = fxmlLoader.load();
             MainController ctrl = fxmlLoader.getController();
@@ -54,7 +54,7 @@ public class LoginController {
             stage.show();            
             
             //when we first open up main windows, we need to load all orders - that's default view
-            ctrl.runService(ctrl.getService_refreshOrders());
+            ctrl.runService(ctrl.getService_refreshAll());
                 
             
         } catch (IOException e){

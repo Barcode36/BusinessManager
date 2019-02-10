@@ -29,7 +29,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -71,11 +70,38 @@ public class MainController implements Initializable {
     @FXML
     private Label label_main_info;
     
+     // Create the service
+    private final Service<Void> service_refreshAll = new Service<Void>() {
+        @Override
+        protected Task<Void> createTask(){
+            Task<Void> task_refreshPrintersTable = new Task<Void>() {            
+                @Override
+                public Void call() throws Exception {
+                    Platform.runLater(() -> {
+                        updateProgress(-1, 100);                 
+                        loadAll();                        
+                    });
+                                       
+                    return null;
+                }        
+            };
+        return task_refreshPrintersTable;
+        }
+    };
     
-    
-    /*****************************          GENERAL - METHODS         *****************************/          
+    /*****************************          GENERAL - METHODS
+     * @param ds *****************************/          
     public void setDataSource(HikariDataSource ds){
         this.ds = ds;        
+    }
+    
+    public void loadAll(){        
+        runService(service_refreshCosts);
+        runService(service_refreshCustomers);
+        runService(service_refreshMaterials);
+        runService(service_refreshObjects);
+        runService(service_refreshOrders);
+        runService(service_refreshPrinters);        
     }
     
     public void runService(Service service){
@@ -106,8 +132,11 @@ public class MainController implements Initializable {
     public void setMain_label_info(Label main_label_info) {
         this.label_main_info = main_label_info;
     }
-    
-    
+
+    public Service<Void> getService_refreshAll() {
+        return service_refreshAll;
+    }
+        
     /*
     *
     *
@@ -188,11 +217,11 @@ public class MainController implements Initializable {
         
         label_order_totalOrders.setText(String.format(Locale.US, "Total(%d)", total_orders));
         label_order_TotalCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", total_price, total_costs));
-        label_order_TotalPricePerHour.setText(String.format(Locale.US, "%.2f$/h", total_price/total_buildTime*60));
+        label_order_TotalPricePerHour.setText(String.format(Locale.US, "%.2f $/h", total_price/total_buildTime*60));
         if (total_weight >= 1000){
-            label_order_TotalWeight.setText(String.format(Locale.US, "%.2fkg/%.2fkg", total_weight/1000, total_supportWeight/1000));
+            label_order_TotalWeight.setText(String.format(Locale.US, "%.2f kg/%.2f kg", total_weight/1000, total_supportWeight/1000));
         } else {
-            label_order_TotalWeight.setText(String.format(Locale.US, "%.2fg/%.2fg", total_weight, total_supportWeight));
+            label_order_TotalWeight.setText(String.format(Locale.US, "%.2f g/%.2f g", total_weight, total_supportWeight));
         }        
         label_order_TotalBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToFormattedTime(total_buildTime).get()));
         label_order_TotalItemsPrinted.setText(String.valueOf(total_itemsSold));        
@@ -217,11 +246,11 @@ public class MainController implements Initializable {
         
         label_order_SelectedOrders.setText(String.format(Locale.US, "Selected(%d)", selected_orders));
         label_order_SelectedCostsPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", selected_price, selected_cost));
-        label_order_SelectedPricePerHour.setText(String.format(Locale.US, "%.2f$/h", selected_price/selected_buildTime*60));
+        label_order_SelectedPricePerHour.setText(String.format(Locale.US, "%.2f $/h", selected_price/selected_buildTime*60));
         if (selected_weight >= 1000) {
-            label_order_SelectedWeight.setText(String.format(Locale.US, "%.2fkg/%.2fkg", selected_weight/1000, selected_supportWeight/1000));
+            label_order_SelectedWeight.setText(String.format(Locale.US, "%.2f kg/%.2f kg", selected_weight/1000, selected_supportWeight/1000));
         } else {
-            label_order_SelectedWeight.setText(String.format(Locale.US, "%.2fg/%.2fg", selected_weight, selected_supportWeight));
+            label_order_SelectedWeight.setText(String.format(Locale.US, "%.2f g/%.2f g", selected_weight, selected_supportWeight));
         }
         label_order_SelectedBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToFormattedTime(selected_buildTime).get()));
         label_order_SelectedItemsPrinted.setText(String.valueOf(selected_itemsSold));        
@@ -339,6 +368,8 @@ public class MainController implements Initializable {
     
     private void calculateSelectedCustomersStatistics(ObservableList<Customer> selectedCustomers){
         
+        ObservableList<Order> allOrders = tv_orders.getItems();
+        
         int orders = 0, items = 0, time = 0;
         double price = 0.0, costs = 0.0, weight = 0.0, supports = 0.0, perHour;
         
@@ -348,24 +379,21 @@ public class MainController implements Initializable {
             for (int i = 0; i < selectedCustomers.size(); i++) {
                 
                 int customer_id = selectedCustomers.get(i).getCustomer_id().get();
-                Double[] statistics = Customer.getCustomerStats(customer_id, ds);
                 
-                double d_orders = statistics[0];
-                double d_items = statistics[1];
-                double d_time = statistics[6];
-                
-                //orders = (int) d_orders;
-                //items = (int) d_items;                
-                //time = (int) d_time;
-                
-                orders += (int) d_orders;
-                items += (int) d_items;                
-                price += statistics[2];
-                costs += statistics[3];
-                weight += statistics[4];
-                supports += statistics[5];
-                time += (int) d_time;
-                            
+                for (int j = 0; j < allOrders.size(); j++) {
+                    Order order = allOrders.get(j);
+                    if (order.getOrder_customerID().get() == customer_id){
+                        
+                        orders++;
+                        items += order.getOrder_quantity().get();
+                        price += order.getOrder_price().get();
+                        costs += order.getOrder_costs().get();
+                        weight += order.getOrder_weighht().get();
+                        supports += order.getOrder_support_weight().get();
+                        time += order.getOrder_buildTime().get();
+                        
+                    }  
+                }
             }
         
             label_customers_selectedOrders.setText(String.format(Locale.US, "%d", orders));
@@ -385,7 +413,7 @@ public class MainController implements Initializable {
             label_customers_selectedPrice.setText(String.format(Locale.US, "%.2f $", price));
             label_customers_selectedCosts.setText(String.format(Locale.US, "%.2f $", costs));
             label_customers_selectedWeight.setText(String.format(Locale.US, "%.2g $", weight));
-            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2g $", supports));            
+            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2 g", supports));            
             label_customers_selectedBuildTime.setText("0");        
             label_customers_selectedPricePerHour.setText(String.format(Locale.US, "0 $/h"));
             
@@ -618,13 +646,14 @@ public class MainController implements Initializable {
     private TableColumn<Material, Double> material_col_remaining, material_col_weight, material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit, material_col_diameter; 
     
     @FXML
-    private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_totalWeight_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_totalWeight, materials_label_Selected, materials_label_Total;
+    private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_totalWeight_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_paidSoldForDifference, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_totalWeight, materials_label_Selected, materials_label_Total;
     
     @FXML
     private Button material_btn_new, material_btn_edit, material_btn_refresh, material_btn_delete;
     
-    /*****************************          MATERIALS - METHODS
-     * @param materials *****************************/    
+    /*****************************          MATERIALS - METHODS *****************************/    
+    
+    
     private void calculateMaterialStatistics(ObservableList<Material> materials){
                      
         int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0;        
@@ -660,7 +689,8 @@ public class MainController implements Initializable {
 
         materials_label_Total.setText(String.format("Total(%d)", total));
         materials_label_shippingPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", shipping, price));
-        materials_label_paidSoldFor.setText(String.format(Locale.US, "%.2f $/%.2f $ (%.2f $)", paid, profit, profit - paid));
+        materials_label_paidSoldFor.setText(String.format(Locale.US, "%.2f $/%.2f $", paid, profit));
+        materials_label_paidSoldForDifference.setText(String.format(Locale.US, "%.2f $", profit - paid));
         materials_label_remainingSoldRolls.setText(String.format("%d/%d", soldRolls, remainingRolls));
         materials_label_totalWeight.setText(String.format("%.2f kg", total_weight/1000));
         materials_label_remainingSoldWeight.setText(String.format(Locale.US, "%.2f / %.2f kg",soldMaterial/1000 ,(total_weight - soldMaterial)/1000));
@@ -1119,7 +1149,7 @@ public class MainController implements Initializable {
     private Label statistics_label_order_totalOrders,statistics_label_order_TotalSoldNotSold,statistics_label_order_TotalBuildTime,statistics_label_order_TotalPricePerHour,statistics_label_order_TotalWeight,statistics_label_order_TotalItemsPrinted,statistics_label_order_TotalCostPrice;
     
     @FXML
-    private Label statistics_materials_label_remainingSoldRolls,statistics_materials_label_avgRollPrice,statistics_materials_label_trashWeight,statistics_materials_label_Total,statistics_materials_label_totalWeight,statistics_materials_label_paidSoldFor,statistics_materials_label_colorsTypes,statistics_materials_label_remainingSoldWeight,statistics_materials_label_shippingPrice;
+    private Label statistics_materials_label_remainingSoldRolls,statistics_materials_label_avgRollPrice,statistics_materials_label_trashWeight,statistics_materials_label_Total,statistics_materials_label_totalWeight,statistics_materials_label_paidSoldFor,statistics_materials_label_colorsTypes,statistics_materials_label_remainingSoldWeight,statistics_materials_label_shippingPrice, statistics_materials_label_paidSoldForDifference;
     
     @FXML
     private Label statistics_costs_label_price,statistics_costs_label_total,statistics_costs_label_shipping,statistics_costs_label_quantity,statistics_costs_label_totalPaid;
@@ -1127,51 +1157,66 @@ public class MainController implements Initializable {
     @FXML
     private Label statistics_printer_label_priceShipping,statistics_printer_label_total,statistics_printer_label_itemsSold,statistics_printer_label_incomes,statistics_printer_label_sum,statistics_printer_label_totalPaid,statistics_printer_label_expenses,statistics_printer_label_difference,statistics_printer_label_dutyTax;
     
-    
+    @FXML
+    private Label statistics_summary_profits,statistics_summary_costs, statistics_summary_difference;
     
     /*****************************          PRINTERS - METHODS         *****************************/
-    
-    private void calculateOverallStatistics(){
-        
-        ObservableList<Printer> printers = tv_printers.getItems();
-        
-        int items_sold = 0, total = printers.size();
-        double price = 0, shipping = 0, duty = 0, tax = 0, expenses = 0, incomes = 0;
-        double sum, totalPaid, difference;
-        
-        for (int i = 0; i < printers.size(); i++) {
-            
-           Printer printer = printers.get(i);
-           
-           items_sold += printer.getPrinter_itemsSold().get();
-           price += printer.getPrinter_price().get();
-           shipping += printer.getPrinter_shipping().get();
-           duty += printer.getPrinter_duty().get();
-           tax += printer.getPrinter_tax().get();
-           expenses += printer.getPrinter_expenses().get();
-           incomes += printer.getPrinter_incomes().get();
-            
-        }
-        
-        sum = price + shipping + duty + tax;
-        totalPaid = sum + expenses;
-        difference = totalPaid - incomes;
-        
-        printer_label_total.setText(String.format("Total(%d)", total));
-        printer_label_priceShipping.setText(String.format(Locale.US, "%.2f $/%.2f $", price, shipping));
-        printer_label_dutyTax.setText(String.format(Locale.US, "%.2f $/%.2f $", duty, tax));
-        printer_label_sum.setText(String.format(Locale.US, "%.2f $", sum));
-        printer_label_expenses.setText(String.format(Locale.US, "%.2f $", expenses));
-        printer_label_totalPaid.setText(String.format(Locale.US, "%.2f $", totalPaid));
-        printer_label_itemsSold.setText("" + items_sold);
-        printer_label_incomes.setText(String.format(Locale.US, "%.2f $", incomes));
-        printer_label_difference.setText(String.format(Locale.US, "%.2f $", difference));
-        
-    }
-    
-    
-    
+
     public void refreshStatisticsLabels(HikariDataSource ds){
+        
+        //Orders
+        statistics_label_order_totalOrders.setText("Orders(" + tv_orders.getItems().size() + ")");
+        statistics_label_order_TotalSoldNotSold.setText(String.format(Locale.US, label_order_SoldOrders.getText().replaceAll("\\D+","") + "/" + label_order_NotSoldOrders.getText().replaceAll("\\D+","")));
+        statistics_label_order_TotalBuildTime.setText(label_order_TotalBuildTime.getText());
+        statistics_label_order_TotalPricePerHour.setText(label_order_TotalPricePerHour.getText());
+        statistics_label_order_TotalWeight.setText(label_order_TotalWeight.getText());
+        statistics_label_order_TotalItemsPrinted.setText(label_order_TotalItemsPrinted.getText());
+        statistics_label_order_TotalCostPrice.setText(label_order_TotalCostPrice.getText());
+        
+        //Materials
+        statistics_materials_label_remainingSoldRolls.setText(materials_label_remainingSoldRolls.getText());
+        statistics_materials_label_avgRollPrice.setText(materials_label_avgRollPrice.getText());
+        statistics_materials_label_trashWeight.setText(materials_label_trashWeight.getText());
+        statistics_materials_label_Total.setText("Materials(" + tv_materials.getItems().size() + ")");
+        statistics_materials_label_totalWeight.setText(materials_label_totalWeight.getText());
+        statistics_materials_label_paidSoldFor.setText(materials_label_paidSoldFor.getText());
+        statistics_materials_label_paidSoldForDifference.setText(materials_label_paidSoldForDifference.getText());
+        statistics_materials_label_colorsTypes.setText(materials_label_colorsTypes.getText());
+        statistics_materials_label_remainingSoldWeight.setText(materials_label_remainingSoldWeight.getText());
+        statistics_materials_label_shippingPrice.setText(materials_label_shippingPrice.getText());
+        
+        //Costs
+        statistics_costs_label_price.setText(costs_label_price.getText());
+        statistics_costs_label_total.setText("Costs(" + tv_costs.getItems().size() + ")");
+        statistics_costs_label_shipping.setText(costs_label_shipping.getText());
+        statistics_costs_label_quantity.setText(costs_label_quantity.getText());
+        statistics_costs_label_totalPaid.setText(costs_label_totalPaid.getText());
+        statistics_printer_label_priceShipping.setText(printer_label_priceShipping.getText());
+                    
+        //Printers
+        statistics_printer_label_total.setText("Printers(" + tv_printers.getItems().size() + ")");
+        statistics_printer_label_itemsSold.setText(printer_label_itemsSold.getText());
+        statistics_printer_label_incomes.setText(printer_label_incomes.getText());
+        statistics_printer_label_sum.setText(printer_label_sum.getText());
+        statistics_printer_label_totalPaid.setText(printer_label_totalPaid.getText());
+        statistics_printer_label_expenses.setText(printer_label_expenses.getText());
+        statistics_printer_label_difference.setText(printer_label_difference.getText());
+        statistics_printer_label_dutyTax.setText(printer_label_dutyTax.getText());
+        
+        //General
+        
+        
+        
+        //Summary
+        double profits, costs, difference, order_costs, order_profits;
+        
+        profits = Double.parseDouble(statistics_label_order_TotalCostPrice.getText().split(" ")[0]);
+        costs = Double.parseDouble(statistics_materials_label_paidSoldFor.getText().split(" ")[0]) + Double.parseDouble(statistics_costs_label_totalPaid.getText().split(" ")[0]) + Double.parseDouble(statistics_printer_label_sum.getText().split(" ")[0]);
+        
+        
+        statistics_summary_profits.setText(String.format(Locale.US, "%.2f $", profits));
+        statistics_summary_costs.setText(String.format(Locale.US, "%.2f $", costs));
+        statistics_summary_difference.setText(String.format(Locale.US, "%.2f $", profits - costs));
         
     }
     
@@ -1211,16 +1256,7 @@ public class MainController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
     /*****************************          INITIALIZE ORDERS TAB          *****************************/ 
-        
-        tab_orders.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event t) {
-                if (tab_orders.isSelected()) {                   
-                        runService(service_refreshOrders);                  
-                }
-            }
-        });
-        
+          
         tv_orders.setRowFactory(tv -> {
             TableRow<Order> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -1306,16 +1342,7 @@ public class MainController implements Initializable {
     *    
     */
     /*****************************          INITIALIZE CUSTOMERS TAB          *****************************/
-    
-    tab_customers.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event t) {
-                if (tab_customers.isSelected()) {
-                    runService(service_refreshCustomers);
-                }
-            }
-        });
-    
+      
     customer_btn_refresh.setOnAction((event) -> {        
         runService(service_refreshCustomers);        
     });
@@ -1419,16 +1446,7 @@ public class MainController implements Initializable {
         });
     return row;
     });
-    
-    tab_objects.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event t) {
-                if (tab_objects.isSelected()) {
-                    runService(service_refreshObjects);
-                }
-            }
-        });
-    
+
     object_btn_new.setOnAction((event) -> {
         try{            
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/objects/NewObject.fxml"));            
@@ -1499,15 +1517,7 @@ public class MainController implements Initializable {
     */
     /*****************************          INITIALIZE MATERIALS TAB          *****************************/
     
-    tab_materials.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event t) {
-                if (tab_materials.isSelected()) {
-                    runService(service_refreshMaterials);
-                }
-            }
-        });
-    
+
     tv_materials.setRowFactory(tv -> {
             TableRow<Material> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -1610,14 +1620,7 @@ public class MainController implements Initializable {
     return row;
     });
      
-    tab_costs.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event t) {
-                if (tab_costs.isSelected()) {
-                    runService(service_refreshCosts);
-                }
-            }
-        });
+
     
     tv_costs.getSelectionModel().getSelectedItems().addListener((Change<? extends Cost> c) -> {        
             calculateCostsStatistics(tv_costs.getSelectionModel().getSelectedItems());
@@ -1696,16 +1699,7 @@ public class MainController implements Initializable {
     *    
     */
     /*****************************          INITIALIZE PRINTERS TAB          *****************************/
-    
-    tab_printers.setOnSelectionChanged(new EventHandler<Event>() {
-            @Override
-            public void handle(Event t) {
-                if (tab_printers.isSelected()) {
-                    runService(service_refreshPrinters);
-                }
-            }
-        });
-    
+
     tv_printers.setRowFactory( tv -> {
         TableRow<Printer> row = new TableRow<>();
         row.setOnMouseClicked(event -> {
@@ -1795,7 +1789,11 @@ public class MainController implements Initializable {
     *    
     */
     /*****************************          INITIALIZE STATISTICS TAB          *****************************/
-    
+    tab_statistics.setOnSelectionChanged((Event t) -> {
+        if (tab_statistics.isSelected()) {
+            runService(service_refreshStatistics);
+        }
+    });
     
     
     /*

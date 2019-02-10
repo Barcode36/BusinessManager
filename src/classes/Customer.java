@@ -8,7 +8,6 @@ package classes;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
@@ -266,30 +265,30 @@ public class Customer  {
         return customersList;
     }
 
-    public static Double[] getCustomerStats(int customer_id, HikariDataSource ds){
-        Double[] statistics = new Double[7];
-        
-        
-        if (MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds) == 0){
-            statistics[0] = 0.0;
-            statistics[1] = 0.0;
-            statistics[2] = 0.0;
-            statistics[3] = 0.0;
-            statistics[4] = 0.0;
-            statistics[5] = 0.0;
-            statistics[6] = 0.0;
-        } else {
-            statistics[0] = MngApi.round(MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-            statistics[1] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-            statistics[2] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-            statistics[3] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, ds), 2); 
-            statistics[4] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-            statistics[5] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-            statistics[6] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-        }        
-        
-        return statistics;
-    }
+//    public static Double[] getCustomerStats(int customer_id, HikariDataSource ds){
+//        Double[] statistics = new Double[7];
+//        
+//        
+//        if (MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds) == 0){
+//            statistics[0] = 0.0;
+//            statistics[1] = 0.0;
+//            statistics[2] = 0.0;
+//            statistics[3] = 0.0;
+//            statistics[4] = 0.0;
+//            statistics[5] = 0.0;
+//            statistics[6] = 0.0;
+//        } else {
+//            statistics[0] = MngApi.round(MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+//            statistics[1] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+//            statistics[2] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+//            statistics[3] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, ds), 2); 
+//            statistics[4] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+//            statistics[5] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+//            statistics[6] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
+//        }        
+//        
+//        return statistics;
+//    }
     
     private static int getOrderCount(SimpleIntegerProperty id, HikariDataSource ds) {
         int orderCount = 0;

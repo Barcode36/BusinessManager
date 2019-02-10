@@ -7,7 +7,6 @@ package classes;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -353,7 +352,7 @@ public class Printer {
                 cost_expenses = MngApi.performDoubleQuery("SELECT SUM(CostPrice) FROM Costs WHERE PrinterID=" + printer_id.get(), ds);
                 printer_totalPrice = printer_price.get() + printer_tax.get() + printer_duty.get();
                 
-                printer_expenses = new SimpleDoubleProperty(MngApi.round(material_expenses + cost_expenses + printer_totalPrice, 2));
+                printer_expenses = new SimpleDoubleProperty(MngApi.round(material_expenses + cost_expenses, 2));
                 
                 printer_overallIncome = new SimpleDoubleProperty(MngApi.round(printer_incomes.get() - printer_expenses.get(), 2));
                 
@@ -473,9 +472,10 @@ public class Printer {
             
             int id = printers.get(i).getPrinter_id().get();
             String query = "DELETE FROM Printers WHERE PrinterID=" + id;
+            System.out.println(query);
             MngApi.performUpdateQuery(query, info, ds);
             
         }
-        
+        info.setText("Printer(s) deleted.");
     }
 }
