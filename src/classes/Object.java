@@ -351,27 +351,29 @@ public class Object {
             //STEP 4: Execute a query
 	    
                 
-                updateQuery = "INSERT INTO Objects (ObjectID,ObjectName,ObjectWeight,SupportWeight,BuildTime,StlLink,Comment) VALUES (?,?,?,?,?,?,?) "
-                    + "ON DUPLICATE KEY UPDATE ObjectID=?,ObjectName=?,ObjectWeight=?,SupportWeight=?,BuildTime=?,StlLink=?,Comment=?";    
+                updateQuery = "INSERT INTO Objects (ObjectID,ObjectName,ObjectWeight,SupportWeight,BuildTime,StlLink,Comment, ProjectID) VALUES (?,?,?,?,?,?,?,?) "
+                    + "ON DUPLICATE KEY UPDATE ObjectID=?,ObjectName=?,ObjectWeight=?,SupportWeight=?,BuildTime=?,StlLink=?,Comment=?,ProjectID=?";    
                 stmt = conn.prepareStatement(updateQuery);
                
+                int i = 1;                
+                stmt.setInt(i, obj.getObject_id().get());i++;
+                stmt.setString(i, obj.getObject_name().get());i++;
+                stmt.setDouble(i, obj.getObject_weight().get());i++;
+                stmt.setDouble(i,obj.getObject_supportWeight().get());i++;
+                stmt.setInt(i, obj.getObject_buildTime().get());i++;
+                stmt.setString(i, obj.getObject_stlLink().get());i++;
+                stmt.setString(i, obj.getObject_comment().get());i++;
+                stmt.setInt(i, 1);i++;
+                
+                stmt.setInt(i, obj.getObject_id().get());i++;
+                stmt.setString(i, obj.getObject_name().get());i++;
+                stmt.setDouble(i, obj.getObject_weight().get());i++;
+                stmt.setDouble(i,obj.getObject_supportWeight().get());i++;
+                stmt.setInt(i, obj.getObject_buildTime().get());i++;
+                stmt.setString(i, obj.getObject_stlLink().get());i++;
+                stmt.setString(i, obj.getObject_comment().get());i++;
+                stmt.setInt(i, 1);
                                 
-                stmt.setInt(1, obj.getObject_id().get());
-                stmt.setString(2, obj.getObject_name().get());
-                stmt.setDouble(3, obj.getObject_weight().get());
-                stmt.setDouble(4,obj.getObject_supportWeight().get());
-                stmt.setInt(5, obj.getObject_buildTime().get());
-                stmt.setString(6, obj.getObject_stlLink().get());
-                stmt.setString(7, obj.getObject_comment().get());
-                                
-                stmt.setInt(8, obj.getObject_id().get());
-                stmt.setString(9, obj.getObject_name().get());
-                stmt.setDouble(10, obj.getObject_weight().get());
-                stmt.setDouble(11,obj.getObject_supportWeight().get());
-                stmt.setInt(12, obj.getObject_buildTime().get());
-                stmt.setString(13, obj.getObject_stlLink().get());
-                stmt.setString(14, obj.getObject_comment().get());
-                                                
                 stmt.executeUpdate();
             
             stmt.close();
