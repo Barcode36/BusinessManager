@@ -1797,7 +1797,7 @@
                                           <Insets />
                                        </GridPane.margin>
                                     </Label>
-                                    <Label fx:id="statistics_materials_label_paidSoldFor" text="0 $/0 $ (0 $)" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <Label fx:id="statistics_materials_label_paidSoldFor" text="0 $/0 $" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                        <font>
                                           <Font name="System Bold" size="12.0" />
                                        </font>
