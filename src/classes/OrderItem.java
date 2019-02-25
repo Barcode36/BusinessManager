@@ -347,7 +347,7 @@ public class OrderItem {
         return orderItemsIDs;
     }
     
-    public static List<OrderItem> getOrderItems(int order_id, HikariDataSource ds){
+    public static List<OrderItem> getOrderItems(List<SimpleTableObject> commonMaterialProperties, int order_id, HikariDataSource ds){
         
         //Create list
         List<OrderItem> itemList = new ArrayList<>();
@@ -401,7 +401,7 @@ public class OrderItem {
                     Double material_price, material_shipping, price_per_gram, total_weight, total_supportWeight, costs;
                     double material_weight;
                 
-                    Material material = Material.getMaterialByID(ds, material_id);
+                    Material material = Material.getMaterialByID(commonMaterialProperties, ds, material_id);
                 
                     material_price = material.getMaterial_price().get();
                     material_shipping = material.getMaterial_shipping().get();

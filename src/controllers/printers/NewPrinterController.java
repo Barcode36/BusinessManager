@@ -13,6 +13,7 @@ import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -84,7 +85,7 @@ public class NewPrinterController implements Initializable {
                 
                 printer_id = new SimpleIntegerProperty(Integer.parseInt(printer_label_id.getText()));
                 printer_itemsSold = new SimpleIntegerProperty(0);
-                printer_type_id = new SimpleIntegerProperty(printer_comboBox_type.getValue().getId().get());
+                printer_type_id = new SimpleIntegerProperty(printer_comboBox_type.getValue().getProperty_id().get());
                 
                 printer_name = new SimpleStringProperty(printer_txtField_name.getText());
                 printer_purchaseDate = new SimpleStringProperty(printer_datePicker_purchaseDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
@@ -137,13 +138,13 @@ public class NewPrinterController implements Initializable {
         setPrinter_label_id(MngApi.getCurrentAutoIncrementValue(ds, "Printers"));
         MngApi.setActualDate(printer_datePicker_purchaseDate);
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinterTypes(ds));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrinterTypes());
         
         printer_comboBox_type.setItems(printers);
         printer_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -166,13 +167,13 @@ public class NewPrinterController implements Initializable {
         
         String printer_type = printer.getPrinter_type().get();
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrinterTypes(ds));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrinterTypes());
         
         printer_comboBox_type.setItems(printers);
         printer_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -183,7 +184,7 @@ public class NewPrinterController implements Initializable {
         
         for (int i = 0; i < printers.size(); i++) {
             
-            if (printer_type.equals(printers.get(i).getName().get()))printer_comboBox_type.getSelectionModel().select(i);
+            if (printer_type.equals(printers.get(i).getProperty_name().get()))printer_comboBox_type.getSelectionModel().select(i);
             
         }
         
@@ -200,5 +201,9 @@ public class NewPrinterController implements Initializable {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
-    }    
+    }
+
+    private List<SimpleTableObject> getPrinterTypes(){
+        return mainController.getListOfMaterialProperties(7);
+    }
 }

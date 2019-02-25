@@ -8,6 +8,7 @@ package controllers.select;
 import classes.Material;
 import classes.MngApi;
 import com.zaxxer.hikari.HikariDataSource;
+import controllers.MainController;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -29,6 +30,8 @@ public class SelectMaterialController implements Initializable {
     private HikariDataSource ds;
     
     private SelectPrinterMaterialPriceController selectPrinterMaterialPriceController;
+    
+    private MainController mainController;
     
     
     @FXML
@@ -77,7 +80,7 @@ public class SelectMaterialController implements Initializable {
     
     public void displayMaterials(){
         //Create list of orders
-        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getNotSpentMaterials(ds));
+        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getNotSpentMaterials(mainController.getCommonMaterialProperties(), ds));
         
         material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
         material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});
@@ -118,8 +121,11 @@ public class SelectMaterialController implements Initializable {
         this.ds = ds;
     }
 
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
+
     public void setSelectPrinterMaterialPriceController(SelectPrinterMaterialPriceController selectPrinterMaterialPriceController) {
         this.selectPrinterMaterialPriceController = selectPrinterMaterialPriceController;
     }
-    
 }

@@ -1,5 +1,7 @@
 package controllers;
 
+import classes.Customer;
+import classes.Material;
 import classes.MngApi;
 import com.zaxxer.hikari.HikariDataSource;
 import javafx.event.ActionEvent;
@@ -54,6 +56,8 @@ public class LoginController {
             stage.show();            
             
             //when we first open up main windows, we need to load all orders - that's default view
+            ctrl.setCommonCustomerProperties(Customer.getCommonCustomerProperties(ds));
+            ctrl.setCommonMaterialProperties(Material.getCommonMaterialProperties(ds));
             ctrl.runService(ctrl.getService_refreshAll());
                 
             

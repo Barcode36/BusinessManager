@@ -13,6 +13,7 @@ import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -102,18 +103,18 @@ public class NewCustomerController implements Initializable {
                 customer_zipCode = new SimpleStringProperty(customer_txtField_zipCode.getText());
                 customer_country = null;
                 
-                customer_company = new SimpleStringProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getName().get());
+                customer_company = null;
                 
                 customer_id = new SimpleIntegerProperty(getCustomer_label_id_value());
-                customer_id_company = new SimpleIntegerProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getId().get());
-                customer_id_country = new SimpleIntegerProperty(customer_comboBox_country.getSelectionModel().getSelectedItem().getId().get());
+                customer_id_company = new SimpleIntegerProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getProperty_id().get());
+                customer_id_country = new SimpleIntegerProperty(customer_comboBox_country.getSelectionModel().getSelectedItem().getProperty_id().get());
                 
                 customer_orderCount = new SimpleIntegerProperty(0);
                 customer_ordersPrice = new SimpleDoubleProperty(0);                
                 
                 Customer newCustomer = new Customer(customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment, customer_id, customer_id_company, customer_id_country, customer_orderCount, customer_ordersPrice);
                 
-                Customer.insertNewCustomer(newCustomer, info, ds);
+                Customer.insertNewCustomer(newCustomer, ds);
             
             MngApi.closeWindow(customer_btn_create);            
             mainController.runService(mainController.getService_refreshCustomers());
@@ -150,11 +151,11 @@ public class NewCustomerController implements Initializable {
                 customer_zipCode = new SimpleStringProperty(customer_txtField_zipCode.getText());
                 customer_country = null;
                 
-                customer_company = new SimpleStringProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getName().get());
+                customer_company = null;
                 
                 customer_id = new SimpleIntegerProperty(getCustomer_label_id_value());
-                customer_id_company = new SimpleIntegerProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getId().get());
-                customer_id_country = new SimpleIntegerProperty(customer_comboBox_country.getSelectionModel().getSelectedItem().getId().get());
+                customer_id_company = new SimpleIntegerProperty(customer_comboBox_company.getSelectionModel().getSelectedItem().getProperty_id().get());
+                customer_id_country = new SimpleIntegerProperty(customer_comboBox_country.getSelectionModel().getSelectedItem().getProperty_id().get());
                 
                 customer_orderCount = new SimpleIntegerProperty(0);
                 customer_ordersPrice = new SimpleDoubleProperty(0);                
@@ -177,15 +178,15 @@ public class NewCustomerController implements Initializable {
     public void setComboBoxes(){
         mode = "create";
         
-        ObservableList<SimpleTableObject> countries = FXCollections.observableArrayList(Customer.getCountries(ds));
-        ObservableList<SimpleTableObject> companies = FXCollections.observableArrayList(Customer.getCompanies(ds));
+        ObservableList<SimpleTableObject> countries = FXCollections.observableArrayList(getCountries());
+        ObservableList<SimpleTableObject> companies = FXCollections.observableArrayList(getCompanies());
         
         customer_comboBox_country.setItems(countries);
         customer_comboBox_country.getSelectionModel().select(229);
         customer_comboBox_country.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -200,7 +201,7 @@ public class NewCustomerController implements Initializable {
         customer_comboBox_company.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -237,10 +238,10 @@ public class NewCustomerController implements Initializable {
         customer_txtField_zipCode.setText(customer.getCustomer_zipCode().get());
         customer_txtField_comment.setText(customer.getCustomer_comment().get());
         
-        SimpleTableObject company = new SimpleTableObject(customer.getCustomer_id_company(), customer.getCustomer_company());
+        SimpleTableObject company = new SimpleTableObject(customer.getCustomer_id_company(), customer.getCustomer_id_company(), customer.getCustomer_company());
         customer_comboBox_company.setValue(company);
         
-        SimpleTableObject country = new SimpleTableObject(customer.getCustomer_id_country(), customer.getCustomer_country());
+        SimpleTableObject country = new SimpleTableObject(customer.getCustomer_id_country(), customer.getCustomer_id_country(), customer.getCustomer_country());
         customer_comboBox_country.setValue(country);
         
         customer_label_title.setText("Edit Customer");        
@@ -273,6 +274,12 @@ public class NewCustomerController implements Initializable {
         this.mode = mode;
     }
     
+    private List<SimpleTableObject> getCompanies() {
+        return mainController.getListOfCustomerProperties(1);
+    }
     
+    private List<SimpleTableObject> getCountries() {
+        return mainController.getListOfCustomerProperties(2);
+    }
     
 }

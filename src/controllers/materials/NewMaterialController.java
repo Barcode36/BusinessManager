@@ -14,6 +14,7 @@ import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -85,25 +86,25 @@ public class NewMaterialController implements Initializable {
             
             try {
                 
-                material_color = new SimpleStringProperty(material_comboBox_color.getSelectionModel().getSelectedItem().getName().get());
-                material_manufacturer = new SimpleStringProperty(material_comboBox_manufacturer.getSelectionModel().getSelectedItem().getName().get());
-                material_type = new SimpleStringProperty(material_comboBox_type.getSelectionModel().getSelectedItem().getName().get());
+                material_color = new SimpleStringProperty(material_comboBox_color.getSelectionModel().getSelectedItem().getProperty_name().get());
+                material_manufacturer = new SimpleStringProperty(material_comboBox_manufacturer.getSelectionModel().getSelectedItem().getProperty_name().get());
+                material_type = new SimpleStringProperty(material_comboBox_type.getSelectionModel().getSelectedItem().getProperty_name().get());
                 material_finished = new SimpleStringProperty("No");
-                material_distributor = new SimpleStringProperty(material_comboBox_distributor.getSelectionModel().getSelectedItem().getName().get());
+                material_distributor = new SimpleStringProperty(material_comboBox_distributor.getSelectionModel().getSelectedItem().getProperty_name().get());
                 material_purchaseDate = new SimpleStringProperty(material_datePicker_purchaseDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                 material_comment = new SimpleStringProperty(material_txtField_comment.getText());
                 
                 material_id = new SimpleIntegerProperty(getMaterial_label_id_value());
-                material_weight = new SimpleIntegerProperty(Integer.parseInt(material_comboBox_weight.getSelectionModel().getSelectedItem().getName().get()));
-                material_id_manufacturer = new SimpleIntegerProperty(material_comboBox_manufacturer.getSelectionModel().getSelectedItem().getId().get());
-                material_id_materialType = new SimpleIntegerProperty(material_comboBox_type.getSelectionModel().getSelectedItem().getId().get());
-                material_id_color = new SimpleIntegerProperty(material_comboBox_color.getSelectionModel().getSelectedItem().getId().get());
-                material_id_weight = new SimpleIntegerProperty(material_comboBox_weight.getSelectionModel().getSelectedItem().getId().get());
-                material_id_seller = new SimpleIntegerProperty(material_comboBox_distributor.getSelectionModel().getSelectedItem().getId().get());
-                material_id_diameter = new SimpleIntegerProperty(material_comboBox_diameter.getSelectionModel().getSelectedItem().getId().get());
+                material_weight = new SimpleIntegerProperty(Integer.parseInt(material_comboBox_weight.getSelectionModel().getSelectedItem().getProperty_name().get()));
+                material_id_manufacturer = new SimpleIntegerProperty(material_comboBox_manufacturer.getSelectionModel().getSelectedItem().getProperty_id().get());
+                material_id_materialType = new SimpleIntegerProperty(material_comboBox_type.getSelectionModel().getSelectedItem().getProperty_id().get());
+                material_id_color = new SimpleIntegerProperty(material_comboBox_color.getSelectionModel().getSelectedItem().getProperty_id().get());
+                material_id_weight = new SimpleIntegerProperty(material_comboBox_weight.getSelectionModel().getSelectedItem().getProperty_id().get());
+                material_id_seller = new SimpleIntegerProperty(material_comboBox_distributor.getSelectionModel().getSelectedItem().getProperty_id().get());
+                material_id_diameter = new SimpleIntegerProperty(material_comboBox_diameter.getSelectionModel().getSelectedItem().getProperty_id().get());
                 
                 
-                material_diameter = new SimpleDoubleProperty(Double.parseDouble(material_comboBox_weight.getSelectionModel().getSelectedItem().getName().get()));
+                material_diameter = new SimpleDoubleProperty(Double.parseDouble(material_comboBox_weight.getSelectionModel().getSelectedItem().getProperty_name().get()));
                 material_price = new SimpleDoubleProperty(Double.parseDouble(material_txtField_price.getText()));
                 material_shipping = new SimpleDoubleProperty(Double.parseDouble(material_txtField_shipping.getText()));
                 
@@ -152,19 +153,20 @@ public class NewMaterialController implements Initializable {
         String weight = String.format("%d", (int) material.getMaterial_weight().get());
         
         System.out.println(weight);
-                
-        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(Material.getMaterialTypes(ds));
-        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(ds));
-        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(ds));        
-        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(ds));        
-        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(ds));        
-        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(ds));
+        
+        //make one list from common table
+        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(getMaterialTypes());
+        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(getMaterialColors());
+        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(getMaterialManufacturers());        
+        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(getMaterialSellers());        
+        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(getMaterialDiameters());        
+        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(getMaterialWeights());
         
         material_comboBox_type.setItems(types);
         material_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -175,7 +177,7 @@ public class NewMaterialController implements Initializable {
       
         for (int i = 0; i < types.size(); i++) {
             
-            if (type.equals(types.get(i).getName().get()))material_comboBox_type.getSelectionModel().select(i);
+            if (type.equals(types.get(i).getProperty_name().get()))material_comboBox_type.getSelectionModel().select(i);
             
         }
         
@@ -183,7 +185,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_color.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -194,7 +196,7 @@ public class NewMaterialController implements Initializable {
         
         for (int i = 0; i < colors.size(); i++) {
             
-            if (color.equals(colors.get(i).getName().get()))material_comboBox_color.getSelectionModel().select(i);
+            if (color.equals(colors.get(i).getProperty_name().get()))material_comboBox_color.getSelectionModel().select(i);
             
         }
         
@@ -202,7 +204,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_diameter.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -213,7 +215,7 @@ public class NewMaterialController implements Initializable {
         
         for (int i = 0; i < diameters.size(); i++) {
             
-            if (diameter.equals(diameters.get(i).getName().get()))material_comboBox_diameter.getSelectionModel().select(i);
+            if (diameter.equals(diameters.get(i).getProperty_name().get()))material_comboBox_diameter.getSelectionModel().select(i);
             
         }
         
@@ -221,7 +223,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_weight.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -232,7 +234,7 @@ public class NewMaterialController implements Initializable {
         
         for (int i = 0; i < weights.size(); i++) {
             
-            if (weight.equals(weights.get(i).getName().get()))material_comboBox_weight.getSelectionModel().select(i);
+            if (weight.equals(weights.get(i).getProperty_name().get()))material_comboBox_weight.getSelectionModel().select(i);
             
         }
         
@@ -240,7 +242,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_manufacturer.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -251,7 +253,7 @@ public class NewMaterialController implements Initializable {
         
         for (int i = 0; i < manufacturers.size(); i++) {
             
-            if (manufacturer.equals(manufacturers.get(i).getName().get()))material_comboBox_manufacturer.getSelectionModel().select(i);
+            if (manufacturer.equals(manufacturers.get(i).getProperty_name().get()))material_comboBox_manufacturer.getSelectionModel().select(i);
             
         }
         
@@ -259,7 +261,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_distributor.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -270,7 +272,7 @@ public class NewMaterialController implements Initializable {
         
         for (int i = 0; i < distributors.size(); i++) {
             
-            if (distributor.equals(distributors.get(i).getName().get()))material_comboBox_distributor.getSelectionModel().select(i);
+            if (distributor.equals(distributors.get(i).getProperty_name().get()))material_comboBox_distributor.getSelectionModel().select(i);
             
         }
         
@@ -285,18 +287,18 @@ public class NewMaterialController implements Initializable {
     
     public void setComboBoxes(){
         
-        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(Material.getMaterialTypes(ds));
-        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(Material.getMaterialColors(ds));
-        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(Material.getMaterialManufacturers(ds));        
-        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(Material.getMaterialSellers(ds));        
-        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(Material.getMaterialDiameters(ds));        
-        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(Material.getMaterialWeights(ds));
+        ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(getMaterialTypes());
+        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(getMaterialTypes());
+        ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(getMaterialManufacturers());        
+        ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(getMaterialSellers());        
+        ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(getMaterialDiameters());        
+        ObservableList<SimpleTableObject> weights = FXCollections.observableArrayList(getMaterialWeights());
         
         material_comboBox_type.setItems(types);
         material_comboBox_type.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -311,7 +313,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_color.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -324,7 +326,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_diameter.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -337,7 +339,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_weight.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -350,7 +352,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_manufacturer.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -363,7 +365,7 @@ public class NewMaterialController implements Initializable {
         material_comboBox_distributor.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -399,5 +401,29 @@ public class NewMaterialController implements Initializable {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+    }
+    
+    private List<SimpleTableObject> getMaterialTypes(){
+        return mainController.getListOfMaterialProperties(1);
+    }
+    
+    private List<SimpleTableObject> getMaterialColors(){
+        return mainController.getListOfMaterialProperties(2);
+    }
+    
+    private List<SimpleTableObject> getMaterialManufacturers(){
+        return mainController.getListOfMaterialProperties(3);
+    }
+    
+    private List<SimpleTableObject> getMaterialSellers(){
+        return mainController.getListOfMaterialProperties(4);
+    }
+    
+    private List<SimpleTableObject> getMaterialDiameters(){
+        return mainController.getListOfMaterialProperties(5);
+    }
+
+    private List<SimpleTableObject> getMaterialWeights(){
+        return mainController.getListOfMaterialProperties(6);
     }
 }

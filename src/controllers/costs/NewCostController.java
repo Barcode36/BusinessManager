@@ -7,13 +7,14 @@ package controllers.costs;
 
 import classes.Cost;
 import classes.MngApi;
-import classes.Printer;
 import classes.SimpleTableObject;
 import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -26,9 +27,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
+import classes.Printer;
 
 /**
  * FXML Controller class
@@ -76,25 +79,25 @@ public class NewCostController implements Initializable {
             Cost newCost;
             
             try {
-            cost_id = new SimpleIntegerProperty(getCost_label_id_value());
-            cost_quantity = new SimpleIntegerProperty(Integer.parseInt(cost_txtField_quantity.getText()));
+                cost_id = new SimpleIntegerProperty(getCost_label_id_value());
+                cost_quantity = new SimpleIntegerProperty(Integer.parseInt(cost_txtField_quantity.getText()));
                         
-            cost_printerID = new SimpleIntegerProperty(comboBox_printer.getValue().getId().get());
-            cost_printer = new SimpleStringProperty(comboBox_printer.getValue().getName().get());
+                cost_printerID = new SimpleIntegerProperty(comboBox_printer.getValue().getProperty_id().get());
+                cost_printer = new SimpleStringProperty(comboBox_printer.getValue().getProperty_name().get());
             
-            cost_name = new SimpleStringProperty(cost_txtField_name.getText());            
-            cost_purchaseDate = new SimpleStringProperty(cost_datePicker_purchaseDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            cost_comment = new SimpleStringProperty(cost_txtField_comment.getText());
+                cost_name = new SimpleStringProperty(cost_txtField_name.getText());            
+                cost_purchaseDate = new SimpleStringProperty(cost_datePicker_purchaseDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                cost_comment = new SimpleStringProperty(cost_txtField_comment.getText());
             
-            cost_price = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_price.getText()));
-            cost_shipping = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_shipping.getText()));
+                cost_price = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_price.getText()));
+                cost_shipping = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_shipping.getText()));
             
-            newCost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_printer, cost_shipping, cost_price);
+                newCost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_printer, cost_shipping, cost_price);
             
-            Cost.insertNewCost(newCost, ds);
+                Cost.insertNewCost(newCost, ds);
             
-            MngApi.closeWindow(cost_btn_create);            
-            mainController.runService(mainController.getService_refreshCosts());
+                MngApi.closeWindow(cost_btn_create);            
+                mainController.runService(mainController.getService_refreshCosts());
             
             } catch (NumberFormatException e) {
                 cost_label_info.setText("Wrong number format, please check your fields.");
@@ -123,13 +126,13 @@ public class NewCostController implements Initializable {
         int id = MngApi.getCurrentAutoIncrementValue(ds, "Costs");
         this.cost_label_id.setText(String.valueOf(id));
 
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(ds));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrintersShort(mainController.getTv_printers()));
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -163,7 +166,7 @@ public class NewCostController implements Initializable {
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -177,7 +180,7 @@ public class NewCostController implements Initializable {
                 
         for (int i = 0; i < printers.size(); i++) {
             
-            if (printer_id == printers.get(i).getId().get())comboBox_printer.getSelectionModel().select(i);
+            if (printer_id == printers.get(i).getProperty_id().get())comboBox_printer.getSelectionModel().select(i);
                     
         }  
     }
@@ -190,4 +193,35 @@ public class NewCostController implements Initializable {
         this.mainController = mainController;
     }
     
+    private List<SimpleTableObject> getPrintersShort(TableView<Printer> tv_printers) {
+        
+        //Create list
+        List<SimpleTableObject> allPrinters = new ArrayList<>();
+               
+        
+        try {
+            
+            ObservableList<Printer> printers = tv_printers.getItems();
+            
+            SimpleIntegerProperty id;
+            SimpleStringProperty name;
+            
+            for (int i = 0; i < allPrinters.size(); i++) {
+                
+                id = new SimpleIntegerProperty(printers.get(i).getPrinter_id().get());
+                name = new SimpleStringProperty(printers.get(i).getPrinter_name().get());
+                
+                allPrinters.add(new SimpleTableObject(id, id, name));
+                
+            }
+            
+         
+            
+        }catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        }
+    return allPrinters;
+    }
+   
 }

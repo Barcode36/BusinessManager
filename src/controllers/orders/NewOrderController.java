@@ -112,6 +112,7 @@ public class NewOrderController implements Initializable {
             stage.show();
             //stage.setAlwaysOnTop(true);            
             ctrl.setDs(ds);
+            ctrl.setMain_controller(mainController);
             ctrl.setNewOrderController(this);
             
             ctrl.displayCustomers();
@@ -164,7 +165,8 @@ public class NewOrderController implements Initializable {
             
                         stage.show();
                         //stage.setAlwaysOnTop(true);            
-                        ctrl.setDs(ds);            
+                        ctrl.setDs(ds);
+                        ctrl.setMainController(mainController);
                         ctrl.setNewOrderController(this);                                               
                         ctrl.setElementValues(tv_selectedObjects.getSelectionModel().getSelectedItem());
                     }catch (IOException e){
@@ -393,7 +395,7 @@ public class NewOrderController implements Initializable {
             Order.insertNewOrder(newOrder, info, ds);
             
             //We will now add assign order to objects, but first, we have to assign OrderID to items belonging to current order
-            //we also have to assing correct orderItemID. We have to keep OrderItemID the same if it is old order item or assign new OrderItemID
+            //we also have to assing correct orderItemID. We have to keep OrderItemID the same. if it is old order item or assign new OrderItemID
             //if it's brand new object (OrderItemID == 0).
             
             //For correct mechanism which will ensure the deleted/updated/added objects belonging to order we have to do 3 key things:
@@ -485,7 +487,7 @@ public class NewOrderController implements Initializable {
         txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());        
         txtField_comment.setText(order.getOrder_comment().get());        
         
-        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(order.getOrder_id().get(), ds));        
+        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(mainController.getCommonMaterialProperties(),order.getOrder_id().get(), ds));        
         selectedObjects.addAll(itemList);        
         setSelectedObjects();
         refreshSelectedObjects();        

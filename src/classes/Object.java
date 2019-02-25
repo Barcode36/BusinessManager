@@ -140,7 +140,7 @@ public class Object {
         List<Object> objectList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT * FROM Objects";
+        String query = "SELECT Objects.*, SUM(ItemQuantity) AS 'SoldCount', SUM(ItemPrice) AS 'SoldPrice', SUM(ItemCosts) AS 'ItemCosts' FROM Objects LEFT JOIN OrderItems ON OrderItems.ObjectID = Objects.ObjectID GROUP BY Objects.ObjectID";
 
         Connection conn = null;
         Statement stmt = null;
@@ -174,13 +174,12 @@ public class Object {
                object_buildTime = new SimpleIntegerProperty(rs.getInt("BuildTime"));
                object_buildTime_formated = MngApi.convertToFormattedTime(object_buildTime.get());
                
-               object_soldCount = new SimpleIntegerProperty(getSoldCount(object_id, ds));               
-               
                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("SupportWeight"));
-               object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));
-               object_soldPrice = new SimpleDoubleProperty(getSoldPrice(object_id, ds));
-               object_costs = new SimpleDoubleProperty(MngApi.round(MngApi.performDoubleQuery("SELECT SUM(ItemCosts) FROM OrderItems WHERE ObjectID=" + object_id.get(), ds), 2));
-                              
+               object_weight = new SimpleDoubleProperty(rs.getDouble("ObjectWeight"));               
+               object_soldPrice = new SimpleDoubleProperty(rs.getDouble("SoldPrice"));
+               object_costs = new SimpleDoubleProperty(MngApi.round(rs.getDouble("ItemCosts"), 2));
+               object_soldCount = new SimpleIntegerProperty(rs.getInt("SoldCount")); 
+               
                Object object = new Object(object_name, object_stlLink, object_buildTime_formated, object_comment, object_id, object_buildTime, object_soldCount, object_supportWeight, object_weight, object_soldPrice, object_costs);
                
                objectList.add(object);
@@ -217,121 +216,7 @@ public class Object {
         return objectList;        
     }
     
-    private static int getSoldCount(SimpleIntegerProperty object_id, HikariDataSource ds){
-        
-        //Create list
-        int soldCount = 0;
-        
-        //Create query
-        String query = "SELECT SUM(ItemQuantity) AS 'SoldCount' FROM OrderItems WHERE ObjectID=" + object_id.get();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-               soldCount = rs.getInt("SoldCount");
-                
-            }
-
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (ClassNotFoundException se) {
-            //Handle errors for Class.forName
-            se.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-        return soldCount;  
-        
-    }
-    
-    private static double getSoldPrice(SimpleIntegerProperty object_id, HikariDataSource ds){
-        //Create list
-        double soldPrice = 0;
-        
-        //Create query
-        String query = "SELECT SUM(ItemPrice) AS 'SoldPrice' FROM OrderItems WHERE ObjectID=" + object_id.get();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-               soldPrice = rs.getDouble("SoldPrice");
-                
-            }
-
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (ClassNotFoundException se) {
-            //Handle errors for Class.forName
-            se.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-        return soldPrice;  
-        
-    }
-    
+   
     public static void insertNewObject(classes.Object obj, HikariDataSource ds){
         
         //Create query

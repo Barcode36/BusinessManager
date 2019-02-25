@@ -242,14 +242,13 @@ public class Material {
 
     
     //this method get list of materials - ONLY materials, without statistics
-    public static List<Material> getMaterials(HikariDataSource ds) {
+    public static List<Material> getMaterials(List<SimpleTableObject> commonMaterialProperties, HikariDataSource ds) {
         
         //Create list
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Materials.Comment, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID ORDER BY Materials.MaterialID DESC";
-
+        String query = "SELECT Materials.*, SUM(ItemWeight+ItemSupportWeight) AS 'MaterialUsed',SUM(ItemPrice) AS 'SoldFor' FROM Materials LEFT JOIN OrderItems ON OrderItems.ItemMaterialID = Materials.MaterialID GROUP BY Materials.MaterialID DESC";
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -280,32 +279,41 @@ public class Material {
                 SimpleIntegerProperty material_id, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
                 SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_weight, material_remaining;
                 
-                material_color = new SimpleStringProperty(rs.getString("Color"));
-                material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
-                material_type = new SimpleStringProperty(rs.getString("MaterialType"));
+                SimpleTableObject manufacturer, materialType,color,weight,distributor,diameter;
+                
+                manufacturer = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("ManufacturerID"));
+                materialType = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("MaterialTypeID"));
+                color = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("ColorID"));
+                weight = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("WeightID"));
+                distributor = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("SellerID"));
+                diameter = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("DiameterID"));
+                
+                
+                material_color = color.getProperty_name();
+                material_manufacturer = manufacturer.getProperty_name();
+                material_type = materialType.getProperty_name();
                 material_finished = new SimpleStringProperty(rs.getString("Finished"));
-                material_distributor = new SimpleStringProperty(rs.getString("Seller"));
+                material_distributor = distributor.getProperty_name();
                 material_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
                 material_comment = new SimpleStringProperty(rs.getString("Comment"));                
                 
                 material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
-                material_id_manufacturer = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
-                material_id_materialType = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
-                material_id_color = new SimpleIntegerProperty(rs.getInt("ColorID"));
-                material_id_weight = new SimpleIntegerProperty(rs.getInt("WeightID"));
-                material_id_seller = new SimpleIntegerProperty(rs.getInt("SellerID"));
-                material_id_diameter = new SimpleIntegerProperty(rs.getInt("DiameterID"));
+                material_id_manufacturer = manufacturer.getProperty_id();
+                material_id_materialType = materialType.getProperty_id();
+                material_id_color = color.getProperty_id();
+                material_id_weight = weight.getProperty_id();
+                material_id_seller = distributor.getProperty_id();
+                material_id_diameter = diameter.getProperty_id();
                 
-                material_diameter = new SimpleDoubleProperty(rs.getDouble("DiameterValue"));
-                material_weight = new SimpleDoubleProperty(rs.getInt("WeightValue"));
+                material_diameter = new SimpleDoubleProperty(Double.parseDouble(diameter.getProperty_name().get()));
+                material_weight =  new SimpleDoubleProperty(Double.parseDouble(weight.getProperty_name().get()));
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                double material_used_absolute = getMaterialUsed(ds, material_id);
-                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(ds, material_id)/material_weight.get()*100, 2));
+                double material_used_absolute = rs.getDouble("MaterialUsed");
+                material_used = new SimpleDoubleProperty(MngApi.round(material_used_absolute/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
-                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(ds, material_id));
-                double price_with_shipping = material_price.get() + material_shipping.get();
+                material_soldFor = new SimpleDoubleProperty(rs.getDouble("SoldFor"));                
                 material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get(), 2));
                 material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
                 
@@ -346,14 +354,13 @@ public class Material {
     return allMaterialsList;
     }
     
-    public static List<Material> getNotSpentMaterials(HikariDataSource ds) {
-        
+    public static List<Material> getNotSpentMaterials(List<SimpleTableObject> commonMaterialProperties, HikariDataSource ds) {
+          
         //Create list
         List<Material> allMaterialsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Materials.MaterialShipping, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID WHERE Materials.Finished='No' ORDER BY Materials.MaterialID DESC";
-
+        String query = "SELECT Materials.*, SUM(ItemWeight+ItemSupportWeight) AS 'MaterialUsed',SUM(ItemPrice) AS 'SoldFor' FROM Materials LEFT JOIN OrderItems ON OrderItems.ItemMaterialID = Materials.MaterialID WHERE Materials.Finished = 'No' GROUP BY Materials.MaterialID DESC";
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -367,8 +374,8 @@ public class Material {
             conn = ds.getConnection();
             
             if(conn.isValid(10) == false) {
-                MngApi obj2 = new MngApi();
-                obj2.alertConnectionLost();
+                MngApi obj = new MngApi();
+                obj.alertConnectionLost();
             }
             
             //STEP 4: Execute a query
@@ -382,39 +389,50 @@ public class Material {
                 
                 SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
                 SimpleIntegerProperty material_id, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
-                SimpleDoubleProperty material_weight, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining;
+                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_weight, material_remaining;
                 
-                material_color = new SimpleStringProperty(rs.getString("Color"));
-                material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
-                material_type = new SimpleStringProperty(rs.getString("MaterialType"));
-                material_finished = new SimpleStringProperty(" ");
-                material_distributor = new SimpleStringProperty(rs.getString("Seller"));
+                SimpleTableObject manufacturer, materialType,color,weight,distributor,diameter;
+                
+                manufacturer = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("ManufacturerID"));
+                materialType = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("MaterialTypeID"));
+                color = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("ColorID"));
+                weight = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("WeightID"));
+                distributor = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("SellerID"));
+                diameter = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("DiameterID"));
+                
+                
+                material_color = color.getProperty_name();
+                material_manufacturer = manufacturer.getProperty_name();
+                material_type = materialType.getProperty_name();
+                material_finished = new SimpleStringProperty(rs.getString("Finished"));
+                material_distributor = distributor.getProperty_name();
                 material_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
-                material_comment = new SimpleStringProperty(" ");                
+                material_comment = new SimpleStringProperty(rs.getString("Comment"));                
                 
-                material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));                
-                material_id_manufacturer = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
-                material_id_materialType = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
-                material_id_color = new SimpleIntegerProperty(rs.getInt("ColorID"));
-                material_id_weight = new SimpleIntegerProperty(rs.getInt("WeightID"));
-                material_id_seller = new SimpleIntegerProperty(rs.getInt("SellerID"));
-                material_id_diameter = new SimpleIntegerProperty(rs.getInt("DiameterID"));
+                material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
+                material_id_manufacturer = manufacturer.getProperty_id();
+                material_id_materialType = materialType.getProperty_id();
+                material_id_color = color.getProperty_id();
+                material_id_weight = weight.getProperty_id();
+                material_id_seller = distributor.getProperty_id();
+                material_id_diameter = diameter.getProperty_id();
                 
-                material_weight = new SimpleDoubleProperty(rs.getInt("WeightValue"));
-                material_diameter = new SimpleDoubleProperty(rs.getDouble("DiameterValue"));
+                material_diameter = new SimpleDoubleProperty(Double.parseDouble(diameter.getProperty_name().get()));
+                material_weight =  new SimpleDoubleProperty(Double.parseDouble(weight.getProperty_name().get()));
                 material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                double material_used_absolute = getMaterialUsed(ds, material_id);
-                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(ds, material_id)/material_weight.get()*100, 2));
-                material_trash = new SimpleDoubleProperty(0);                    
-                material_soldFor = new SimpleDoubleProperty(0);
-                material_profit = new SimpleDoubleProperty(0);
+                double material_used_absolute = rs.getDouble("MaterialUsed");
+                material_used = new SimpleDoubleProperty(MngApi.round(material_used_absolute/material_weight.get()*100, 2));
+                material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
+                material_soldFor = new SimpleDoubleProperty(rs.getDouble("SoldFor"));                
+                material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get(), 2));
                 material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
                 
                 Material material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining);
-                                
-                allMaterialsList.add(material);                
+                
+                allMaterialsList.add(material);
+                
             }
 
             rs.close();
@@ -422,8 +440,8 @@ public class Material {
             //signIn(event);
             e.printStackTrace();
         } catch (SQLNonTransientConnectionException se) {
-            MngApi obj2 = new MngApi();
-            obj2.alertConnectionLost();
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();
@@ -448,121 +466,18 @@ public class Material {
     return allMaterialsList;
     }
     
-    public static double getMaterialUsed(HikariDataSource ds, SimpleIntegerProperty materialID) {        
-                
-        double used = 0;        
-        
-        String query = "SELECT SUM(ItemWeight)+SUM(ItemSupportWeight) AS ItemWeight FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data            
-            while(rs.next()){                
-                
-                used = rs.getDouble("ItemWeight");
-                        
-            }
-            
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return used;
+    
+    private static SimpleTableObject getCommonMaterialPropertiesByID(List<SimpleTableObject> commonMaterialProperties, int id){
+        return commonMaterialProperties.get(id-1);
     }
     
-    public static Double getMaterialSoldFor(HikariDataSource ds, SimpleIntegerProperty materialID) {        
-                
-        double soldFor = 0;        
-        
-        String query = "SELECT SUM(ItemPrice) AS 'SoldFor' FROM OrderItems WHERE ItemMaterialID=" + materialID.get();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data            
-            while(rs.next()){                
-                                
-                soldFor = rs.getDouble("SoldFor");
-                        
-            }
-            
-            
-
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return soldFor;
-    }
-        
-    public static List<SimpleTableObject> getMaterialTypes(HikariDataSource ds) {
+    public static List<SimpleTableObject> getCommonMaterialProperties(HikariDataSource ds) {
         
         //Create list
-        List<SimpleTableObject> materialTypes = new ArrayList<>();
+        List<SimpleTableObject> properties = new ArrayList<>();
         
         //Create query
-        String query = "SELECT MaterialTypeID, MaterialType FROM MaterialTypes ORDER BY MaterialType ASC";
+        String query = "SELECT * FROM CommonMaterialProperties";
 
         Connection conn = null;
         Statement stmt = null;
@@ -590,84 +505,16 @@ public class Material {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("MaterialType"));
+                SimpleIntegerProperty property_id, property_type_id;
+                SimpleStringProperty property_type_name;
                 
-                SimpleTableObject sto = new SimpleTableObject(id, name);
+                property_id = new SimpleIntegerProperty(rs.getInt("PropertyID"));
+                property_type_id = new SimpleIntegerProperty(rs.getInt("PropertyTypeID"));
+                property_type_name = new SimpleStringProperty(rs.getString("PropertyName"));
                 
-                materialTypes.add(sto);
+                SimpleTableObject property = new SimpleTableObject(property_id, property_type_id, property_type_name);
                 
-            }
-
-            rs.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return materialTypes;
-    }
-    
-    public static List<SimpleTableObject> getMaterialManufacturers(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> materialManufacturers = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT ManufacturerID, ManufacturerName FROM MaterialManufacturers ORDER BY ManufacturerName ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("ManufacturerName"));
-                
-                SimpleTableObject sto = new SimpleTableObject(id, name);
-                
-                materialManufacturers.add(sto);
+                properties.add(property);
                 
             }
 
@@ -696,156 +543,15 @@ public class Material {
             }//end finally try
         }//end try
         
-    return materialManufacturers;
+    return properties;
     }
-    
-    public static List<SimpleTableObject> getMaterialSellers(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> materialSellers = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT SellerID, SellerName FROM MaterialSellers ORDER BY SellerName ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){                
-                
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("SellerID"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("SellerName"));
-                
-                SimpleTableObject sto = new SimpleTableObject(id, name);
-                
-                materialSellers.add(sto);
-                
-            }
-
-            rs.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return materialSellers;
-    }
-    
-    public static List<SimpleTableObject> getMaterialColors(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> materialColors = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT ColorID, ColorName FROM MaterialColors ORDER BY ColorName ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){                
-                
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("ColorID"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("ColorName"));
-                
-                SimpleTableObject sto = new SimpleTableObject(id, name);
-                materialColors.add(sto);
-                
-            }
-
-            rs.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return materialColors;
-    }
-    
-     public static Material getMaterialByID(HikariDataSource ds, SimpleIntegerProperty material_id) {
+       
+    public static Material getMaterialByID(List<SimpleTableObject> commonMaterialProperties,HikariDataSource ds, SimpleIntegerProperty material_id) {
         
         Material material = null;
         
         //Create query
-        String query = "SELECT Materials.Comment, Materials.MaterialID, MaterialManufacturers.ManufacturerID, MaterialManufacturers.ManufacturerName AS 'Manufacturer', MaterialTypes.MaterialTypeID, MaterialTypes.MaterialType, MaterialColors.ColorID, MaterialColors.ColorName AS 'Color', MaterialWeights.WeightID, MaterialWeights.WeightValue, Materials.MaterialPrice, Materials.MaterialShipping, Materials.PurchaseDate, MaterialSellers.SellerID, MaterialSellers.SellerName AS 'Seller', Materials.Finished, Materials.Trash, MaterialDiameters.DiameterID, MaterialDiameters.DiameterValue FROM Materials JOIN MaterialTypes ON Materials.MaterialTypeID=MaterialTypes.MaterialTypeID JOIN MaterialManufacturers ON Materials.ManufacturerID = MaterialManufacturers.ManufacturerID JOIN MaterialSellers ON Materials.SellerID = MaterialSellers.SellerID JOIN MaterialColors ON Materials.ColorID = MaterialColors.ColorID JOIN MaterialWeights ON Materials.WeightID = MaterialWeights.WeightID JOIN MaterialDiameters ON Materials.DiameterID = MaterialDiameters.DiameterID WHERE MaterialID="+ material_id.get() + " ORDER BY Materials.MaterialID DESC";
+        String query = "SELECT Materials.*, SUM(ItemWeight+ItemSupportWeight) AS 'MaterialUsed',SUM(ItemPrice) AS 'SoldFor' FROM Materials LEFT JOIN OrderItems ON OrderItems.ItemMaterialID = Materials.MaterialID WHERE Materials.MaterialID=" + material_id.get() + " GROUP BY Materials.MaterialID DESC";
 
         Connection conn = null;
         Statement stmt = null;
@@ -875,35 +581,45 @@ public class Material {
                 
                 SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
                 SimpleIntegerProperty material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
-                SimpleDoubleProperty material_weight, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining;
+                SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_weight, material_remaining;
                 
-                material_color = new SimpleStringProperty(rs.getString("Color"));
-                material_manufacturer = new SimpleStringProperty(rs.getString("Manufacturer"));
-                material_type = new SimpleStringProperty(rs.getString("MaterialType"));
+                SimpleTableObject manufacturer, materialType,color,weight,distributor,diameter;
+                
+                manufacturer = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("ManufacturerID"));
+                materialType = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("MaterialTypeID"));
+                color = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("ColorID"));
+                weight = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("WeightID"));
+                distributor = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("SellerID"));
+                diameter = getCommonMaterialPropertiesByID(commonMaterialProperties, rs.getInt("DiameterID"));
+                
+                
+                material_color = color.getProperty_name();
+                material_manufacturer = manufacturer.getProperty_name();
+                material_type = materialType.getProperty_name();
                 material_finished = new SimpleStringProperty(rs.getString("Finished"));
-                material_distributor = new SimpleStringProperty(rs.getString("Seller"));
+                material_distributor = distributor.getProperty_name();
                 material_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
                 material_comment = new SimpleStringProperty(rs.getString("Comment"));                
-                                
                 
-                material_id_manufacturer = new SimpleIntegerProperty(rs.getInt("ManufacturerID"));
-                material_id_materialType = new SimpleIntegerProperty(rs.getInt("MaterialTypeID"));
-                material_id_color = new SimpleIntegerProperty(rs.getInt("ColorID"));
-                material_id_weight = new SimpleIntegerProperty(rs.getInt("WeightID"));
-                material_id_seller = new SimpleIntegerProperty(rs.getInt("SellerID"));
-                material_id_diameter = new SimpleIntegerProperty(rs.getInt("DiameterID"));
+                material_id = new SimpleIntegerProperty(rs.getInt("MaterialID"));
+                material_id_manufacturer = manufacturer.getProperty_id();
+                material_id_materialType = materialType.getProperty_id();
+                material_id_color = color.getProperty_id();
+                material_id_weight = weight.getProperty_id();
+                material_id_seller = distributor.getProperty_id();
+                material_id_diameter = diameter.getProperty_id();
                 
-                material_weight = new SimpleDoubleProperty(rs.getDouble("WeightValue"));
-                material_diameter = new SimpleDoubleProperty(rs.getDouble("DiameterValue"));
-                material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));                
+                material_diameter = new SimpleDoubleProperty(Double.parseDouble(diameter.getProperty_name().get()));
+                material_weight =  new SimpleDoubleProperty(Double.parseDouble(weight.getProperty_name().get()));
+                material_price = new SimpleDoubleProperty(rs.getDouble("MaterialPrice"));
                 material_shipping = new SimpleDoubleProperty(rs.getDouble("MaterialShipping"));
                 
-                double material_used_absolute = getMaterialUsed(ds, material_id);
-                material_used = new SimpleDoubleProperty(MngApi.round(getMaterialUsed(ds, material_id)/material_weight.get()*100, 2));
+                double material_used_absolute = rs.getDouble("MaterialUsed");
+                material_used = new SimpleDoubleProperty(MngApi.round(material_used_absolute/material_weight.get()*100, 2));
                 material_trash = new SimpleDoubleProperty(rs.getDouble("Trash"));                    
-                material_soldFor = new SimpleDoubleProperty(getMaterialSoldFor(ds, material_id));
-                material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get() - material_price.get(), 2));
-                material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));
+                material_soldFor = new SimpleDoubleProperty(rs.getDouble("SoldFor"));                
+                material_profit = new SimpleDoubleProperty(MngApi.round(material_soldFor.get(), 2));
+                material_remaining = new SimpleDoubleProperty(MngApi.round(material_weight.get() - material_used_absolute, 2));                
                 
                 material = new Material(material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment, material_id, material_weight, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter, material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_remaining);                        
                 
@@ -940,152 +656,7 @@ public class Material {
     return material;
     }
     
-    public static List<SimpleTableObject> getMaterialWeights(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> materialWeights = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT WeightID, WeightValue FROM MaterialWeights ORDER BY WeightValue ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("WeightID"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("WeightValue"));
-                
-                SimpleTableObject sto = new SimpleTableObject(id, name); 
-                
-                materialWeights.add(sto);
-                
-            }
-
-            rs.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return materialWeights;
-    }
-    
-    public static List<SimpleTableObject> getMaterialDiameters(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> materialDiameters = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT DiameterID, DiameterValue FROM MaterialDiameters ORDER BY DiameterValue ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                
-                
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("DiameterID"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("DiameterValue"));
-                
-                SimpleTableObject sto = new SimpleTableObject(id, name); 
-                
-                materialDiameters.add(sto);
-                
-            }
-
-            rs.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return materialDiameters;
-    }
-    
-     public static void insertNewMaterial(Material material, HikariDataSource ds){
+    public static void insertNewMaterial(Material material, HikariDataSource ds){
         
         //Create query
         String updateQuery;
@@ -1103,7 +674,8 @@ public class Material {
             conn = ds.getConnection();
             //STEP 4: Execute a query
 	    
-                updateQuery = "INSERT INTO Materials (MaterialID,ManufacturerID,MaterialTypeID,ColorID,WeightID,MaterialPrice,MaterialShipping,PurchaseDate,SellerID,Finished,Trash,DiameterID,Comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE MaterialID=?,ManufacturerID=?,MaterialTypeID=?,ColorID=?,WeightID=?,MaterialPrice=?,MaterialShipping=?,PurchaseDate=?,SellerID=?,Finished=?,Trash=?,DiameterID=?,Comment=?";                
+                updateQuery = "INSERT INTO Materials (MaterialID,ManufacturerID,MaterialTypeID,ColorID,WeightID,MaterialPrice,MaterialShipping,PurchaseDate,SellerID,Finished,Trash,DiameterID,Comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                        + "ON DUPLICATE KEY UPDATE MaterialID=?,ManufacturerID=?,MaterialTypeID=?,ColorID=?,WeightID=?,MaterialPrice=?,MaterialShipping=?,PurchaseDate=?,SellerID=?,Finished=?,Trash=?,DiameterID=?,Comment=?";                
                 stmt = conn.prepareStatement(updateQuery);
                 
                 int i = 1;

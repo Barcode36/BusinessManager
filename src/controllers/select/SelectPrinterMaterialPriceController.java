@@ -12,6 +12,7 @@ import classes.OrderItem;
 import classes.Printer;
 import classes.SimpleTableObject;
 import com.zaxxer.hikari.HikariDataSource;
+import controllers.MainController;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
@@ -52,6 +53,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     private Material material;
     
+    private MainController mainController;
     
     @FXML
     private ComboBox<SimpleTableObject> comboBox_printer;
@@ -111,6 +113,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 stage.show();
                 //stage.setAlwaysOnTop(true);            
                 ctrl.setDs(ds);
+                ctrl.setMainController(mainController);
                 ctrl.setSelectPrinterMaterialPriceController(this);
             
                 ctrl.displayMaterials();
@@ -145,8 +148,8 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                     String buildTime_formatted = txtField_hours.getText() + "h " + txtField_minutes.getText() + "m";
                         buildTime = MngApi.convertToMinutes(buildTime_formatted);
                                      
-                    int printerID = comboBox_printer.getValue().getId().get();
-                    String printer_name = comboBox_printer.getValue().getName().get();
+                    int printerID = comboBox_printer.getValue().getProperty_id().get();
+                    String printer_name = comboBox_printer.getValue().getProperty_name().get();
             
                     String[] material2 = txtField_material.getText().split(";");
                         String material_id = material2[0];
@@ -216,7 +219,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
 
         //set material values if there are some otherwise skip
         if(selectedObject.getMaterial_id().get() != 0) {
-            this.material = Material.getMaterialByID(ds, selectedObject.getMaterial_id());        
+            this.material = Material.getMaterialByID(mainController.getCommonMaterialProperties(), ds, selectedObject.getMaterial_id());        
             int id = material.getMaterial_id().get();
             String type = material.getMaterial_manufacturer().get() + " " + this.material.getMaterial_type().get();
             String manufacturer = material.getMaterial_manufacturer().get();
@@ -249,7 +252,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
             @Override
             public String toString(SimpleTableObject object) {
-                return object.getName().get();
+                return object.getProperty_name().get();
             }
 
             @Override
@@ -263,7 +266,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 
         for (int i = 0; i < printers.size(); i++) {
             
-            if (printer_id == printers.get(i).getId().get()){
+            if (printer_id == printers.get(i).getProperty_id().get()){
                 comboBox_printer.getSelectionModel().select(i);
             } else {
              comboBox_printer.setValue(printers.get(0));   
@@ -355,5 +358,9 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     public void setNewOrderController(NewOrderController newOrderController) {
         this.newOrderController = newOrderController;
     }
-        
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
+    
 }

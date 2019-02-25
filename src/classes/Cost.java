@@ -7,7 +7,6 @@ package classes;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -124,7 +123,7 @@ public class Cost {
         List<Cost> allCostsList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Costs.CostID, Costs.CostName, Costs.CostQuantity, Costs.CostShipping, Costs.PurchaseDate, Costs.Comment, Costs.CostPrice, Costs.PrinterID, Printers.PrinterName FROM Costs JOIN Printers ON Costs.PrinterID = Printers.PrinterID ORDER BY Costs.CostID ASC";
+        String query = "SELECT Costs.*, Printers.PrinterName FROM Costs JOIN Printers ON Costs.PrinterID = Printers.PrinterID ORDER BY Costs.CostID ASC";
 
         Connection conn = null;
         Statement stmt = null;

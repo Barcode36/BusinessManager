@@ -8,6 +8,7 @@ package classes;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
@@ -177,13 +178,13 @@ public class Customer  {
         this.customer_ordersPrice = customer_ordersPrice;
     }
 
-    public static List<Customer> getCustomers(HikariDataSource ds){
+    public static List<Customer> getCustomers(List<SimpleTableObject> commonCustomerProperties,HikariDataSource ds){
             
         //Create list
         List<Customer> customersList = new ArrayList<>();
         
         //Create query
-        String query = "SELECT Customers.DateCreated, Customers.LastName, Customers.FirstName, Customers.Comment, Customers.Mail, Customers.Phone, Customers.Address, Customers.City, Customers.CompanyID, Customers.ZipCode, Countries.CountryID, Countries.CountryName, Companies.CompanyName, Customers.CustomerID FROM Customers JOIN Countries ON Customers.CountryID=Countries.CountryID JOIN Companies ON Customers.CompanyID = Companies.CompanyID ORDER BY Customers.CustomerID ASC";
+        String query = "SELECT SUM(OrderPrice) AS 'OrderPrice', COUNT(Orders.CustomerID) AS 'OrderCount', Customers.* FROM Customers LEFT JOIN Orders ON Orders.CustomerID = Customers.CustomerID GROUP BY Customers.CustomerID ASC";
 
         Connection conn = null;
         Statement stmt = null;
@@ -208,7 +209,7 @@ public class Customer  {
                 SimpleStringProperty customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment;
                 SimpleIntegerProperty customer_id, customer_id_company, customer_id_country, customer_orderCount;
                 SimpleDoubleProperty customer_ordersPrice;
-                
+                                
                 customer_lastName = new SimpleStringProperty(rs.getString("LastName"));
                 customer_firstName = new SimpleStringProperty(rs.getString("FirstName"));
                 customer_dateCreated = new SimpleStringProperty(rs.getString("DateCreated"));
@@ -218,15 +219,16 @@ public class Customer  {
                 customer_address = new SimpleStringProperty(rs.getString("Address"));
                 customer_city = new SimpleStringProperty(rs.getString("City"));
                 customer_zipCode = new SimpleStringProperty(rs.getString("ZipCode"));
-                customer_country = new SimpleStringProperty(rs.getString("CountryName"));
-                customer_company = new SimpleStringProperty(rs.getString("CompanyName"));
+                customer_country = getCommonCustomerPropertiesByID(commonCustomerProperties, rs.getInt("CountryID")).getProperty_name();
+                customer_company = getCommonCustomerPropertiesByID(commonCustomerProperties, rs.getInt("CompanyID")).getProperty_name();
                 
                 customer_id = new SimpleIntegerProperty(rs.getInt("CustomerID"));
-                customer_id_company = new SimpleIntegerProperty(rs.getInt("CompanyID"));
-                customer_id_country = new SimpleIntegerProperty(rs.getInt("CountryID"));                
-                customer_orderCount = new SimpleIntegerProperty(getOrderCount(customer_id, ds));
+                customer_id_company = getCommonCustomerPropertiesByID(commonCustomerProperties, rs.getInt("CompanyID")).getProperty_id();
+                customer_id_country = getCommonCustomerPropertiesByID(commonCustomerProperties, rs.getInt("CountryID")).getProperty_id();
                 
-                customer_ordersPrice = new SimpleDoubleProperty(getOrdersPrice(customer_id, ds));                
+               
+                customer_orderCount = new SimpleIntegerProperty(rs.getInt("OrderCount"));                
+                customer_ordersPrice = new SimpleDoubleProperty(rs.getDouble("OrderPrice"));                
                 
                 Customer customer = new Customer(customer_lastName, customer_firstName, customer_dateCreated, customer_mail, customer_phone, customer_address, customer_city, customer_zipCode, customer_country, customer_company, customer_comment, customer_id, customer_id_company, customer_id_country, customer_orderCount, customer_ordersPrice);
                 
@@ -265,40 +267,96 @@ public class Customer  {
         return customersList;
     }
 
-//    public static Double[] getCustomerStats(int customer_id, HikariDataSource ds){
-//        Double[] statistics = new Double[7];
+    public static List<SimpleTableObject> getCommonCustomerProperties(HikariDataSource ds) {
+        
+        //Create list
+        List<SimpleTableObject> properties = new ArrayList<>();
+        
+        //Create query
+        String query = "select * from CommonCustomerProperties";
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = ds.getConnection();
+            
+            if(conn.isValid(10) == false) {
+                MngApi obj = new MngApi();
+                obj.alertConnectionLost();
+            }
+            
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+                SimpleIntegerProperty property_id, property_type_id;
+                SimpleStringProperty property_type_name;
+                
+                property_id = new SimpleIntegerProperty(rs.getInt("PropertyID"));
+                property_type_id = new SimpleIntegerProperty(rs.getInt("PropertyTypeID"));
+                property_type_name = new SimpleStringProperty(rs.getString("PropertyName"));
+                
+                SimpleTableObject obj = new SimpleTableObject(property_id, property_type_id, property_type_name);
+                
+                properties.add(obj);
+                
+            }
+
+            rs.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+    return properties;
+    }
+        
+//    public static void insertNewCustomer(Customer newCustomer, Label info, HikariDataSource ds){
 //        
+//        String updateQuery = "INSERT INTO Customers VALUES (null,'" + newCustomer.getCustomer_firstName().get() + "','" + newCustomer.getCustomer_lastName().get() + "','" + newCustomer.getCustomer_dateCreated().get() + "','" + newCustomer.getCustomer_comment().get() + "','" + newCustomer.getCustomer_phone().get() + "','" + newCustomer.getCustomer_address().get() + "','" + newCustomer.getCustomer_city().get() + "','" + newCustomer.getCustomer_mail().get() + "','" + newCustomer.getCustomer_zipCode().get() + "'," + newCustomer.getCustomer_id_country().get() + "," + newCustomer.getCustomer_id_company().get() + ")";
+//        MngApi.performUpdateQuery(updateQuery, info, ds);                
 //        
-//        if (MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds) == 0){
-//            statistics[0] = 0.0;
-//            statistics[1] = 0.0;
-//            statistics[2] = 0.0;
-//            statistics[3] = 0.0;
-//            statistics[4] = 0.0;
-//            statistics[5] = 0.0;
-//            statistics[6] = 0.0;
-//        } else {
-//            statistics[0] = MngApi.round(MngApi.performDoubleQuery("SELECT COUNT(OrderID) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-//            statistics[1] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderQuantity) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-//            statistics[2] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderPrice) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-//            statistics[3] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderCosts) FROM Orders WHERE CustomerID=" + customer_id, ds), 2); 
-//            statistics[4] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-//            statistics[5] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderSupportWeight) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-//            statistics[6] = MngApi.round(MngApi.performDoubleQuery("SELECT SUM(OrderBuildTime) FROM Orders WHERE CustomerID=" + customer_id, ds), 2);
-//        }        
-//        
-//        return statistics;
 //    }
     
-    private static int getOrderCount(SimpleIntegerProperty id, HikariDataSource ds) {
-        int orderCount = 0;
+    public static void insertNewCustomer(Customer customer, HikariDataSource ds){
         
         //Create query
-        String query = "SELECT Orders.OrderID FROM Orders WHERE CustomerID=" + id.get();
- 
+        String updateQuery;
+
         Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        
         try {
             
             //STEP 2: Register JDBC driver
@@ -308,147 +366,49 @@ public class Customer  {
 
             conn = ds.getConnection();
             //STEP 4: Execute a query
-            stmt = conn.createStatement();
+	    
+                updateQuery = "INSERT INTO Customers (CustomerID,FirstName,LastName,DateCreated,Comment,Phone,Address,City,Mail,ZipCode,CountryID,CompanyID)" +
+                              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)" + 
+                              "ON DUPLICATE KEY UPDATE CustomerID=?,FirstName=?,LastName=?,DateCreated=?,Comment=?,Phone=?,Address=?,City=?,Mail=?,ZipCode=?,CountryID=?,CompanyID=?";
+                stmt = conn.prepareStatement(updateQuery);
+                
+                int i = 1;
+                
+                stmt.setInt(i, customer.getCustomer_id().get());i++;
+                stmt.setString(i, customer.getCustomer_firstName().get());i++;
+                stmt.setString(i, customer.getCustomer_lastName().get());i++;
+                stmt.setString(i, customer.getCustomer_dateCreated().get());i++;
+                stmt.setString(i, customer.getCustomer_comment().get());i++;
+                stmt.setString(i, customer.getCustomer_phone().get());i++;
+                stmt.setString(i, customer.getCustomer_address().get());i++;
+                stmt.setString(i, customer.getCustomer_city().get());i++;
+                stmt.setString(i, customer.getCustomer_mail().get());i++;
+                stmt.setString(i, customer.getCustomer_zipCode().get());i++;
+                stmt.setInt(i, customer.getCustomer_id_country().get());i++;
+                stmt.setInt(i, customer.getCustomer_id_company().get());i++;
+                
+                
+                stmt.setInt(i, customer.getCustomer_id().get());i++;
+                stmt.setString(i, customer.getCustomer_firstName().get());i++;
+                stmt.setString(i, customer.getCustomer_lastName().get());i++;
+                stmt.setString(i, customer.getCustomer_dateCreated().get());i++;
+                stmt.setString(i, customer.getCustomer_comment().get());i++;
+                stmt.setString(i, customer.getCustomer_phone().get());i++;
+                stmt.setString(i, customer.getCustomer_address().get());i++;
+                stmt.setString(i, customer.getCustomer_city().get());i++;
+                stmt.setString(i, customer.getCustomer_mail().get());i++;
+                stmt.setString(i, customer.getCustomer_zipCode().get());i++;
+                stmt.setInt(i, customer.getCustomer_id_country().get());i++;
+                stmt.setInt(i, customer.getCustomer_id_company().get());i++;
+                
+                
+                stmt.executeUpdate();
             
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                orderCount++;
-                
-            }
-
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (ClassNotFoundException se) {
-            //Handle errors for Class.forName
-            se.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-        return orderCount;
-    }
-
-    private static double getOrdersPrice(SimpleIntegerProperty id, HikariDataSource ds) {
-        double ordersPrice = 0;
-        
-        //Create query
-        String query = "SELECT SUM(OrderPrice) AS 'OrderPrice' FROM Orders WHERE CustomerID=" + id.get();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                ordersPrice = rs.getDouble("OrderPrice");
-                
-            }
-
-            rs.close();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (ClassNotFoundException se) {
-            //Handle errors for Class.forName
-            se.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-        return ordersPrice;
-    }
-    
-    public static List<SimpleTableObject> getCompanies(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> companies = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT * FROM Companies ORDER BY CompanyID ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                
-                
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("CompanyID"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("CompanyName"));
-                
-                SimpleTableObject sto = new SimpleTableObject(id, name); 
-                
-                companies.add(sto);
-                
-            }
-
-            rs.close();
+            stmt.close();
+            conn.close();
         } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
+            MngApi obj2 = new MngApi();
+            obj2.alertConnectionLost();
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();
@@ -468,91 +428,9 @@ public class Customer  {
             } catch (SQLException se) {
                 se.printStackTrace();
             }//end finally try
-        }//end try
-        
-    return companies;
-    }
-    
-    public static List<SimpleTableObject> getCountries(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> countries = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT CountryId, CountryName FROM Countries ORDER BY CountryName ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                SimpleIntegerProperty id = new SimpleIntegerProperty(rs.getInt("CountryId"));
-                SimpleStringProperty name = new SimpleStringProperty(rs.getString("CountryName"));
-                
-                SimpleTableObject sto = new SimpleTableObject(id, name); 
-                
-                countries.add(sto);
-                
-            }
-
-            rs.close();
-        } catch (NullPointerException e){
-            //signIn(event);
-            e.printStackTrace();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return countries;
-    }
-    
-     public static void insertNewCustomer(Customer newCustomer, Label info, HikariDataSource ds){
-        
-        String updateQuery = "INSERT INTO Customers VALUES (null,'" + newCustomer.getCustomer_firstName().get() + "','" + newCustomer.getCustomer_lastName().get() + "','" + newCustomer.getCustomer_dateCreated().get() + "','" + newCustomer.getCustomer_comment().get() + "','" + newCustomer.getCustomer_phone().get() + "','" + newCustomer.getCustomer_address().get() + "','" + newCustomer.getCustomer_city().get() + "','" + newCustomer.getCustomer_mail().get() + "','" + newCustomer.getCustomer_zipCode().get() + "'," + newCustomer.getCustomer_id_country().get() + "," + newCustomer.getCustomer_id_company().get() + ")";
-        MngApi.performUpdateQuery(updateQuery, info, ds);                
-        
-    }
+        }//end try         
+    } 
+     
      
     public static void deleteCustomers(ObservableList<Customer> customers, Label info, HikariDataSource ds){
         
@@ -563,5 +441,9 @@ public class Customer  {
             MngApi.performUpdateQuery(query, info, ds);   
             
         }        
-    } 
+    }
+    
+    private static SimpleTableObject getCommonCustomerPropertiesByID(List<SimpleTableObject> commonCustomerProperties, int id){
+        return commonCustomerProperties.get(id-1);
+    }
 }

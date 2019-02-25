@@ -12,6 +12,7 @@ import classes.MngApi;
 import classes.Object;
 import classes.Order;
 import classes.Printer;
+import classes.SimpleTableObject;
 import com.zaxxer.hikari.HikariDataSource;
 import controllers.customers.NewCustomerController;
 import controllers.materials.NewMaterialController;
@@ -20,6 +21,8 @@ import controllers.orders.NewOrderController;
 import controllers.printers.NewPrinterController;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
@@ -70,6 +73,10 @@ public class MainController implements Initializable {
     @FXML
     private Label label_main_info;
     
+    @FXML
+    private List<SimpleTableObject> commonMaterialProperties, commonCustomerProperties;
+           
+    
      // Create the service
     private final Service<Void> service_refreshAll = new Service<Void>() {
         @Override
@@ -89,11 +96,7 @@ public class MainController implements Initializable {
         }
     };
     
-    /*****************************          GENERAL - METHODS
-     * @param ds *****************************/          
-    public void setDataSource(HikariDataSource ds){
-        this.ds = ds;        
-    }
+    /*****************************          GENERAL - METHODS *****************************/
     
     public void loadAll(){        
         runService(service_refreshCosts);
@@ -102,6 +105,59 @@ public class MainController implements Initializable {
         runService(service_refreshObjects);
         runService(service_refreshOrders);
         runService(service_refreshPrinters);        
+    }
+    
+    //gets list of common material properties (loaded at the begining) based on types
+    /*
+    +----------------+------------------+
+    | PropertyTypeID | PropertyTypeName |
+    +----------------+------------------+
+    |              1 | Type             |
+    |              2 | Color            |
+    |              3 | Manufacturer     |
+    |              4 | Seller           |
+    |              5 | Diameter         |
+    |              6 | Weight           |
+    |              7 | Printer Type     |
+    +----------------+------------------+
+    */
+    public List<SimpleTableObject> getListOfMaterialProperties(int type){
+        
+        List<SimpleTableObject> properties = new ArrayList<>();
+        
+        for (int i = 0; i < commonMaterialProperties.size(); i++) {
+            
+            if(properties.get(i).getProperty_type_id().get() == type)properties.add(commonMaterialProperties.get(i));
+            
+        }
+        
+        return properties;
+    }
+    
+    /*
+    +----------------+------------------+
+    | PropertyTypeID | PropertyTypeName |
+    +----------------+------------------+
+    |              1 | Company          |
+    |              2 | Country          |
+    +----------------+------------------+
+    */
+    
+    public List<SimpleTableObject> getListOfCustomerProperties(int type){
+        
+        List<SimpleTableObject> properties = new ArrayList<>();
+        
+        for (int i = 0; i < commonCustomerProperties.size(); i++) {
+            
+            if(properties.get(i).getProperty_type_id().get() == type)properties.add(commonCustomerProperties.get(i));
+            
+        }
+        
+        return properties;
+    }
+    
+    public void setDataSource(HikariDataSource ds){
+        this.ds = ds;        
     }
     
     public void runService(Service service){
@@ -136,7 +192,46 @@ public class MainController implements Initializable {
     public Service<Void> getService_refreshAll() {
         return service_refreshAll;
     }
-        
+
+    public List<SimpleTableObject> getCommonMaterialProperties() {
+        return commonMaterialProperties;
+    }
+
+    public void setCommonMaterialProperties(List<SimpleTableObject> commonMaterialProperties) {
+        this.commonMaterialProperties = commonMaterialProperties;
+    }
+    
+    public List<SimpleTableObject> getCommonCustomerProperties() {
+        return commonCustomerProperties;
+    }
+
+    public void setCommonCustomerProperties(List<SimpleTableObject> commonCustomerProperties) {
+        this.commonCustomerProperties = commonCustomerProperties;
+    }
+
+    public TableView<Order> getTv_orders() {
+        return tv_orders;
+    }
+
+    public TableView<Customer> getTv_customers() {
+        return tv_customers;
+    }
+
+    public TableView<Object> getTv_objects() {
+        return tv_objects;
+    }
+
+    public TableView<Material> getTv_materials() {
+        return tv_materials;
+    }
+
+    public TableView<Cost> getTv_costs() {
+        return tv_costs;
+    }
+
+    public TableView<Printer> getTv_printers() {
+        return tv_printers;
+    }    
     /*
     *
     *
@@ -179,10 +274,7 @@ public class MainController implements Initializable {
         int sold_orders = 0, notSold_orders = 0, total_orders, total_itemsSold = 0, total_buildTime = 0;        
         double sold_price = 0, sold_costs = 0, notSold_price = 0, notSold_costs = 0, total_costs = 0, total_price = 0, total_weight = 0, total_supportWeight = 0;
         
-        //setting  statistics for sold and not sold orders        
-        //notSold_orders = MngApi.performIntegerQuery("SELECT COUNT(OrderID) FROM Orders WHERE OrderStatus='Not Sold'", user);
-        
-        
+                
         for (int i = 0; i < tv_orders.getItems().size(); i++) {
             Order order = tv_orders.getItems().get(i);
             if (order.getOrder_status().get().equals("Sold")){
@@ -423,7 +515,7 @@ public class MainController implements Initializable {
     
     public void refreshCustomersTable(HikariDataSource ds) {
         //Create list of orders
-        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(ds));
+        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(commonCustomerProperties,ds));
         
         
         //set cell value factory for columns by type
@@ -598,7 +690,7 @@ public class MainController implements Initializable {
     private void calculateSelectedObjectsStatistics(ObservableList<classes.Object> selectedObjects){
         
         int timesPrinted = 0, buildTime = 0;
-        double price = 0, costs = 0, weight = 0, supportWeight = 0,pricePerHour = 0;
+        double price = 0, costs = 0, weight = 0, supportWeight = 0;
         
         for (int i = 0; i < selectedObjects.size(); i++) {
             
@@ -657,7 +749,7 @@ public class MainController implements Initializable {
     private void calculateMaterialStatistics(ObservableList<Material> materials){
                      
         int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0;        
-        double shipping = 0, price = 0, paid = 0, profit = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0, total_weight = 0;
+        double shipping = 0, price = 0, paid = 0, profit = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0, total_weight = 0;
                 
         for (int i = 0; i < materials.size(); i++) {
             
@@ -684,8 +776,8 @@ public class MainController implements Initializable {
         
         paid = shipping + price;
         avgRollPrice = paid/(soldRolls + remainingRolls);
-        colors = MngApi.performIntegerQuery("SELECT COUNT(ColorID) FROM MaterialColors", ds);
-        types = MngApi.performIntegerQuery("SELECT COUNT(MaterialTypeID) FROM MaterialTypes", ds);
+        colors = SimpleTableObject.getNumberOfProperties(commonMaterialProperties, 2);
+        types = SimpleTableObject.getNumberOfProperties(commonMaterialProperties, 1);
 
         materials_label_Total.setText(String.format("Total(%d)", total));
         materials_label_shippingPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", shipping, price));
@@ -749,7 +841,7 @@ public class MainController implements Initializable {
     public void refreshMaterialsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(ds));
+        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(commonMaterialProperties,ds));
         
         material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
         material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});           
@@ -980,7 +1072,7 @@ public class MainController implements Initializable {
     private TableColumn<Printer, Double> printer_col_price, printer_col_shipping, printer_col_incomes, printer_col_expenses, printer_col_overallIncome, printer_col_duty, printer_col_tax;
     
     @FXML
-    private Button printer_btn_new, printer_btn_edit, printer_btn_delete, printer_btn_details, printer_btn_refresh;
+    private Button printer_btn_new, printer_btn_edit, printer_btn_delete, printer_btn_refresh;
     
     @FXML
     private Label printer_label_total, printer_label_priceShipping, printer_label_sum, printer_label_expenses, printer_label_totalPaid, printer_label_itemsSold, printer_label_incomes, printer_label_difference, printer_label_dutyTax;
