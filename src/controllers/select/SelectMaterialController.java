@@ -62,9 +62,7 @@ public class SelectMaterialController implements Initializable {
             TableRow<Material> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                    selectPrinterMaterialPriceController.setMaterialTxtField(tv_materials.getSelectionModel().getSelectedItem()); 
-                    System.out.println(tv_materials.getSelectionModel().getSelectedItem().getMaterial_weight().get());
-                    System.out.println(tv_materials.getSelectionModel().getSelectedItem().getMaterial_price().get());
+                    selectPrinterMaterialPriceController.setMaterialTxtField(tv_materials.getSelectionModel().getSelectedItem());                     
                     MngApi.closeWindow(btn_select);                   
                 }
             });
@@ -77,10 +75,18 @@ public class SelectMaterialController implements Initializable {
         });
     }    
 
-    
+    //displays not spent materials
     public void displayMaterials(){
-        //Create list of orders
-        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getNotSpentMaterials(mainController.getCommonMaterialProperties(), ds));
+        
+        ObservableList<Material> materialList = mainController.getTv_materials().getItems();
+        
+        for (int i = 0; i < materialList.size(); i++) {
+            Material material = materialList.get(i);
+            
+            if (material.getMaterial_finished().get().equals("Yes"))materialList.remove(material);
+            
+        }
+        
         
         material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
         material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});

@@ -9,6 +9,7 @@ import classes.MngApi;
 import classes.Object;
 import classes.OrderItem;
 import com.zaxxer.hikari.HikariDataSource;
+import controllers.MainController;
 import controllers.orders.NewOrderController;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -35,7 +36,7 @@ public class SelectObjectController implements Initializable {
     private HikariDataSource ds;
     
     private NewOrderController newOrderController;
-    
+    private MainController mainController;
     
     @FXML
     private TableView<classes.Object> tv_objects;
@@ -135,8 +136,7 @@ public class SelectObjectController implements Initializable {
             costs = new SimpleDoubleProperty();
             
             OrderItem orderItem = new OrderItem(orderItem_id, object_name, object_buildTime_formated, printer_name, material_type, material_color, order_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
-            
-            System.out.println(orderItem.getOrder_id().get());
+                        
             orderItems.add(orderItem);
             
             i++;
@@ -148,7 +148,7 @@ public class SelectObjectController implements Initializable {
     public void displayObjects(){
         
         //Create list of orders
-        ObservableList<classes.Object> objectList = FXCollections.observableArrayList(classes.Object.getObjects(ds));
+        ObservableList<classes.Object> objectList = mainController.getTv_objects().getItems();
         
         object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
         object_col_buildTime_formated.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
@@ -186,7 +186,8 @@ public class SelectObjectController implements Initializable {
     public TableView<Object> getTv_objects() {
         return tv_objects;
     }
-    
-    
-    
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 }

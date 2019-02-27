@@ -16,6 +16,8 @@ import controllers.MainController;
 import controllers.orders.NewOrderController;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -31,6 +33,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -51,7 +54,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     private OrderItem selectedObject;
     
-    private Material material;
+    private Material selectedMaterial;
     
     private MainController mainController;
     
@@ -74,7 +77,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         txtField_quantity.textProperty().addListener((observable, oldValue, newValue) -> {             
             try{                
                 if(txtField_quantity.isEditable())
-                    setCostsTimeWeight(Integer.parseInt(newValue));                          
+                    setCostsTimeWeight();                          
             } catch(NumberFormatException e){
                 label_info.setText("Enter some positive, non-zero numeric value!");
                 label_info.setTextFill(Color.web("#ff0000"));
@@ -84,16 +87,17 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         
         txtField_weight.textProperty().addListener((observable, oldValue, newValue) -> {            
            //if(txtField_weight.isEditable())
-               setCosts();
+               //setCosts();
+               setCostsTimeWeight();
         });
         
         txtField_supportWeight.textProperty().addListener((observable, oldValue, newValue) -> {            
              //if(txtField_supportWeight.isEditable())
-                 setCosts();
+                 setCostsTimeWeight();
         });
         
         txtField_material.textProperty().addListener((observable, oldValue, newValue) -> {            
-           setCosts();
+           setCostsTimeWeight();
         });
         
         btn_selectMaterial.setOnAction((event) -> {
@@ -126,7 +130,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         btn_assign.setOnAction((event) -> {
             try {
                 int quantity, buildTime;
-                double weight, supportWeight, material_remaining = MngApi.performDoubleQuery("SELECT MaterialWeights.WeightValue FROM MaterialWeights JOIN Materials ON MaterialWeights.WeightID = Materials.WeightID WHERE MaterialID=" + material.getMaterial_id().get(), ds) - MngApi.performDoubleQuery("SELECT SUM(ItemWeight) FROM OrderItems WHERE ItemMaterialID=" + material.getMaterial_id().get(), ds);
+                double weight, supportWeight, material_remaining = selectedMaterial.getMaterial_remaining().get();
             
                 double price, costs;
                 
@@ -191,7 +195,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 label_info.setText("Not enough material!");
                 label_info.setTextFill(Color.web("#ff0000"));
             } catch (NullPointerException e){
-                label_info.setText("Fill all the fields!");
+                label_info.setText("Fill all the fields!");                
                 label_info.setTextFill(Color.web("#ff0000"));
             }
             
@@ -202,28 +206,42 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         });
     }    
     
-    public void setMaterialTxtField(Material material){
-        this.material = material;
+    //in case we are editing previously defined object - there is stored only material ID, not other info so we need to get them 
+    public void setMaterialTxtField(int material_id){
+        this.selectedMaterial = getMaterialByID(mainController.getTv_materials().getItems(), selectedObject.getMaterial_id().get());
         
-        int id = this.material.getMaterial_id().get();
-        String type = this.material.getMaterial_manufacturer().get() + " " + this.material.getMaterial_type().get();
-        String manufacturer = this.material.getMaterial_manufacturer().get();
-        String color = this.material.getMaterial_color().get();
+        int id = this.selectedMaterial.getMaterial_id().get();
+        String type = this.selectedMaterial.getMaterial_manufacturer().get() + " " + this.selectedMaterial.getMaterial_type().get();
+        String manufacturer = this.selectedMaterial.getMaterial_manufacturer().get();
+        String color = this.selectedMaterial.getMaterial_color().get();
+        
+        txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);        
+    }
+    
+    //in case we are redefining new material from "select Material" dialog window - there is stored complete information about material so we can use it as parameter
+    public void setMaterialTxtField(Material material){
+        this.selectedMaterial = material;
+        
+        int id = this.selectedMaterial.getMaterial_id().get();
+        String type = this.selectedMaterial.getMaterial_manufacturer().get() + " " + this.selectedMaterial.getMaterial_type().get();
+        String manufacturer = this.selectedMaterial.getMaterial_manufacturer().get();
+        String color = this.selectedMaterial.getMaterial_color().get();
         
         txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);        
     }
     
     //set values at window opening
-    public void setElementValues(OrderItem selectedObject){
+    //by default, all text fields except Price are locked and not editable. Depending on the item - whether it is 3D printing ervice or some pre-defined object - we will unlock correct text fields
+    public void setElementValues2(OrderItem selectedObject){
         this.selectedObject = selectedObject;
 
         //set material values if there are some otherwise skip
         if(selectedObject.getMaterial_id().get() != 0) {
-            this.material = Material.getMaterialByID(mainController.getCommonMaterialProperties(), ds, selectedObject.getMaterial_id());        
-            int id = material.getMaterial_id().get();
-            String type = material.getMaterial_manufacturer().get() + " " + this.material.getMaterial_type().get();
-            String manufacturer = material.getMaterial_manufacturer().get();
-            String color = material.getMaterial_color().get();        
+            this.selectedMaterial = getMaterialByID(mainController.getTv_materials().getItems(), selectedObject.getMaterial_id().get());
+            int id = selectedMaterial.getMaterial_id().get();
+            String type = selectedMaterial.getMaterial_manufacturer().get() + " " + this.selectedMaterial.getMaterial_type().get();
+            String manufacturer = selectedMaterial.getMaterial_manufacturer().get();
+            String color = selectedMaterial.getMaterial_color().get();        
             txtField_material.setText(id + ";" + type + ";" + manufacturer + ";" + color);
         }
         
@@ -231,7 +249,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         if(selectedObject.getObject_id().get() == 1){
             txtField_quantity.setText("1");
             txtField_quantity.setEditable(false);
-        //user doesnt need to interact with these fieldssince all values are loaded from database and just multiplied by quantity
+        //user doesnt need to interact with these fields since all values are loaded from database and just multiplied by quantity
         } else {            
             txtField_quantity.setText(String.valueOf(selectedObject.getQuantity().get()));
             txtField_quantity.setEditable(true);
@@ -278,15 +296,91 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         txtField_costs.setText(String.format(Locale.UK, "%.2f", selectedObject.getCosts().get()));        
     }
     
-       
-    //sets costs, build time and wight when quantity is changed
-    private void setCostsTimeWeight(int quantity){
-        try{
-            double material_price, material_shipping, material_weight, price_per_gram, weight, support_weight, total_weight, price, costs;
-            int hours, minutes, build_time;
-            
+    //new method
+    public void setElementValues(OrderItem selectedObject){
+        this.selectedObject = selectedObject;       
         
-            quantity = Integer.parseInt(txtField_quantity.getText());
+        try {
+            //decide editability of text fields
+            //by default, all text fields except Price are locked and not editable. Depending on the item - whether it is 3D printing ervice or some pre-defined object - we will unlock correct text fields
+            int obj_id = selectedObject.getObject_id().get();
+        
+            switch (obj_id){
+                //obj_id == 1 => it is 3D printing service, we cannot edit quantity field
+                case 1:
+                    txtField_quantity.setText("1");
+                    txtField_weight.setEditable(true);                    
+                    txtField_supportWeight.setEditable(true);
+                    txtField_hours.setEditable(true);
+                    txtField_minutes.setEditable(true);
+                    break;
+                // obj_id != 1 => that means it is pre-defined objects, we can edit only quantity    
+                default:
+                    txtField_quantity.setEditable(true);
+            }
+        
+            //now just set the fields - if it is new object, null (nothing) will be set. If it is existing object, proper values will be set
+            txtField_quantity.setText(String.valueOf(selectedObject.getQuantity().get()));
+            
+            txtField_weight.setText(selectedObject.getObject_weight().get() + "");
+            //System.out.println("Weght of selected object: " + selectedObject.getObject_weight().get() + "/nWeight of this.selectedObject: "+ this.selectedObject.getObject_weight().get());
+            txtField_supportWeight.setText(selectedObject.getObject_supportWeight().get() + "");
+        
+            String[] buildTime_formatted = selectedObject.getObject_buildTime_formated().get().split(" ");
+        
+            txtField_hours.setText(String.format(Locale.UK, "%s", buildTime_formatted[0].replaceAll("[^\\d.]", "")));
+            txtField_minutes.setText(String.format(Locale.UK, "%s", buildTime_formatted[1].replaceAll("[^\\d.]", "")));
+        
+            //set material if there was some material defined before - i. e. if we are editing object
+            if(selectedObject.getMaterial_id().get() != 0) {
+                setMaterialTxtField(selectedObject.getMaterial_id().get());
+            }
+                        
+            //set list of printers
+            ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrintersShort(mainController.getTv_printers()));
+            
+            comboBox_printer.setItems(printers);
+            comboBox_printer.setVisibleRowCount(7);
+            comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
+                @Override
+                public String toString(SimpleTableObject object) {
+                    return object.getProperty_name().get();
+                }
+
+                @Override
+                public SimpleTableObject fromString(String string) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
+        
+            //set previously defined printer, if there is any
+            int printer_id = selectedObject.getPrinter_id().get();                
+            for (int i = 0; i < printers.size(); i++) {
+            
+                if (printer_id == printers.get(i).getProperty_id().get()){
+                    comboBox_printer.getSelectionModel().select(i);
+                } else {
+                 comboBox_printer.setValue(printers.get(0));   
+                }            
+            } 
+            
+            txtField_price.setText(selectedObject.getPrice().get() + "");
+            txtField_costs.setText(selectedObject.getCosts().get() + "");
+            
+        } catch (NullPointerException e){
+            //e.printStackTrace();
+        }
+    }
+    
+    
+    //sets costs, build time and weight when quantity is changed
+    private void setCostsTimeWeight(){
+        try{
+            double  weight, support_weight, total_weight;
+            double material_price, material_shipping, material_weight, price_per_gram, costs;
+            int hours, minutes, build_time, quantity = Integer.parseInt(txtField_quantity.getText());
+            
+            //check for quantity to be 0
             if(quantity == 0){
                 txtField_quantity.setText("1");
                 quantity = 1;
@@ -295,7 +389,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             //set up weights
             weight = quantity*selectedObject.getObject_weight().get();
             support_weight = quantity*selectedObject.getObject_supportWeight().get();
-                total_weight = weight + support_weight;            
+            total_weight = weight + support_weight;            
             txtField_weight.setText(String.valueOf(weight));
             txtField_supportWeight.setText(String.valueOf(support_weight));
             
@@ -307,39 +401,16 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             txtField_minutes.setText(String.valueOf(minutes));
             
             //set up costs
-            setCosts();
-                        
-        } catch (NumberFormatException e){
-            label_info.setText("Wrong number format, please check your fields.");
-            label_info.setTextFill(Color.web("#ff0000"));
-            //e.printStackTrace();
-        }
-
-    }
-    
-    //calculating costs when wight is changed
-    private void setCosts(){
-        try{
-            double material_price, material_shipping, material_weight, price_per_gram, weight, support_weight, total_weight, costs;            
-            int quantity = Integer.parseInt(txtField_quantity.getText());
+            material_price = selectedMaterial.getMaterial_price().get();
+            material_shipping = selectedMaterial.getMaterial_shipping().get();
+            material_weight = selectedMaterial.getMaterial_weight().get();
             
-//            material_price = material.getMaterial_price().get();
-//            material_shipping = material.getMaterial_shipping().get();
-//            material_weight = material.getMaterial_weight().get();
-
-            material_price = material.getMaterial_price().get();
-            material_shipping = material.getMaterial_shipping().get();
-            material_weight = material.getMaterial_weight().get();
-                        
-           
-            weight = Double.parseDouble(txtField_weight.getText())*quantity;
-            support_weight = Double.parseDouble(txtField_supportWeight.getText())*quantity;
-                total_weight = weight + support_weight;                  
             price_per_gram = (material_price+material_shipping)/material_weight;                
             
-            costs = price_per_gram*total_weight*quantity;        
+            costs = price_per_gram*total_weight;        
             txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
             
+                        
         } catch (NumberFormatException e){
             label_info.setText("Wrong number format, please check your fields.");
             label_info.setTextFill(Color.web("#ff0000"));
@@ -350,7 +421,80 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         }
 
     }
-
+    
+    //calculating costs when weight is changed
+//    private void setCosts(int quantity){
+//        try{
+//            double material_price, material_shipping, material_weight, price_per_gram, weight, support_weight, total_weight, costs;            
+//            
+//            material_price = selectedMaterial.getMaterial_price().get();
+//            material_shipping = selectedMaterial.getMaterial_shipping().get();
+//            material_weight = selectedMaterial.getMaterial_weight().get();
+//                                  
+//            weight = Double.parseDouble(txtField_weight.getText())*quantity;
+//            support_weight = Double.parseDouble(txtField_supportWeight.getText())*quantity;
+//                total_weight = weight + support_weight;                  
+//            price_per_gram = (material_price+material_shipping)/material_weight;                
+//            
+//            costs = price_per_gram*total_weight*quantity;        
+//            txtField_costs.setText(String.format(Locale.US, "%.2f", costs));
+//            
+//        } catch (NumberFormatException e){
+//            label_info.setText("Wrong number format, please check your fields.");
+//            label_info.setTextFill(Color.web("#ff0000"));
+//            //e.printStackTrace();
+//        } catch (NullPointerException e) {
+//            //It is okey if user is creating new order and material has not been set yet so there are missing data to calculate costs
+//            //e.printStackTrace();
+//        }
+//
+//    }
+    
+    public Material getMaterialByID(ObservableList<Material> materials, int material_id){
+        
+        Material material = null;
+        
+        for (int i = 0; i < materials.size(); i++) {
+            
+            material = materials.get(i);
+            if(material.getMaterial_id().get() == material_id)return material;
+            
+        }        
+        
+        return material;
+    }
+    
+    private List<SimpleTableObject> getPrintersShort(TableView<Printer> tv_printers) {
+        
+        //Create list
+        List<SimpleTableObject> allPrinters = new ArrayList<>();
+               
+        
+        try {
+            
+            ObservableList<Printer> printers = tv_printers.getItems();
+            
+            SimpleIntegerProperty id;
+            SimpleStringProperty name;
+            
+            for (int i = 0; i < printers.size(); i++) {
+                
+                id = new SimpleIntegerProperty(printers.get(i).getPrinter_id().get());
+                name = new SimpleStringProperty(printers.get(i).getPrinter_name().get());
+                
+                allPrinters.add(new SimpleTableObject(id, id, name));
+                
+            }
+            
+         
+            
+        }catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        }
+    return allPrinters;
+    }
+    
     public void setDs(HikariDataSource ds) {
         this.ds = ds;
     }

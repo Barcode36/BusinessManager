@@ -288,7 +288,7 @@ public class NewMaterialController implements Initializable {
     public void setComboBoxes(){
         
         ObservableList<SimpleTableObject> types = FXCollections.observableArrayList(getMaterialTypes());
-        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(getMaterialTypes());
+        ObservableList<SimpleTableObject> colors = FXCollections.observableArrayList(getMaterialColors());
         ObservableList<SimpleTableObject> manufacturers = FXCollections.observableArrayList(getMaterialManufacturers());        
         ObservableList<SimpleTableObject> distributors = FXCollections.observableArrayList(getMaterialSellers());        
         ObservableList<SimpleTableObject> diameters = FXCollections.observableArrayList(getMaterialDiameters());        

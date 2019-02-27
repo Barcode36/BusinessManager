@@ -12,7 +12,6 @@ import controllers.MainController;
 import controllers.orders.NewOrderController;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -91,7 +90,7 @@ public class SelectCustomerController implements Initializable {
     public void displayCustomers() {        
         
         //Create list of orders
-        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(main_controller.getCommonCustomerProperties(), ds));
+        ObservableList<Customer> customerList = main_controller.getTv_customers().getItems();
         
         //set cell value factory for columns by type
         // customer_col_company, customer_col_comment;
@@ -128,6 +127,5 @@ public class SelectCustomerController implements Initializable {
 
     public void setMain_controller(MainController main_controller) {
         this.main_controller = main_controller;
-    }
-    
+    }        
 }

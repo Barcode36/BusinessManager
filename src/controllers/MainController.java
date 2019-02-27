@@ -99,12 +99,13 @@ public class MainController implements Initializable {
     /*****************************          GENERAL - METHODS *****************************/
     
     public void loadAll(){        
-        runService(service_refreshCosts);
         runService(service_refreshCustomers);
+        runService(service_refreshCosts);
+        runService(service_refreshObjects);        
         runService(service_refreshMaterials);
-        runService(service_refreshObjects);
         runService(service_refreshOrders);
-        runService(service_refreshPrinters);        
+        runService(service_refreshPrinters);
+        runService(service_refreshStatistics);
     }
     
     //gets list of common material properties (loaded at the begining) based on types
@@ -127,7 +128,9 @@ public class MainController implements Initializable {
         
         for (int i = 0; i < commonMaterialProperties.size(); i++) {
             
-            if(properties.get(i).getProperty_type_id().get() == type)properties.add(commonMaterialProperties.get(i));
+            SimpleTableObject obj = commonMaterialProperties.get(i);
+            
+            if(obj.getProperty_type_id().get() == type)properties.add(obj);
             
         }
         
@@ -143,13 +146,16 @@ public class MainController implements Initializable {
     +----------------+------------------+
     */
     
-    public List<SimpleTableObject> getListOfCustomerProperties(int type){
+    public List<SimpleTableObject> getCommonCustomerPropertiesByType(int type){
         
         List<SimpleTableObject> properties = new ArrayList<>();
         
         for (int i = 0; i < commonCustomerProperties.size(); i++) {
             
-            if(properties.get(i).getProperty_type_id().get() == type)properties.add(commonCustomerProperties.get(i));
+            SimpleTableObject obj = commonCustomerProperties.get(i);
+            
+            if(obj.getProperty_type_id().get() == type)properties.add(obj);
+            
             
         }
         
@@ -269,6 +275,7 @@ public class MainController implements Initializable {
     private Label label_order_SelectedCostsPrice, label_order_SelectedWeight, label_order_SelectedItemsPrinted, label_order_SelectedPricePerHour, label_order_SelectedBuildTime, label_order_SelectedOrders;
     
     /*****************************          ORDERS TAB - METHODS        *****************************/    
+    //calculates statics of all orders
     private void calculateOrderStatistics(){
         
         int sold_orders = 0, notSold_orders = 0, total_orders, total_itemsSold = 0, total_buildTime = 0;        
@@ -319,7 +326,7 @@ public class MainController implements Initializable {
         label_order_TotalItemsPrinted.setText(String.valueOf(total_itemsSold));        
     }
     
-    private void calculateSelectedOrdersStatistics(ObservableList<Order> selectedOrders){
+    private void calculateOrderStatistics(ObservableList<Order> selectedOrders){
                
         int selected_orders, selected_itemsSold = 0, selected_buildTime = 0;        
         double  selected_weight = 0, selected_supportWeight = 0, selected_price = 0, selected_cost = 0;
@@ -458,7 +465,7 @@ public class MainController implements Initializable {
     
     /*****************************          CUSTOMERS - METHODS         *****************************/
     
-    private void calculateSelectedCustomersStatistics(ObservableList<Customer> selectedCustomers){
+    private void calculateCustomerStatistics(ObservableList<Customer> selectedCustomers){
         
         ObservableList<Order> allOrders = tv_orders.getItems();
         
@@ -505,7 +512,7 @@ public class MainController implements Initializable {
             label_customers_selectedPrice.setText(String.format(Locale.US, "%.2f $", price));
             label_customers_selectedCosts.setText(String.format(Locale.US, "%.2f $", costs));
             label_customers_selectedWeight.setText(String.format(Locale.US, "%.2g $", weight));
-            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2 g", supports));            
+            label_customers_selectedSupportWeight.setText(String.format(Locale.US, "%.2f g", supports));            
             label_customers_selectedBuildTime.setText("0");        
             label_customers_selectedPricePerHour.setText(String.format(Locale.US, "0 $/h"));
             
@@ -561,10 +568,7 @@ public class MainController implements Initializable {
         tv_customers.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //set list to display in table
         tv_customers.setItems(customerList);
-        
-        
-        int total_customers = customerList.size();        
-        label_customers_custCount.setText(String.valueOf(total_customers));
+                
     }
     
     private void showCustomerDetails(ObservableList<Customer> selectedCustomer){
@@ -582,7 +586,8 @@ public class MainController implements Initializable {
                 public Void call() throws Exception {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
-                        refreshCustomersTable(ds);                    
+                        refreshCustomersTable(ds);
+                        label_customers_custCount.setText(tv_customers.getItems().size() + "");
                     });                    
                     
                     return null;
@@ -659,7 +664,7 @@ public class MainController implements Initializable {
         
         tv_objects.setItems(objectList);
         tv_objects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        object_label_objCount.setText(String.valueOf(objectList.size()));
+        
     }    
     
     // Create the service
@@ -672,7 +677,7 @@ public class MainController implements Initializable {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
                         refreshObjectsTable(ds);
-                        calculateOrderStatistics();
+                        object_label_objCount.setText(tv_objects.getItems().size() + "");
                     });
                     
                     
@@ -687,7 +692,7 @@ public class MainController implements Initializable {
         return service_refreshObjects;
     }
     
-    private void calculateSelectedObjectsStatistics(ObservableList<classes.Object> selectedObjects){
+    private void calculatedObjectStatistics(ObservableList<classes.Object> selectedObjects){
         
         int timesPrinted = 0, buildTime = 0;
         double price = 0, costs = 0, weight = 0, supportWeight = 0;
@@ -738,7 +743,7 @@ public class MainController implements Initializable {
     private TableColumn<Material, Double> material_col_remaining, material_col_weight, material_col_price, material_col_shipping, material_col_used, material_col_trash, material_col_soldFor, material_col_profit, material_col_diameter; 
     
     @FXML
-    private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_totalWeight_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_paidSoldForDifference, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_totalWeight, materials_label_Selected, materials_label_Total;
+    private Label materials_label_shippingPrice_sel, materials_label_paidSoldFor_sel, materials_label_remainingSoldRolls_sel, materials_label_remainingSoldWeight_sel, materials_label_trashWeight_sel, materials_label_avgRollPrice_sel, materials_label_totalWeight_sel, materials_label_shippingPrice, materials_label_paidSoldFor, materials_label_paidSoldForDifference, materials_label_remainingSoldRolls, materials_label_remainingSoldWeight, materials_label_trashWeight, materials_label_avgRollPrice, materials_label_colorsTypes, materials_label_totalWeight, materials_label_Selected, materials_label_Total,materials_label_colorsTypes_sel;
     
     @FXML
     private Button material_btn_new, material_btn_edit, material_btn_refresh, material_btn_delete;
@@ -746,8 +751,10 @@ public class MainController implements Initializable {
     /*****************************          MATERIALS - METHODS *****************************/    
     
     
-    private void calculateMaterialStatistics(ObservableList<Material> materials){
+    private void calculateMaterialStatistics(){
                      
+        ObservableList<Material> materials = tv_materials.getItems();
+        
         int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0;        
         double shipping = 0, price = 0, paid = 0, profit = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0, total_weight = 0;
                 
@@ -791,10 +798,10 @@ public class MainController implements Initializable {
         materials_label_colorsTypes.setText(String.format("%d/%d", colors, types));
     }
     
-    private void calculateSelectedMaterialStatistics(ObservableList<Material> materials){
+    private void calculateMaterialStatistics(ObservableList<Material> materials){
                      
         int total = materials.size(), remainingRolls = 0, soldRolls = 0, colors = 0, types = 0;        
-        double shipping = 0, price = 0, paid = 0, profit = 0, remainingMaterial = 0, soldMaterial = 0, trash = 0, avgRollPrice = 0, total_weight = 0;
+        double shipping = 0, price = 0, paid, profit = 0, soldMaterial = 0, trash = 0, avgRollPrice, total_weight = 0;
                 
         for (int i = 0; i < materials.size(); i++) {
             
@@ -829,13 +836,9 @@ public class MainController implements Initializable {
         materials_label_totalWeight_sel.setText(String.format("%.2f kg", total_weight/1000));
         materials_label_remainingSoldWeight_sel.setText(String.format(Locale.US, "%.2f / %.2f kg",soldMaterial/1000 ,(total_weight - soldMaterial)/1000));
         materials_label_trashWeight_sel.setText(String.format(Locale.US, "%.2f g", trash));
-        if(avgRollPrice == 0){
-            materials_label_avgRollPrice_sel.setText(String.format(Locale.US, "%.2f $", avgRollPrice));
-        } else {
-            
-        }
-        
-        
+        materials_label_avgRollPrice_sel.setText(String.format(Locale.US, "%.2f $", avgRollPrice));
+        materials_label_colorsTypes_sel.setText(String.format("%d/%d", colors, types));
+          
     }
     
     public void refreshMaterialsTable(HikariDataSource ds){
@@ -898,7 +901,7 @@ public class MainController implements Initializable {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);
                         refreshMaterialsTable(ds);
-                        calculateMaterialStatistics(tv_materials.getItems());
+                        calculateMaterialStatistics();
                     });
                     
                     return null;
@@ -1082,7 +1085,7 @@ public class MainController implements Initializable {
     
     /*****************************          PRINTERS - METHODS         *****************************/
     
-    private void calculatePrintersStatistics(){
+    private void calculatePrinterStatistics(){
         
         ObservableList<Printer> printers = tv_printers.getItems();
         
@@ -1120,7 +1123,7 @@ public class MainController implements Initializable {
         
     }
     
-    private void calculateSelectedPrintersStatistics(ObservableList<Printer> printers){
+    private void calculatePrinterStatistics(ObservableList<Printer> printers){
                 
         int items_sold = 0, total = printers.size();
         double price = 0, shipping = 0, duty = 0, tax = 0, expenses = 0, incomes = 0;
@@ -1210,7 +1213,7 @@ public class MainController implements Initializable {
                     Platform.runLater(() -> {
                         updateProgress(-1, 100);                 
                         refreshPrintersTable(ds);
-                        calculatePrintersStatistics();
+                        calculatePrinterStatistics();
                     });
                                        
                     return null;
@@ -1297,13 +1300,18 @@ public class MainController implements Initializable {
         
         //General
         
-        
-        
         //Summary
-        double profits, costs, difference, order_costs, order_profits;
+        double profits, costs, material_costs, costs_costs, printer_costs;
+        
+        material_costs = Double.parseDouble(statistics_materials_label_paidSoldFor.getText().split(" ")[0]);
+        printer_costs = Double.parseDouble(statistics_printer_label_sum.getText().split(" ")[0]);
+        costs_costs = Double.parseDouble(statistics_costs_label_totalPaid.getText().split(" ")[0]);
+        
+        //System.out.println("Material costs: " + material_costs + "\nCost costs: " + costs_costs + "\nPrinter costs: " + printer_costs);
+
         
         profits = Double.parseDouble(statistics_label_order_TotalCostPrice.getText().split(" ")[0]);
-        costs = Double.parseDouble(statistics_materials_label_paidSoldFor.getText().split(" ")[0]) + Double.parseDouble(statistics_costs_label_totalPaid.getText().split(" ")[0]) + Double.parseDouble(statistics_printer_label_sum.getText().split(" ")[0]);
+        costs = material_costs + printer_costs + costs_costs;
         
         
         statistics_summary_profits.setText(String.format(Locale.US, "%.2f $", profits));
@@ -1360,11 +1368,11 @@ public class MainController implements Initializable {
         });
             
         tv_orders.getSelectionModel().getSelectedItems().addListener((Change<? extends Order> c) -> {        
-            calculateSelectedOrdersStatistics(tv_orders.getSelectionModel().getSelectedItems());
+            calculateOrderStatistics(tv_orders.getSelectionModel().getSelectedItems());
         });
         
         order_btn_refresh.setOnAction((event) -> {            
-            runService(service_refreshOrders);            
+            loadAll();
         });
         
         order_btn_new.setOnAction((event) -> {
@@ -1436,7 +1444,8 @@ public class MainController implements Initializable {
     /*****************************          INITIALIZE CUSTOMERS TAB          *****************************/
       
     customer_btn_refresh.setOnAction((event) -> {        
-        runService(service_refreshCustomers);        
+        //runService(service_refreshCustomers);        
+        loadAll();
     });
     
     //in progress
@@ -1455,7 +1464,7 @@ public class MainController implements Initializable {
     });
 
     tv_customers.getSelectionModel().getSelectedItems().addListener((Change<? extends Customer> c) -> {        
-        calculateSelectedCustomersStatistics(tv_customers.getSelectionModel().getSelectedItems());        
+        calculateCustomerStatistics(tv_customers.getSelectionModel().getSelectedItems());        
     });
     
     customer_btn_new.setOnAction((event) -> {
@@ -1517,7 +1526,8 @@ public class MainController implements Initializable {
     /*****************************          INITIALIZE OBJECTS TAB          *****************************/
     
     object_btn_refresh.setOnAction((event) -> {
-        runService(service_refreshCustomers);
+        //runService(service_refreshCustomers);
+        loadAll();
     });
             
     object_btn_delete.setOnAction((event) -> {
@@ -1526,7 +1536,7 @@ public class MainController implements Initializable {
     });
     
     tv_objects.getSelectionModel().getSelectedItems().addListener((Change<? extends classes.Object> c) -> {        
-            calculateSelectedObjectsStatistics(tv_objects.getSelectionModel().getSelectedItems());
+            calculatedObjectStatistics(tv_objects.getSelectionModel().getSelectedItems());
         });
     
     tv_objects.setRowFactory( tv -> {
@@ -1621,7 +1631,7 @@ public class MainController implements Initializable {
         });
     
     tv_materials.getSelectionModel().getSelectedItems().addListener((Change<? extends Material> c) -> {        
-            calculateSelectedMaterialStatistics(tv_materials.getSelectionModel().getSelectedItems());
+            calculateMaterialStatistics(tv_materials.getSelectionModel().getSelectedItems());
         });
     
     material_btn_new.setOnAction((event) -> {        
@@ -1685,7 +1695,8 @@ public class MainController implements Initializable {
     });
     
     material_btn_refresh.setOnAction((event) -> {
-        runService(service_refreshMaterials);
+        //runService(service_refreshMaterials);
+        loadAll();
     });
     
     material_btn_delete.setOnAction((event) -> {
@@ -1780,7 +1791,8 @@ public class MainController implements Initializable {
     });
     
     cost_btn_refresh.setOnAction((event) -> {        
-        runService(service_refreshCosts);
+        //runService(service_refreshCosts);
+        loadAll();
     });
     
     /*
@@ -1803,7 +1815,7 @@ public class MainController implements Initializable {
     });
     
     tv_printers.getSelectionModel().getSelectedItems().addListener((Change<? extends Printer> c) -> {        
-            calculateSelectedPrintersStatistics(tv_printers.getSelectionModel().getSelectedItems());
+            calculatePrinterStatistics(tv_printers.getSelectionModel().getSelectedItems());
         });
     
     printer_btn_new.setOnAction((event) -> {        
@@ -1870,7 +1882,8 @@ public class MainController implements Initializable {
     });
     
     printer_btn_refresh.setOnAction((event) -> {        
-        runService(service_refreshPrinters);
+        //runService(service_refreshPrinters);
+        loadAll();
     });
     
     /*

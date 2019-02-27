@@ -459,6 +459,13 @@ UPDATE Materials SET SellerID=44 WHERE MaterialID IN (37);
 -- set 1.75
 UPDATE Materials SET DiameterID=45;
 
+-- set finished Materials
+/*
+*
+*
+*/
+UPDATE Materials SET Finished='Yes' WHERE MaterialID=26;
+
 -- set Material weights
 /*
 *
@@ -467,7 +474,7 @@ UPDATE Materials SET DiameterID=45;
 -- set 1000
 UPDATE Materials SET WeightID=49;
 -- set 750
-UPDATE Materials SET WeightID=47 WHERE MaterialID IN (4,5,25,26,27,28,29);
+UPDATE Materials SET WeightID=48 WHERE MaterialID IN (4,5,25,26,27,28,29);
 -- set 2000
 UPDATE Materials SET WeightID=50 WHERE MaterialID IN (23,24);
 

@@ -206,7 +206,7 @@ public class NewCostController implements Initializable {
             SimpleIntegerProperty id;
             SimpleStringProperty name;
             
-            for (int i = 0; i < allPrinters.size(); i++) {
+            for (int i = 0; i < printers.size(); i++) {
                 
                 id = new SimpleIntegerProperty(printers.get(i).getPrinter_id().get());
                 name = new SimpleStringProperty(printers.get(i).getPrinter_name().get());

@@ -545,7 +545,21 @@ public class Material {
         
     return properties;
     }
-       
+    
+    public static Material getMaterialByID(ObservableList<Material> materials, int material_id){
+        Material material = null;
+        
+        for (int i = 0; i < materials.size(); i++) {
+            
+            material = materials.get(i);
+            
+            if(material.getMaterial_id().get() == material_id)break;
+            
+        }
+        
+        return material;
+    }
+    
     public static Material getMaterialByID(List<SimpleTableObject> commonMaterialProperties,HikariDataSource ds, SimpleIntegerProperty material_id) {
         
         Material material = null;

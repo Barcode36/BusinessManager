@@ -275,11 +275,11 @@ public class NewCustomerController implements Initializable {
     }
     
     private List<SimpleTableObject> getCompanies() {
-        return mainController.getListOfCustomerProperties(1);
+        return mainController.getCommonCustomerPropertiesByType(1);
     }
     
     private List<SimpleTableObject> getCountries() {
-        return mainController.getListOfCustomerProperties(2);
+        return mainController.getCommonCustomerPropertiesByType(2);
     }
     
 }

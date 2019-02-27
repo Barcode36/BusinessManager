@@ -138,7 +138,8 @@ public class NewOrderController implements Initializable {
             stage.show();        
             ctrl.setDs(ds);            
             ctrl.setNewOrderController(this);
-            ctrl.getTv_objects().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);            
+            ctrl.getTv_objects().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            ctrl.setMainController(mainController);
             
             ctrl.displayObjects();
         }catch (IOException e){
@@ -169,6 +170,7 @@ public class NewOrderController implements Initializable {
                         ctrl.setMainController(mainController);
                         ctrl.setNewOrderController(this);                                               
                         ctrl.setElementValues(tv_selectedObjects.getSelectionModel().getSelectedItem());
+                        
                     }catch (IOException e){
             
                     }
@@ -465,7 +467,7 @@ public class NewOrderController implements Initializable {
     public void setNewOrderFields(){
        
         label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(ds, "Orders")));
-        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);        
+        //tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);        
         txtField_pricePerHour.setText("2.5");        
         datePicker_dateCreated.setValue(LocalDate.now());
         datePicker_dueDate.setValue(LocalDate.now());
@@ -475,6 +477,7 @@ public class NewOrderController implements Initializable {
     public void setUpdateOrderFields(ObservableList<Order> orders){
         Order order = orders.get(0);
         
+        label_title.setText("Edit Order");
         btn_create.setText("Update");
         btn_create.setDisable(false);
         
@@ -487,7 +490,7 @@ public class NewOrderController implements Initializable {
         txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());        
         txtField_comment.setText(order.getOrder_comment().get());        
         
-        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(mainController.getCommonMaterialProperties(),order.getOrder_id().get(), ds));        
+        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(mainController.getTv_materials().getItems(),order.getOrder_id().get(), ds));        
         selectedObjects.addAll(itemList);        
         setSelectedObjects();
         refreshSelectedObjects();        
