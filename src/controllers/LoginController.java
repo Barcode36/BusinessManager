@@ -38,6 +38,7 @@ public class LoginController {
             ds.addDataSourceProperty("cachePrepStmts", "true");
             ds.addDataSourceProperty("prepStmtCacheSize", "250");
             ds.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            ds.setMaxLifetime(600000);
             ds.setMaximumPoolSize(5);
             
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));            
