@@ -80,13 +80,13 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         });   
         
         txtField_weight.textProperty().addListener((observable, oldValue, newValue) -> {            
-            try{     
-                if(newValue.isEmpty())txtField_weight.setText("0");
+            try{                
                 double quantity = Math.abs(Double.parseDouble(newValue));
                 
                 //Costs setting = just multiply price per gram by object total weight (support including)
                 //Costs setting = just multiply price per one object - (objects + support)*pricePergram - by quantity (use absolute values)
                 double obj_weight = Math.abs(Double.parseDouble(txtField_weight.getText()));
+                
                 double obj_sup_weight = Math.abs(Double.parseDouble(txtField_supportWeight.getText()));
                 double price_per_gram = (selectedMaterial.getMaterial_price().get() + selectedMaterial.getMaterial_shipping().get())/selectedMaterial.getMaterial_weight().get();
                 
@@ -102,7 +102,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         
         txtField_supportWeight.textProperty().addListener((observable, oldValue, newValue) -> {            
             try{           
-                if(newValue.isEmpty())txtField_supportWeight.setText("0");
+                //if(newValue.isEmpty())txtField_supportWeight.setText("0");
                 double quantity = Math.abs(Double.parseDouble(newValue));
                 
                 //Costs setting = just multiply price per gram by object total weight (support including)
@@ -110,7 +110,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 double obj_weight = Math.abs(Double.parseDouble(txtField_weight.getText()));
                 double obj_sup_weight = Math.abs(Double.parseDouble(txtField_supportWeight.getText()));
                 double price_per_gram = (selectedMaterial.getMaterial_price().get() + selectedMaterial.getMaterial_shipping().get())/selectedMaterial.getMaterial_weight().get();
-                
+                System.out.println(obj_sup_weight);
                 double costs = (obj_sup_weight + obj_weight)*price_per_gram;
                 
                 txtField_costs.setText("" + MngApi.round(costs, 2));
