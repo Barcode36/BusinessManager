@@ -84,7 +84,7 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <TextField fx:id="txtField_price" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
+            <TextField fx:id="txtField_price" prefHeight="25.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="8">
                <GridPane.margin>
                   <Insets right="230.0" />
                </GridPane.margin>
@@ -115,7 +115,7 @@
                   <Insets right="10.0" />
                </GridPane.margin>
             </Button>
-            <TextField fx:id="txtField_quantity" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <TextField fx:id="txtField_quantity" editable="false" prefHeight="25.0" text="1" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets right="230.0" />
                </GridPane.margin>
@@ -159,12 +159,12 @@
                   <Insets right="5.0" />
                </GridPane.margin>
             </Label>
-            <TextField fx:id="txtField_weight" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <TextField fx:id="txtField_weight" editable="false" prefHeight="25.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets right="230.0" />
                </GridPane.margin>
             </TextField>
-            <TextField fx:id="txtField_supportWeight" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <TextField fx:id="txtField_supportWeight" editable="false" prefHeight="25.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets right="230.0" />
                </GridPane.margin>
@@ -177,12 +177,12 @@
                   <Insets right="5.0" />
                </GridPane.margin>
             </Label>
-            <TextField fx:id="txtField_hours" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <TextField fx:id="txtField_hours" editable="false" prefHeight="25.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets right="250.0" />
                </GridPane.margin>
             </TextField>
-            <TextField fx:id="txtField_minutes" editable="false" prefHeight="25.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <TextField fx:id="txtField_minutes" editable="false" prefHeight="25.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets left="60.0" right="200.0" />
                </GridPane.margin>

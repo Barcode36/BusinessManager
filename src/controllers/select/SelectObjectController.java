@@ -8,7 +8,6 @@ package controllers.select;
 import classes.MngApi;
 import classes.Object;
 import classes.OrderItem;
-import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import controllers.orders.NewOrderController;
 import java.net.URL;
@@ -33,8 +32,7 @@ import javafx.scene.control.TextField;
  */
 public class SelectObjectController implements Initializable {
 
-    private HikariDataSource ds;
-    
+      
     private NewOrderController newOrderController;
     private MainController mainController;
     
@@ -90,7 +88,7 @@ public class SelectObjectController implements Initializable {
             
         }
         
-        newOrderController.getSelectedObjects().addAll(selectedObjects);
+        newOrderController.getOrderObjects().addAll(selectedObjects);
         newOrderController.setSelectedObjects();
         MngApi.closeWindow(btn_close);
         
@@ -175,10 +173,6 @@ public class SelectObjectController implements Initializable {
         
     }
     
-    public void setDs(HikariDataSource ds) {
-        this.ds = ds;
-    }
-
     public void setNewOrderController(NewOrderController newOrderController) {
         this.newOrderController = newOrderController;
     }

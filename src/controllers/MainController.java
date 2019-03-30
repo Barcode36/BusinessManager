@@ -1307,9 +1307,6 @@ public class MainController implements Initializable {
         printer_costs = Double.parseDouble(statistics_printer_label_sum.getText().split(" ")[0]);
         costs_costs = Double.parseDouble(statistics_costs_label_totalPaid.getText().split(" ")[0]);
         
-        //System.out.println("Material costs: " + material_costs + "\nCost costs: " + costs_costs + "\nPrinter costs: " + printer_costs);
-
-        
         profits = Double.parseDouble(statistics_label_order_TotalCostPrice.getText().split(" ")[0]);
         costs = material_costs + printer_costs + costs_costs;
         
@@ -1392,8 +1389,9 @@ public class MainController implements Initializable {
             stage.show();
             
             ctrl.setDs(ds);            
-            ctrl.setMainController(this);
-            ctrl.setNewOrderFields();            
+            ctrl.setMainController(this);            
+            ctrl.setIsBeingEdited(false, tv_orders.getSelectionModel().getSelectedItems());
+            ctrl.setOrderFields();
             
         }catch (IOException e){
             
@@ -1418,9 +1416,10 @@ public class MainController implements Initializable {
                 stage.show();
             
                 ctrl.setDs(ds);            
-                ctrl.setMainController(this);
-                ctrl.setUpdateOrderFields(tv_orders.getSelectionModel().getSelectedItems());            
-            
+                ctrl.setMainController(this);                
+                ctrl.setIsBeingEdited(true, tv_orders.getSelectionModel().getSelectedItems());
+                ctrl.setOrderFields();
+                
             } catch (IOException e){
                 e.printStackTrace();
             } catch (NullPointerException e){

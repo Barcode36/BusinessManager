@@ -7,11 +7,9 @@ package controllers.select;
 
 import classes.Material;
 import classes.MngApi;
-import com.zaxxer.hikari.HikariDataSource;
 import controllers.MainController;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -26,8 +24,6 @@ import javafx.scene.control.TableView;
  * @author Erik PC
  */
 public class SelectMaterialController implements Initializable {
-
-    private HikariDataSource ds;
     
     private SelectPrinterMaterialPriceController selectPrinterMaterialPriceController;
     
@@ -123,10 +119,6 @@ public class SelectMaterialController implements Initializable {
         tv_materials.setItems(materialList);        
     }
     
-    public void setDs(HikariDataSource ds) {
-        this.ds = ds;
-    }
-
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }

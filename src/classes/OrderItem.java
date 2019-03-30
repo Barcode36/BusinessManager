@@ -197,15 +197,15 @@ public class OrderItem {
                 
                 OrderItem orderItem = orderItems.get(i);
                                
-                if(orderItem.getOrderItem_id().get() == 0){
-                    updateQuery = "SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA ='" + ds.getUsername()+ "' AND   TABLE_NAME   ='OrderItems'";
-                    stmt = conn.prepareStatement(updateQuery);
-                    ResultSet rs = stmt.executeQuery(updateQuery);
-                
-                    while(rs.next()){
-                        orderItem.setOrderItem_id(new SimpleIntegerProperty(rs.getInt(1)));
-                    }
-                }
+//                if(orderItem.getOrderItem_id().get() == 0){
+//                    updateQuery = "SELECT AUTO_INCREMENT FROM  INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA ='" + ds.getUsername()+ "' AND   TABLE_NAME   ='OrderItems'";
+//                    stmt = conn.prepareStatement(updateQuery);
+//                    ResultSet rs = stmt.executeQuery(updateQuery);
+//                
+//                    while(rs.next()){
+//                        orderItem.setOrderItem_id(new SimpleIntegerProperty(rs.getInt(1)));
+//                    }
+//                }
                 
                 updateQuery = "INSERT INTO OrderItems (OrderItemID,OrderID,ObjectID,ItemMaterialID,ItemWeight,ItemSupportWeight,ItemBuildTime,ItemPrice,ItemQuantity,PrinterID,ItemCosts) VALUES (?,?,?,?,?,?,?,?,?,?,?) "
                     + "ON DUPLICATE KEY UPDATE OrderID=?,ObjectID=?,ItemMaterialID=?,ItemWeight=?,ItemSupportWeight=?,ItemBuildTime=?,ItemPrice=?,ItemQuantity=?,PrinterID=?,ItemCosts=?";            
@@ -235,9 +235,12 @@ public class OrderItem {
                 stmt.setDouble(21, orderItem.getCosts().get());
                                 
                 stmt.executeUpdate();
+                
+                stmt.close();
+                conn.close();
             }
-            stmt.close();
-            conn.close();
+            
+            
         } catch (SQLNonTransientConnectionException se) {
             MngApi obj = new MngApi();
             obj.alertConnectionLost();
@@ -246,8 +249,8 @@ public class OrderItem {
             se.printStackTrace();
         } catch (Exception e) {
             //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
+            e.printStackTrace();            
+        }finally {
             //finally block used to close resources
             try {
                 if (stmt != null)
@@ -354,7 +357,7 @@ public class OrderItem {
         List<OrderItem> itemList = new ArrayList<>();
         
         //Create query
-        String query =  "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.*, Printers.PrinterID, Printers.PrinterName FROM OrderItems  JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID  JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID   WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
+        String query =  "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.*, Printers.PrinterID, Printers.PrinterName FROM OrderItems  JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID  JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
         
         Connection conn = null;
         Statement stmt = null;

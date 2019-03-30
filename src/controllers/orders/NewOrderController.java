@@ -57,10 +57,14 @@ public class NewOrderController implements Initializable {
     
     private MainController mainController;
     
-    private Customer selectedCustomer;
+    //private Customer selectedCustomer;
     
-    private ObservableList<OrderItem> selectedObjects = FXCollections.observableArrayList();    
+    private ObservableList<OrderItem> orderObjects = FXCollections.observableArrayList();
     
+    
+    private Order order;
+    
+    private boolean isBeingEdited;
     
     @FXML
     private ToggleGroup toggleGroup_status = new ToggleGroup();
@@ -81,7 +85,7 @@ public class NewOrderController implements Initializable {
     private DatePicker datePicker_dateCreated, datePicker_dueDate;
     
     @FXML
-    private TableView<OrderItem> tv_selectedObjects;
+    private TableView<OrderItem> tv_orderObjects;
     
     @FXML
     private TableColumn<OrderItem, Integer> col_objectID, col_quantity,col_printerID, col_materialID;
@@ -135,8 +139,7 @@ public class NewOrderController implements Initializable {
             stage.setResizable(false);
             stage.centerOnScreen();            
             
-            stage.show();        
-            ctrl.setDs(ds);            
+            stage.show();                        
             ctrl.setNewOrderController(this);
             ctrl.getTv_objects().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             ctrl.setMainController(mainController);
@@ -148,7 +151,7 @@ public class NewOrderController implements Initializable {
             
         });
         
-        tv_selectedObjects.setRowFactory( tv -> {
+        tv_orderObjects.setRowFactory( tv -> {
             TableRow<OrderItem> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
@@ -168,9 +171,9 @@ public class NewOrderController implements Initializable {
                         //stage.setAlwaysOnTop(true);            
                         ctrl.setDs(ds);
                         ctrl.setMainController(mainController);
-                        ctrl.setNewOrderController(this);                                               
-                        ctrl.setElementValues(tv_selectedObjects.getSelectionModel().getSelectedItem());
-                        
+                        ctrl.setNewOrderController(this);                        
+                        ctrl.setFields(tv_orderObjects.getSelectionModel().getSelectedItem());
+                                                
                     }catch (IOException e){
             
                     }
@@ -182,12 +185,12 @@ public class NewOrderController implements Initializable {
         
         btn_removeSelected.setOnAction((event) -> {
             
-            if(tv_selectedObjects.getSelectionModel().getSelectedItems() == null){
+            if(tv_orderObjects.getSelectionModel().getSelectedItems() == null){
                 label_info.setText("Select an item.");
                 label_info.setTextFill(Color.web("#ff0000"));
                 return;
             }
-            selectedObjects.removeAll(tv_selectedObjects.getSelectionModel().getSelectedItems());
+            orderObjects.removeAll(tv_orderObjects.getSelectionModel().getSelectedItems());
             refreshSelectedObjects();
             
         });
@@ -199,8 +202,8 @@ public class NewOrderController implements Initializable {
             
         });
         
-        btn_create.setOnAction((event) -> {
-            createOrUpdateOrder(mainController.getMain_label_info());
+        btn_create.setOnAction((event) -> {            
+            createOrUpdateOrder(mainController.getMain_label_info());            
         });
         
         btn_cancel.setOnAction((event) -> {            
@@ -216,18 +219,18 @@ public class NewOrderController implements Initializable {
         double weight = 0, supportWeight = 0, weightSum = 0, price = 0, costs = 0, profit = 0;
         int quantity = 0, buildTime = 0;
         
-        for (int i = 0; i < selectedObjects.size(); i++) {
-            if(selectedObjects.get(i).getQuantity().get() != 0){
+        for (int i = 0; i < orderObjects.size(); i++) {
+            if(orderObjects.get(i).getQuantity().get() != 0){
                 
-                quantity = selectedObjects.get(i).getQuantity().get();
+                quantity = orderObjects.get(i).getQuantity().get();
             
-                weight = selectedObjects.get(i).getObject_weight().get();
-                supportWeight = selectedObjects.get(i).getObject_supportWeight().get();
+                weight = orderObjects.get(i).getObject_weight().get();
+                supportWeight = orderObjects.get(i).getObject_supportWeight().get();
                 //weightSum = weight + supportWeight;
-                buildTime = selectedObjects.get(i).getObject_buildTime().get();
+                buildTime = orderObjects.get(i).getObject_buildTime().get();
             
-                price = selectedObjects.get(i).getPrice().get();
-                costs = selectedObjects.get(i).getCosts().get();
+                price = orderObjects.get(i).getPrice().get();
+                costs = orderObjects.get(i).getCosts().get();
                 //profit = price - costs;
             
                 summary_quantity += quantity;
@@ -264,9 +267,9 @@ public class NewOrderController implements Initializable {
             double pricePerHour = Double.parseDouble(txtField_pricePerHour.getText());
             double pricePerMinute = pricePerHour/60;
             
-            for (int i = 0; i < selectedObjects.size(); i++) {
+            for (int i = 0; i < orderObjects.size(); i++) {
                 
-                OrderItem item = selectedObjects.get(i);
+                OrderItem item = orderObjects.get(i);
                 
                 int buildTime = item.getObject_buildTime().get()*item.getQuantity().get();                
                 
@@ -330,11 +333,11 @@ public class NewOrderController implements Initializable {
         col_objectCosts.setStyle("-fx-alignment: CENTER;");
         col_objectPrice.setStyle("-fx-alignment: CENTER;");       
         
-        tv_selectedObjects.setItems(selectedObjects);
+        tv_orderObjects.setItems(orderObjects);
     }
 
-    public ObservableList<OrderItem> getSelectedObjects() {
-        return selectedObjects;
+    public ObservableList<OrderItem> getOrderObjects() {
+        return orderObjects;
     }    
     
     public int getOrderID(){
@@ -342,7 +345,7 @@ public class NewOrderController implements Initializable {
     }
     
     public void refreshSelectedObjects(){        
-        tv_selectedObjects.refresh();
+        tv_orderObjects.refresh();
         calcualteSummary();
     }
 
@@ -354,8 +357,9 @@ public class NewOrderController implements Initializable {
         try{           
             
             //check empty order or items without assigned material, printer, etc.
-            for (int i = 0; i < tv_selectedObjects.getItems().size(); i++) {
-                if(tv_selectedObjects.getItems().get(i).getPrinter_id().get() == 0 || tv_selectedObjects.getItems().isEmpty()) throw new NullPointerException();            
+            if(tv_orderObjects.getItems().isEmpty())throw new NullPointerException();
+            for (int i = 0; i < tv_orderObjects.getItems().size(); i++) {
+                if(tv_orderObjects.getItems().get(i).getPrinter_id().get() == 0) throw new NullPointerException();            
             }
             
             //chceck for inappropriate signs in text fields and mepty text fields
@@ -413,8 +417,8 @@ public class NewOrderController implements Initializable {
             
             List<Integer> originalObjects = OrderItem.getListOfIOrderItemIDs(newOrder, ds);                
             List<Integer> newObjects = new ArrayList<>();
-                for (int j = 0; j < selectedObjects.size(); j++) {
-                    OrderItem item = selectedObjects.get(j);
+                for (int j = 0; j < orderObjects.size(); j++) {
+                    OrderItem item = orderObjects.get(j);
                     newObjects.add(item.getOrderItem_id().get());
                 }
             
@@ -423,17 +427,17 @@ public class NewOrderController implements Initializable {
             
             //2. Determine updated original objects and update them in DB table
             /*
-            In selectedObjects (new OrderItems) we have items with OrderItemID=<Integer> (old object - might be changed, need to update)
+            In orderObjects (new OrderItems) we have items with OrderItemID=<Integer> (old object - might be changed, need to update)
             or OrderItemID=0 (new objects)
             */
             
             //3. Determine new objects in order and add then in DB table
             /*
-            New objects have OrderItemID=0. We will update existing objects and insert newone using OrderItem.insertNewOrderItems(selectedObjects, user)
+            New objects have OrderItemID=0. We will update existing objects and insert newone using OrderItem.insertNewOrderItems(orderObjects, user)
             method. Correct orderItemID will be assigned within this method
             */
             
-            OrderItem.insertNewOrderItems(selectedObjects, ds);
+            OrderItem.insertNewOrderItems(orderObjects, ds);
             
             mainController.runService(mainController.getService_refreshOrders());                
             MngApi.closeWindow(btn_create);
@@ -443,7 +447,7 @@ public class NewOrderController implements Initializable {
             label_info.setTextFill(Color.web("#ff0000"));
             //e.printStackTrace();            
         } catch (NullPointerException | IndexOutOfBoundsException e) {                
-            label_info.setText("Insert some objects and assign some material first.");
+            label_info.setText("Insert some objects and/or assign some material first.");
             label_info.setTextFill(Color.web("#ff0000"));
             //e.printStackTrace();
         }
@@ -452,7 +456,7 @@ public class NewOrderController implements Initializable {
     }    
     
     public void setSelectedCustomer(Customer selectedCustomer) {
-        this.selectedCustomer = selectedCustomer;
+        //this.selectedCustomer = selectedCustomer;
         txtField_customer.setText(selectedCustomer.getCustomer_id().get() + ";" + selectedCustomer.getCustomer_lastName().get() + ";" + selectedCustomer.getCustomer_firstName().get());
     }
 
@@ -464,56 +468,72 @@ public class NewOrderController implements Initializable {
         this.mainController = mainController;        
     }
     
-    public void setNewOrderFields(){
-       
+    public void setOrderFields(){
+        tv_orderObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        
+        if (isBeingEdited){
+            setFieldsForEditing();            
+        } else {
+            setFieldsForCreating();
+        }                
+    }
+    
+    private void setFieldsForCreating(){
+        //get latest order ID
         label_orderID.setText(String.valueOf(MngApi.getCurrentAutoIncrementValue(ds, "Orders")));
-        //tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);        
-        txtField_pricePerHour.setText("2.5");        
+        //set some default price per hour
+        txtField_pricePerHour.setText("3");
+        //set dates to actual date
         datePicker_dateCreated.setValue(LocalDate.now());
         datePicker_dueDate.setValue(LocalDate.now());
-                
+        //set button title
+        btn_create.setText("Create");
     }
    
-    public void setUpdateOrderFields(ObservableList<Order> orders){
-        Order order = orders.get(0);
-        
-        label_title.setText("Edit Order");
-        btn_create.setText("Update");
+    private void setFieldsForEditing(){
         btn_create.setDisable(false);
-        
-	LocalDate dateCerated = LocalDate.parse(order.getOrder_dateCreated().get());
+        btn_create.setText("Update");
+        label_title.setText("Edit Order");
+        label_info.setText("Edit fields");
+        label_info.setTextFill(Color.web("#ff0000"));
+            
+        label_orderID.setText(String.valueOf(order.getOrder_id().get()));
+            
+        LocalDate dateCerated = LocalDate.parse(order.getOrder_dateCreated().get());
         LocalDate dueDate = LocalDate.parse(order.getOrder_dueDate().get());
         datePicker_dateCreated.setValue(dateCerated);
         datePicker_dueDate.setValue(dueDate);
-        
-        label_orderID.setText(String.valueOf(order.getOrder_id().get()));
         txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());        
-        txtField_comment.setText(order.getOrder_comment().get());        
-        
-        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(mainController.getTv_materials().getItems(),order.getOrder_id().get(), ds));        
-        selectedObjects.addAll(itemList);        
+            
+        //list order items which belongs to particular order
+        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(mainController.getTv_materials().getItems(),order.getOrder_id().get(), ds));
+        //add listed order items to global list
+        orderObjects.addAll(itemList);
+        //display this global list in table
         setSelectedObjects();
-        refreshSelectedObjects();        
-        
-        // RadioButton soldStatus = (RadioButton)toggleGroup_status.getSelectedToggle();            
+        //calculate summary for those objects
+        calcualteSummary();
+        txtField_comment.setText(order.getOrder_comment().get());
+        //select whether order is sold or not
         String status = order.getOrder_status().get();        
-        switch (status){
-            case "Sold":
-                radioBtn_Sold.setSelected(true);
-                return;                
-            default:
-                radioBtn_NotSold.setSelected(true);            
-        }
+            switch (status){
+                case "Sold":
+                    radioBtn_Sold.setSelected(true);
+                    return;                
+                default:
+                    radioBtn_NotSold.setSelected(true);            
+            }
+    }
         
-        label_title.setText("Update Order");        
-        label_info.setText("Edit fields");
-        label_info.setTextFill(Color.web("#ff0000"));
-        
+    public boolean isIsBeingEdited() {
+        return isBeingEdited;
+    }
+
+    public void setIsBeingEdited(boolean isBeingEdited, ObservableList<Order> orders) {
+        this.isBeingEdited = isBeingEdited;
+        this.order = orders.get(0);
     }
     
-    public void setSelectedOrder_label_id_value(Order order) {
-        this.label_orderID.setText(String.valueOf(order.getOrder_id().get()));
-        tv_selectedObjects.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    }
-        
+    
+    
 }
