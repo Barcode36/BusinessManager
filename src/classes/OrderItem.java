@@ -237,10 +237,10 @@ public class OrderItem {
                 stmt.executeUpdate();
                 
                 stmt.close();
-                conn.close();
+                
             }
             
-            
+          conn.close();  
         } catch (SQLNonTransientConnectionException se) {
             MngApi obj = new MngApi();
             obj.alertConnectionLost();
