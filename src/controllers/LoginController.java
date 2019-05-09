@@ -59,6 +59,7 @@ public class LoginController {
             //when we first open up main windows, we need to load all orders - that's default view
             ctrl.setCommonCustomerProperties(Customer.getCommonCustomerProperties(ds));
             ctrl.setCommonMaterialProperties(Material.getCommonMaterialProperties(ds));
+            ctrl.downloadTables(ds);
             ctrl.runService(ctrl.getService_refreshAll());
                 
             

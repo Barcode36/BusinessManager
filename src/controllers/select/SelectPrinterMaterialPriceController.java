@@ -60,7 +60,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         
     
     @FXML
-    private ComboBox<SimpleTableObject> comboBox_printer;
+    private ComboBox<Printer> comboBox_printer;
     
     @FXML
     private TextField txtField_material, txtField_price, txtField_quantity, txtField_costs, txtField_weight, txtField_supportWeight, txtField_hours, txtField_minutes;
@@ -381,32 +381,33 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     public void setComboBox(){
         //set list of printers
-            ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrintersShort(mainController.getTv_printers()));
+        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrintersShort(mainController.getTv_printers()));
             
-            comboBox_printer.setItems(printers);
-            comboBox_printer.setVisibleRowCount(7);
-            comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
-                @Override
-                public String toString(SimpleTableObject object) {
-                    return object.getProperty_name().get();
-                }
-
-                @Override
-                public SimpleTableObject fromString(String string) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-            });
-            
-            //set previously defined printer, if there is any - otherwise set default first printer
-            int printer_id = selectedObject.getPrinter_id().get();                
-            for (int i = 0; i < printers.size(); i++) {
-            
-                if (printer_id == printers.get(i).getProperty_id().get()){
-                    comboBox_printer.getSelectionModel().select(i);
-                } else {
-                    comboBox_printer.setValue(printers.get(0));   
-                }            
+        //edit all combo boxes to eliminate usage of Simple table object and possibly get rid of that class            
+        comboBox_printer.setItems(printers2);
+        comboBox_printer.setVisibleRowCount(7);
+        comboBox_printer.setConverter(new StringConverter<Printer>() {
+            @Override
+            public String toString(Printer object) {
+                return object.getPrinter_name().get();
             }
+
+            @Override
+            public Printer fromString(String string) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+            
+        //set previously defined printer, if there is any - otherwise set default first printer
+        int printer_id = selectedObject.getPrinter_id().get();                
+        for (int i = 0; i < printers.size(); i++) {
+            
+            if (printer_id == printers.get(i).getProperty_id().get()){
+                comboBox_printer.getSelectionModel().select(i);
+            } else {
+                comboBox_printer.setValue(printers.get(0));   
+            }            
+        }
     }
         
     //sets costs, build time and weight when quantity is changed

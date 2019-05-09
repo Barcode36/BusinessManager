@@ -50,7 +50,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-
 /**
  * FXML Controller class
  *
@@ -72,10 +71,11 @@ public class MainController implements Initializable {
     
     @FXML
     private Label label_main_info;
+        
+    //private List<SimpleTableObject> commonMaterialProperties, commonCustomerProperties;
     
-    @FXML
-    private List<SimpleTableObject> commonMaterialProperties, commonCustomerProperties;
-           
+    private List<CommonCustomerProperties> commonCustomerProperties;
+    private List<CommonMaterialProperties> commonMaterialProperties;    
     
      // Create the service
     private final Service<Void> service_refreshAll = new Service<Void>() {
@@ -97,6 +97,24 @@ public class MainController implements Initializable {
     };
     
     /*****************************          GENERAL - METHODS *****************************/
+    
+    public void downloadTables(HikariDataSource ds){
+        
+        System.out.println("Downloading has started...");
+        commonCustomerProperties = Customer.getCommonCustomerProperties(ds);
+        commonMaterialProperties = Material.getCommonMaterialProperties(ds);
+        costs = Costs.getCosts(ds);
+        customerPropertyTypes = CustomerPropertyTypes.getCustomerPropertyTypes(ds);
+        customers = Customers.getCustomers(ds);
+        materialPropertyTypes = MaterialPropertyTypes.getMaterialPropertyTypes(ds);
+        materials = Materials.getMaterials(ds);
+        objects = Objects.getObjects(ds);
+        orderItems = OrderItems.getOrderItems(ds);
+        orderStatus = OrderStatus.getOrderStatuses();
+        printers = Printers.getPrinters(ds);        
+        System.out.println("\nDownloading completed.");
+        
+    }
     
     public void loadAll(){        
         runService(service_refreshCustomers);
@@ -634,7 +652,7 @@ public class MainController implements Initializable {
     public void refreshObjectsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.getObjects(ds));
+        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.downloadObjectsTable(ds));
         
         object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
         object_col_stlLink.setCellValueFactory((param) -> {return param.getValue().getObject_stlLink();});           

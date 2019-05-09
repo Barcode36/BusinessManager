@@ -5,6 +5,8 @@
  */
 package classes;
 
+import Database.tables.Costs;
+import Database.tables.Printers;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,10 +29,28 @@ import javafx.scene.control.Label;
  */
 public class Cost {
     
+    //database table columns
     private SimpleIntegerProperty cost_id, cost_quantity, cost_printerID;
-    private SimpleStringProperty cost_name, cost_purchaseDate, cost_comment, cost_printer;
+    private SimpleStringProperty cost_name, cost_purchaseDate, cost_comment;
     private SimpleDoubleProperty cost_shipping, cost_price;
+    
+    //additional fields
+    private SimpleStringProperty cost_printer;
+        
+    //simple constructor for database table
 
+    public Cost(SimpleIntegerProperty cost_id, SimpleIntegerProperty cost_quantity, SimpleIntegerProperty cost_printerID, SimpleStringProperty cost_name, SimpleStringProperty cost_purchaseDate, SimpleStringProperty cost_comment, SimpleDoubleProperty cost_shipping, SimpleDoubleProperty cost_price) {
+        this.cost_id = cost_id;
+        this.cost_quantity = cost_quantity;
+        this.cost_printerID = cost_printerID;
+        this.cost_name = cost_name;
+        this.cost_purchaseDate = cost_purchaseDate;
+        this.cost_comment = cost_comment;
+        this.cost_shipping = cost_shipping;
+        this.cost_price = cost_price;
+    }
+        
+    //complex constructor for table view items
     public Cost(SimpleIntegerProperty cost_id, SimpleIntegerProperty cost_quantity, SimpleIntegerProperty cost_printerID, SimpleStringProperty cost_name, SimpleStringProperty cost_purchaseDate, SimpleStringProperty cost_comment, SimpleStringProperty cost_printer, SimpleDoubleProperty cost_shipping, SimpleDoubleProperty cost_price) {
         this.cost_id = cost_id;
         this.cost_quantity = cost_quantity;
@@ -42,88 +62,27 @@ public class Cost {
         this.cost_shipping = cost_shipping;
         this.cost_price = cost_price;
     }
-
-    public SimpleIntegerProperty getCost_id() {
-        return cost_id;
-    }
-
-    public void setCost_id(SimpleIntegerProperty cost_id) {
-        this.cost_id = cost_id;
-    }
-
-    public SimpleIntegerProperty getCost_quantity() {
-        return cost_quantity;
-    }
-
-    public void setCost_quantity(SimpleIntegerProperty cost_quantity) {
-        this.cost_quantity = cost_quantity;
-    }
-
-    public SimpleIntegerProperty getCost_printerID() {
-        return cost_printerID;
-    }
-
-    public void setCost_printerID(SimpleIntegerProperty cost_printerID) {
-        this.cost_printerID = cost_printerID;
-    }
-
-    public SimpleStringProperty getCost_name() {
-        return cost_name;
-    }
-
-    public void setCost_name(SimpleStringProperty cost_name) {
-        this.cost_name = cost_name;
-    }
-
-    public SimpleStringProperty getCost_purchaseDate() {
-        return cost_purchaseDate;
-    }
-
-    public void setCost_purchaseDate(SimpleStringProperty cost_purchaseDate) {
-        this.cost_purchaseDate = cost_purchaseDate;
-    }
-
-    public SimpleStringProperty getCost_comment() {
-        return cost_comment;
-    }
-
-    public void setCost_comment(SimpleStringProperty cost_comment) {
-        this.cost_comment = cost_comment;
-    }
-
-    public SimpleStringProperty getCost_printer() {
-        return cost_printer;
-    }
-
-    public void setCost_printer(SimpleStringProperty cost_printer) {
-        this.cost_printer = cost_printer;
-    }
-
-    public SimpleDoubleProperty getCost_shipping() {
-        return cost_shipping;
-    }
-
-    public void setCost_shipping(SimpleDoubleProperty cost_shipping) {
-        this.cost_shipping = cost_shipping;
-    }
-
-    public SimpleDoubleProperty getCost_price() {
-        return cost_price;
-    }
-
-    public void setCost_price(SimpleDoubleProperty cost_price) {
-        this.cost_price = cost_price;
-    }
-
     
     
-    public static List<Cost> getCosts(HikariDataSource ds) {
+    public static List<Cost> getCosts(List<Cost> costsTable, List<Printers> printers) {
+        
+        for (int i = 0; i < costsTable.size(); i++) {
+            
+            Cost cost = costsTable.get(i);
+            
+            cost.setCost_printer(Printer.getPrinterById(cost.getCost_printerID()));
+            
+        }
+        return costsTable;
+    }
+    
+    public static List<Costs> getCostsTable(HikariDataSource ds) {
         
         //Create list
-        List<Cost> allCostsList = new ArrayList<>();
+        List<Costs> costs = new ArrayList<>();
         
-        //Create query
-        String query = "SELECT Costs.*, Printers.PrinterName FROM Costs JOIN Printers ON Costs.PrinterID = Printers.PrinterID ORDER BY Costs.CostID ASC";
+        //Create query        
+        String query = "SELECT * FROM Costs";
 
         Connection conn = null;
         Statement stmt = null;
@@ -133,9 +92,9 @@ public class Cost {
             //STEP 2: Register JDBC driver
             Class.forName("org.mariadb.jdbc.Driver");
 
-            //STEP 3: Open a connection
-
+            //STEP 3: Open a connection            
             conn = ds.getConnection();
+            
             //STEP 4: Execute a query
             stmt = conn.createStatement();
             
@@ -145,40 +104,37 @@ public class Cost {
             //in this loop we sequentialy add columns to list of Strings
             while(rs.next()){
                 
-                SimpleIntegerProperty cost_id, cost_quantity, cost_printerID;
-                SimpleStringProperty cost_name, cost_purchaseDate, cost_comment, cost_printer;
-                SimpleDoubleProperty cost_shipping, cost_price;
+                SimpleIntegerProperty costID = new SimpleIntegerProperty(rs.getInt("CostID"));
+                SimpleIntegerProperty costQuantity = new SimpleIntegerProperty(rs.getInt("CostQantity"));
+                SimpleIntegerProperty printerID = new SimpleIntegerProperty(rs.getInt("PrinterID"));
+    
+                SimpleDoubleProperty costShipping = new SimpleDoubleProperty(rs.getDouble("CostShipping"));
+                SimpleDoubleProperty costPrice = new SimpleDoubleProperty(rs.getDouble("CostPrice"));
+    
+                SimpleStringProperty costName = new SimpleStringProperty(rs.getString("CostName"));
+                SimpleStringProperty purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
+                SimpleStringProperty comment = new SimpleStringProperty(rs.getString("Comment"));
                 
-                cost_id = new SimpleIntegerProperty(rs.getInt("CostID"));
-                cost_quantity = new SimpleIntegerProperty(rs.getInt("CostQuantity"));
-                cost_printerID = new SimpleIntegerProperty(rs.getInt("PrinterID"));
+                Costs cost = new Costs(costID, costQuantity, printerID, costShipping, costPrice, costName, purchaseDate, comment);
                 
-                cost_name = new SimpleStringProperty(rs.getString("CostName"));
-                cost_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
-                cost_comment = new SimpleStringProperty(rs.getString("Comment"));
-                cost_printer = new SimpleStringProperty(rs.getString("PrinterName"));
+                costs.add(cost);
                 
-                cost_shipping = new SimpleDoubleProperty(rs.getDouble("CostShipping"));
-                cost_price = new SimpleDoubleProperty(rs.getDouble("CostPrice"));
-                
-                Cost cost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_printer, cost_shipping, cost_price);
-                
-                allCostsList.add(cost);
             }
 
             rs.close();
-        }catch (NullPointerException e){
+        } catch (NullPointerException e){
             //signIn(event);
             e.printStackTrace();
-        }catch (SQLNonTransientConnectionException se) {
+        } catch (SQLNonTransientConnectionException se) {
             MngApi obj = new MngApi();
             obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
             se.printStackTrace();
-        } catch (Exception e) {
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
             //Handle errors for Class.forName
-            e.printStackTrace();
+            
+            se.printStackTrace();
         } finally {
             //finally block used to close resources
             try {
@@ -193,9 +149,8 @@ public class Cost {
                 se.printStackTrace();
             }//end finally try
         }//end try
-    
         
-    return allCostsList;
+        return costs;
     }
     
     public static void insertNewCost(Cost cost, HikariDataSource ds){
@@ -280,4 +235,75 @@ public class Cost {
         
     }
     
+    public SimpleIntegerProperty getCost_id() {
+        return cost_id;
+    }
+
+    public void setCost_id(SimpleIntegerProperty cost_id) {
+        this.cost_id = cost_id;
+    }
+
+    public SimpleIntegerProperty getCost_quantity() {
+        return cost_quantity;
+    }
+
+    public void setCost_quantity(SimpleIntegerProperty cost_quantity) {
+        this.cost_quantity = cost_quantity;
+    }
+
+    public SimpleIntegerProperty getCost_printerID() {
+        return cost_printerID;
+    }
+
+    public void setCost_printerID(SimpleIntegerProperty cost_printerID) {
+        this.cost_printerID = cost_printerID;
+    }
+
+    public SimpleStringProperty getCost_name() {
+        return cost_name;
+    }
+
+    public void setCost_name(SimpleStringProperty cost_name) {
+        this.cost_name = cost_name;
+    }
+
+    public SimpleStringProperty getCost_purchaseDate() {
+        return cost_purchaseDate;
+    }
+
+    public void setCost_purchaseDate(SimpleStringProperty cost_purchaseDate) {
+        this.cost_purchaseDate = cost_purchaseDate;
+    }
+
+    public SimpleStringProperty getCost_comment() {
+        return cost_comment;
+    }
+
+    public void setCost_comment(SimpleStringProperty cost_comment) {
+        this.cost_comment = cost_comment;
+    }
+
+    public SimpleStringProperty getCost_printer() {
+        return cost_printer;
+    }
+
+    public void setCost_printer(SimpleStringProperty cost_printer) {
+        this.cost_printer = cost_printer;
+    }
+
+    public SimpleDoubleProperty getCost_shipping() {
+        return cost_shipping;
+    }
+
+    public void setCost_shipping(SimpleDoubleProperty cost_shipping) {
+        this.cost_shipping = cost_shipping;
+    }
+
+    public SimpleDoubleProperty getCost_price() {
+        return cost_price;
+    }
+
+    public void setCost_price(SimpleDoubleProperty cost_price) {
+        this.cost_price = cost_price;
+    }
 }

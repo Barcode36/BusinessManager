@@ -5,6 +5,7 @@
  */
 package classes;
 
+import Database.tables.Printers;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,6 +18,7 @@ import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 
@@ -26,11 +28,21 @@ import javafx.scene.control.Label;
  */
 public class OrderItem {
     
-    private SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
-    private SimpleIntegerProperty orderItem_id, order_id, object_id, object_buildTime, quantity, printer_id, material_id;
-    private SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
+//    private SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
+//    private SimpleIntegerProperty orderItem_id, order_id, object_id, object_buildTime, quantity, printer_id, material_id;
+//    private SimpleDoubleProperty object_supportWeight, object_weight, price, costs;
+    
+    private SimpleStringProperty  object_buildTime_formated;
+    private SimpleIntegerProperty orderItem_id, order_id, quantity;
+    private SimpleDoubleProperty price, costs;
+    
+    private Material material;//for material_type, material_color, material_id
+    private Printer printer;//printer_name, printer_id
+    private Object object;//object_name, object_id, object_buildTime, object_supportWeight, object_weight
 
     public OrderItem(SimpleIntegerProperty orderItem_id, SimpleStringProperty object_name, SimpleStringProperty object_buildTime_formated, SimpleStringProperty printer_name, SimpleStringProperty material_type, SimpleStringProperty material_color, SimpleIntegerProperty order_id, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty quantity, SimpleIntegerProperty printer_id, SimpleIntegerProperty material_id, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleDoubleProperty price, SimpleDoubleProperty costs) {
+        this.printer = Printers.getPrinterById(printers, printer_id);
+        this.material = material;        
         this.orderItem_id = orderItem_id;
         this.object_name = object_name;
         this.object_buildTime_formated = object_buildTime_formated;
@@ -46,137 +58,9 @@ public class OrderItem {
         this.object_supportWeight = object_supportWeight;
         this.object_weight = object_weight;
         this.price = price;
-        this.costs = costs;
-    }
-
-    public SimpleIntegerProperty getOrderItem_id() {
-        return orderItem_id;
-    }
-
-    public void setOrderItem_id(SimpleIntegerProperty orderItem_id) {
-        this.orderItem_id = orderItem_id;
+        this.costs = costs;        
     }
     
-    public SimpleIntegerProperty getOrder_id() {
-        return order_id;
-    }
-
-    public void setOrder_id(SimpleIntegerProperty order_id) {
-        this.order_id = order_id;
-    }
-
-    public SimpleStringProperty getObject_name() {
-        return object_name;
-    }
-
-    public void setObject_name(SimpleStringProperty object_name) {
-        this.object_name = object_name;
-    }
-
-    public SimpleStringProperty getObject_buildTime_formated() {
-        return object_buildTime_formated;
-    }
-
-    public void setObject_buildTime_formated(SimpleStringProperty object_buildTime_formated) {
-        this.object_buildTime_formated = object_buildTime_formated;
-    }
-
-    public SimpleStringProperty getPrinter_name() {
-        return printer_name;
-    }
-
-    public void setPrinter_name(SimpleStringProperty printer_name) {
-        this.printer_name = printer_name;
-    }
-
-    public SimpleStringProperty getMaterial_type() {
-        return material_type;
-    }
-
-    public void setMaterial_type(SimpleStringProperty material_type) {
-        this.material_type = material_type;
-    }
-
-    public SimpleStringProperty getMaterial_color() {
-        return material_color;
-    }
-
-    public void setMaterial_color(SimpleStringProperty material_color) {
-        this.material_color = material_color;
-    }
-
-    public SimpleIntegerProperty getObject_id() {
-        return object_id;
-    }
-
-    public void setObject_id(SimpleIntegerProperty object_id) {
-        this.object_id = object_id;
-    }
-
-    public SimpleIntegerProperty getObject_buildTime() {
-        return object_buildTime;
-    }
-
-    public void setObject_buildTime(SimpleIntegerProperty object_buildTime) {
-        this.object_buildTime = object_buildTime;
-    }
-
-    public SimpleIntegerProperty getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(SimpleIntegerProperty qunatity) {
-        this.quantity = qunatity;
-    }
-
-    public SimpleIntegerProperty getPrinter_id() {
-        return printer_id;
-    }
-
-    public void setPrinter_id(SimpleIntegerProperty printer_id) {
-        this.printer_id = printer_id;
-    }
-
-    public SimpleIntegerProperty getMaterial_id() {
-        return material_id;
-    }
-
-    public void setMaterial_id(SimpleIntegerProperty material_id) {
-        this.material_id = material_id;
-    }
-
-    public SimpleDoubleProperty getObject_supportWeight() {
-        return object_supportWeight;
-    }
-
-    public void setObject_supportWeight(SimpleDoubleProperty object_supportWeight) {
-        this.object_supportWeight = object_supportWeight;
-    }
-
-    public SimpleDoubleProperty getObject_weight() {
-        return object_weight;
-    }
-
-    public void setObject_weight(SimpleDoubleProperty object_weight) {
-        this.object_weight = object_weight;
-    }
-
-    public SimpleDoubleProperty getPrice() {
-        return price;
-    }
-
-    public void setPrice(SimpleDoubleProperty price) {
-        this.price = price;
-    }
-
-    public SimpleDoubleProperty getCosts() {
-        return costs;
-    }
-
-    public void setCosts(SimpleDoubleProperty costs) {
-        this.costs = costs;
-    }
-
     public static void insertNewOrderItems(ObservableList<OrderItem> orderItems, HikariDataSource ds){ 
         //Create query
         String updateQuery;
@@ -264,6 +148,91 @@ public class OrderItem {
                 se.printStackTrace();
             }//end finally try
         }//end try        
+    }
+    
+    public static ObservableList<OrderItem> getOrderItemsByOrderId(SimpleIntegerProperty order_id, ObservableList<OrderItem> allOrderItems) {
+        
+        ObservableList<OrderItem> filteredItems = FXCollections.observableArrayList();
+        
+        //binary search: we are searching first orderItem with order_id and then we will find beginning of series (there could be multiple orderItems with same order_id
+        int numberToGuess = order_id.get();
+        int start = 1;
+        int end = allOrderItems.size();
+        int position = 0;
+        
+        while(start <= end){
+            position = (start + end)/2;
+            
+            OrderItem item = allOrderItems.get(position);
+            
+            if (item.getOrderItem_id() == order_id)break;
+            
+            if(numberToGuess < item.getOrderItem_id().get()){
+                
+                end = position -1;                
+                
+            } else {
+                
+                start = position + 1;
+                
+            }            
+        }
+        
+        //now that we have position of at least one orderItem with order_id, we can find first occurence of such a orderItem        
+        while(allOrderItems.get(position).getOrder_id() == order_id){
+            position--;
+        }
+        position++;
+        
+        //now we should be at the beggining of orderItems with same order_id, so we can add them to the list
+        while(allOrderItems.get(position).getOrder_id() == order_id){
+            filteredItems.add(allOrderItems.get(position));
+        }
+        
+        return filteredItems;
+    }
+    
+    public static ObservableList<OrderItem> getOrderItemsByMaterialId(SimpleIntegerProperty material_id, ObservableList<OrderItem> allOrderItems){
+        
+        ObservableList<OrderItem> filteredItems = FXCollections.observableArrayList();
+        
+        //binary search: we are searching first orderItem with material_id and then we will find beginning of series (there could be multiple orderItems with same material_id
+        int numberToGuess = material_id.get();
+        int start = 1;
+        int end = allOrderItems.size();
+        int position = 0;
+        
+        while(start <= end){
+            position = (start + end)/2;
+            
+            OrderItem item = allOrderItems.get(position);
+            
+            if (item.getMaterial_id() == material_id)break;
+            
+            if(numberToGuess < item.getOrderItem_id().get()){
+                
+                end = position - 1;                
+                
+            } else {
+                
+                start = position + 1;
+                
+            }            
+        }
+        
+        //now that we have position of at least one orderItem with material_id, we can find first occurence of such a orderItem        
+        while(allOrderItems.get(position).getMaterial_id() == material_id){
+            position--;
+        }
+        position++;
+        
+        //now we should be at the beggining of orderItems with same material_id, so we can add them to the list
+        while(allOrderItems.get(position).getMaterial_id() == material_id){
+            filteredItems.add(allOrderItems.get(position));
+        }
+        
+        return filteredItems;
+        
     }
     
     public static void deleteOrderItem(OrderItem orderItem, Label info, HikariDataSource ds){
@@ -454,4 +423,131 @@ public class OrderItem {
         
     }
     
+    public SimpleIntegerProperty getOrderItem_id() {
+        return orderItem_id;
+    }
+
+    public void setOrderItem_id(SimpleIntegerProperty orderItem_id) {
+        this.orderItem_id = orderItem_id;
+    }
+    
+    public SimpleIntegerProperty getOrder_id() {
+        return order_id;
+    }
+
+    public void setOrder_id(SimpleIntegerProperty order_id) {
+        this.order_id = order_id;
+    }
+
+    public SimpleStringProperty getObject_name() {
+        return object_name;
+    }
+
+    public void setObject_name(SimpleStringProperty object_name) {
+        this.object_name = object_name;
+    }
+
+    public SimpleStringProperty getObject_buildTime_formated() {
+        return object_buildTime_formated;
+    }
+
+    public void setObject_buildTime_formated(SimpleStringProperty object_buildTime_formated) {
+        this.object_buildTime_formated = object_buildTime_formated;
+    }
+
+    public SimpleStringProperty getPrinter_name() {
+        return printer_name;
+    }
+
+    public void setPrinter_name(SimpleStringProperty printer_name) {
+        this.printer_name = printer_name;
+    }
+
+    public SimpleStringProperty getMaterial_type() {
+        return material_type;
+    }
+
+    public void setMaterial_type(SimpleStringProperty material_type) {
+        this.material_type = material_type;
+    }
+
+    public SimpleStringProperty getMaterial_color() {
+        return material_color;
+    }
+
+    public void setMaterial_color(SimpleStringProperty material_color) {
+        this.material_color = material_color;
+    }
+
+    public SimpleIntegerProperty getObject_id() {
+        return object_id;
+    }
+
+    public void setObject_id(SimpleIntegerProperty object_id) {
+        this.object_id = object_id;
+    }
+
+    public SimpleIntegerProperty getObject_buildTime() {
+        return object_buildTime;
+    }
+
+    public void setObject_buildTime(SimpleIntegerProperty object_buildTime) {
+        this.object_buildTime = object_buildTime;
+    }
+
+    public SimpleIntegerProperty getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(SimpleIntegerProperty qunatity) {
+        this.quantity = qunatity;
+    }
+
+    public SimpleIntegerProperty getPrinter_id() {
+        return printer_id;
+    }
+
+    public void setPrinter_id(SimpleIntegerProperty printer_id) {
+        this.printer_id = printer_id;
+    }
+
+    public SimpleIntegerProperty getMaterial_id() {
+        return material_id;
+    }
+
+    public void setMaterial_id(SimpleIntegerProperty material_id) {
+        this.material_id = material_id;
+    }
+
+    public SimpleDoubleProperty getObject_supportWeight() {
+        return object_supportWeight;
+    }
+
+    public void setObject_supportWeight(SimpleDoubleProperty object_supportWeight) {
+        this.object_supportWeight = object_supportWeight;
+    }
+
+    public SimpleDoubleProperty getObject_weight() {
+        return object_weight;
+    }
+
+    public void setObject_weight(SimpleDoubleProperty object_weight) {
+        this.object_weight = object_weight;
+    }
+
+    public SimpleDoubleProperty getPrice() {
+        return price;
+    }
+
+    public void setPrice(SimpleDoubleProperty price) {
+        this.price = price;
+    }
+
+    public SimpleDoubleProperty getCosts() {
+        return costs;
+    }
+
+    public void setCosts(SimpleDoubleProperty costs) {
+        this.costs = costs;
+    }    
  }
