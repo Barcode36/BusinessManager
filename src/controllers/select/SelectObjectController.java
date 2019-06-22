@@ -133,7 +133,14 @@ public class SelectObjectController implements Initializable {
             price = new SimpleDoubleProperty();
             costs = new SimpleDoubleProperty();
             
-            OrderItem orderItem = new OrderItem(orderItem_id, object_name, object_buildTime_formated, printer_name, material_type, material_color, order_id, object_id, object_buildTime, quantity, printer_id, material_id, object_supportWeight, object_weight, price, costs);
+            OrderItem orderItem = new OrderItem(orderItem_id, order_id, object_id, material_id, quantity, printer_id, object_buildTime, object_supportWeight, object_weight, price);
+            
+            orderItem.getObject().setObject_name(object_name);
+            orderItem.getObject().setObject_buildTime_formated(object_buildTime_formated);
+            orderItem.getObject().setObject_costs(costs);
+            orderItem.getPrinter().setPrinter_name(printer_name);
+            orderItem.getMaterial().setMaterial_type(material_type);
+            orderItem.getMaterial().setMaterial_color(material_color);
                         
             orderItems.add(orderItem);
             

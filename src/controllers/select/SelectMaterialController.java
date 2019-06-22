@@ -85,7 +85,7 @@ public class SelectMaterialController implements Initializable {
         
         
         material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
-        material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});
+        material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_seller();});
         material_col_manufacturer.setCellValueFactory((param) -> {return param.getValue().getMaterial_manufacturer();});
         material_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getMaterial_purchaseDate();});
         material_col_type.setCellValueFactory((param) -> {return param.getValue().getMaterial_type();});

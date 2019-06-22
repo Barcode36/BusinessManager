@@ -23,9 +23,7 @@ public class LoginController {
     private Button btn_login;    
     
     private HikariDataSource ds = new HikariDataSource();
-    
-
-    
+        
     //signs in user into database and displays application's main window with loaded "Orders" table
     public void signIn(ActionEvent event) {       
         try{

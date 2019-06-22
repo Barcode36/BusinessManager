@@ -148,7 +148,7 @@ public class NewMaterialController implements Initializable {
         String type = material.getMaterial_type().get();
         String color = material.getMaterial_color().get();
         String manufacturer = material.getMaterial_manufacturer().get();
-        String distributor = material.getMaterial_distributor().get();
+        String distributor = material.getMaterial_seller().get();
         String diameter = String.valueOf(material.getMaterial_diameter().get());
         String weight = String.format("%d", (int) material.getMaterial_weight().get());
         

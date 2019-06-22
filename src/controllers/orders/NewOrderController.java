@@ -224,13 +224,13 @@ public class NewOrderController implements Initializable {
                 
                 quantity = orderObjects.get(i).getQuantity().get();
             
-                weight = orderObjects.get(i).getObject_weight().get();
-                supportWeight = orderObjects.get(i).getObject_supportWeight().get();
+                weight = orderObjects.get(i).getOrderItem_weight().get();
+                supportWeight = orderObjects.get(i).getOrderItem_supportWeight().get();
                 //weightSum = weight + supportWeight;
-                buildTime = orderObjects.get(i).getObject_buildTime().get();
+                buildTime = orderObjects.get(i).getObject().getObject_buildTime().get();
             
                 price = orderObjects.get(i).getPrice().get();
-                costs = orderObjects.get(i).getCosts().get();
+                costs = orderObjects.get(i).getObject().getObject_costs().get();
                 //profit = price - costs;
             
                 summary_quantity += quantity;
@@ -271,7 +271,7 @@ public class NewOrderController implements Initializable {
                 
                 OrderItem item = orderObjects.get(i);
                 
-                int buildTime = item.getObject_buildTime().get()*item.getQuantity().get();                
+                int buildTime = item.getObject().getObject_buildTime().get()*item.getQuantity().get();                
                 
                 double finalPrice = buildTime*pricePerMinute;
                 
@@ -297,11 +297,11 @@ public class NewOrderController implements Initializable {
     
     public void setSelectedObjects() {
         
-        col_objectName.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
-        col_buildTime_formatted.setCellValueFactory((param) -> {return param.getValue().getObject_buildTime_formated();});
-        col_materialColor.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
-        col_materialType.setCellValueFactory((param) -> {return param.getValue().getMaterial_type();});
-        col_printer.setCellValueFactory((param) -> {return param.getValue().getPrinter_name();});
+        col_objectName.setCellValueFactory((param) -> {return param.getValue().getObject().getObject_name();});
+        col_buildTime_formatted.setCellValueFactory((param) -> {return param.getValue().getObject().getObject_buildTime_formated();});
+        col_materialColor.setCellValueFactory((param) -> {return param.getValue().getMaterial().getMaterial_color();});
+        col_materialType.setCellValueFactory((param) -> {return param.getValue().getMaterial().getMaterial_type();});
+        col_printer.setCellValueFactory((param) -> {return param.getValue().getPrinter().getPrinter_name();});
         
         col_materialID.setCellValueFactory((param) -> {return param.getValue().getMaterial_id().asObject();});        
         col_objectID.setCellValueFactory((param) -> {return param.getValue().getObject_id().asObject();});
@@ -309,9 +309,9 @@ public class NewOrderController implements Initializable {
         col_quantity.setCellValueFactory((param) -> {return param.getValue().getQuantity().asObject();});
         
         
-        col_weight.setCellValueFactory((param) -> {return param.getValue().getObject_weight().asObject();});
-        col_supportWeight.setCellValueFactory((param) -> {return param.getValue().getObject_supportWeight().asObject();});
-        col_objectCosts.setCellValueFactory((param) -> {return param.getValue().getCosts().asObject();});
+        col_weight.setCellValueFactory((param) -> {return param.getValue().getOrderItem_weight().asObject();});
+        col_supportWeight.setCellValueFactory((param) -> {return param.getValue().getOrderItem_supportWeight().asObject();});
+        col_objectCosts.setCellValueFactory((param) -> {return param.getValue().getObject().getObject_costs().asObject();});
         col_objectPrice.setCellValueFactory((param) -> {return param.getValue().getPrice().asObject();});
         
         
@@ -397,7 +397,7 @@ public class NewOrderController implements Initializable {
             String[] totalSupportWeightFormatted = label_supportWeight.getText().split(" ");
             totalSupportWeight = new SimpleDoubleProperty(Double.parseDouble(totalSupportWeightFormatted[0]));
             
-            newOrder = new Order(null, status, comment, dateCreated, dueDate, totalBuildTimeFormatted, order_id, customer_id, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight);
+            newOrder = new Order(order_id, customer_id, status, comment, dateCreated, dueDate, totalQuantity, totalBuildTime, totalCosts, totalPrice, totalWeight, totalSupportWeight, dueDate, totalBuildTimeFormatted, orderObjects, Customer.getCustomerById(customer_id, mainController.getTv_customers().getItems()));
             Order.insertNewOrder(newOrder, info, ds);
             
             //We will now add assign order to objects, but first, we have to assign OrderID to items belonging to current order
@@ -409,14 +409,14 @@ public class NewOrderController implements Initializable {
                 //2. Determine updated original objects and update them in DB table
                 //3. Determine new objects in order and add then in DB table
                     
-            //1. Determine IDs of removed original objects and remove them frob DB table
+            //1. Determine IDs of removed original objects and remove them from DB table
             /*
             We do this by comparing IDs of old OrderItems vs NewOrderItems. We remove matches from old OrderItems so we can keep only objects to remove
             because they are not in new OrderItems.
             */
             
-            List<Integer> originalObjects = OrderItem.getListOfIOrderItemIDs(newOrder, ds);                
-            List<Integer> newObjects = new ArrayList<>();
+            ObservableList<OrderItem> originalObjects = null;//OrderItem.getOrderItemsForOrders(order_id, mainController.getTv_orders().getItems());
+            ObservableList<Integer> newObjects = FXCollections.observableArrayList();
                 for (int j = 0; j < orderObjects.size(); j++) {
                     OrderItem item = orderObjects.get(j);
                     newObjects.add(item.getOrderItem_id().get());

@@ -5,8 +5,7 @@
  */
 package classes;
 
-import Database.tables.Costs;
-import Database.tables.Printers;
+
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,11 +13,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 
@@ -49,37 +47,23 @@ public class Cost {
         this.cost_shipping = cost_shipping;
         this.cost_price = cost_price;
     }
-        
-    //complex constructor for table view items
-    public Cost(SimpleIntegerProperty cost_id, SimpleIntegerProperty cost_quantity, SimpleIntegerProperty cost_printerID, SimpleStringProperty cost_name, SimpleStringProperty cost_purchaseDate, SimpleStringProperty cost_comment, SimpleStringProperty cost_printer, SimpleDoubleProperty cost_shipping, SimpleDoubleProperty cost_price) {
-        this.cost_id = cost_id;
-        this.cost_quantity = cost_quantity;
-        this.cost_printerID = cost_printerID;
-        this.cost_name = cost_name;
-        this.cost_purchaseDate = cost_purchaseDate;
-        this.cost_comment = cost_comment;
-        this.cost_printer = cost_printer;
-        this.cost_shipping = cost_shipping;
-        this.cost_price = cost_price;
-    }
     
-    
-    public static List<Cost> getCosts(List<Cost> costsTable, List<Printers> printers) {
+    public static ObservableList<Cost> getCosts(ObservableList<Cost> costsTable, ObservableList<Printer> printers) {
         
         for (int i = 0; i < costsTable.size(); i++) {
             
             Cost cost = costsTable.get(i);
             
-            cost.setCost_printer(Printer.getPrinterById(cost.getCost_printerID()));
+            cost.setCost_printer(Printer.getPrinterById(printers, cost.getCost_printerID()).getPrinter_name());
             
         }
         return costsTable;
     }
     
-    public static List<Costs> getCostsTable(HikariDataSource ds) {
+    public static ObservableList<Cost> downloadCostsTable(HikariDataSource ds) {
         
         //Create list
-        List<Costs> costs = new ArrayList<>();
+        ObservableList<Cost> costs = FXCollections.observableArrayList();
         
         //Create query        
         String query = "SELECT * FROM Costs";
@@ -105,7 +89,7 @@ public class Cost {
             while(rs.next()){
                 
                 SimpleIntegerProperty costID = new SimpleIntegerProperty(rs.getInt("CostID"));
-                SimpleIntegerProperty costQuantity = new SimpleIntegerProperty(rs.getInt("CostQantity"));
+                SimpleIntegerProperty costQuantity = new SimpleIntegerProperty(rs.getInt("CostQuantity"));
                 SimpleIntegerProperty printerID = new SimpleIntegerProperty(rs.getInt("PrinterID"));
     
                 SimpleDoubleProperty costShipping = new SimpleDoubleProperty(rs.getDouble("CostShipping"));
@@ -115,7 +99,7 @@ public class Cost {
                 SimpleStringProperty purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
                 SimpleStringProperty comment = new SimpleStringProperty(rs.getString("Comment"));
                 
-                Costs cost = new Costs(costID, costQuantity, printerID, costShipping, costPrice, costName, purchaseDate, comment);
+                Cost cost = new Cost(costID, costQuantity, printerID, costName, purchaseDate, comment, costShipping, costPrice);
                 
                 costs.add(cost);
                 

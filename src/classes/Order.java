@@ -12,11 +12,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 /**
@@ -68,13 +67,13 @@ public class Order {
         this.customer = customer;
     }
     
-    public static List<Order> downloadOrdersTable(HikariDataSource ds) {
+    public static ObservableList<Order> downloadOrdersTable(HikariDataSource ds) {
         
         //Create list
-        List<Order> orders = new ArrayList<>();
+        ObservableList<Order> orders = FXCollections.observableArrayList();
         
         //Create query        
-        String query = "SELECT * FROM Orders ORDER BY OrderID";
+        String query = "SELECT * FROM Orders ORDER BY OrderID DESC";
 
         Connection conn = null;
         Statement stmt = null;
@@ -144,76 +143,107 @@ public class Order {
         
         return orders;
     }
-        
-    public static List<Order> getOrders(ObservableList<Order> ordersTable, ObservableList<Customer> customers, ObservableList<OrderItem> allOrderItems) {
+    
+    public static ObservableList<SimpleTableObject> downloadOrderStatusTable(HikariDataSource ds) {
         
         //Create list
-        List<Order> orderList = new ArrayList<>();
+        ObservableList<SimpleTableObject> customerPropertyTypes = FXCollections.observableArrayList();
+        
+        //Create query        
+        String query = "SELECT * FROM OrderStatus";
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection            
+            conn = ds.getConnection();
+            
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+                SimpleStringProperty propertyTypeName = new SimpleStringProperty(rs.getString("OrderStatus"));
+                
+                SimpleTableObject property = new SimpleTableObject(null, null, propertyTypeName);
+                
+                customerPropertyTypes.add(property);
+                
+            }
+
+            rs.close();
+        } catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+            se.printStackTrace();
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+        return customerPropertyTypes;
+    }
+    
+    //this method should return a complete list of orders with all the information about order items, costs, and all the details
+    //At the begginning it's only group of tables with basic information. Those information will merge and will return one complex list of orders with all the details
+    public static ObservableList<Order> getOrders(ObservableList<Order> ordersTable, ObservableList<Customer> customersTable, ObservableList<OrderItem> orderItemsTable, ObservableList<classes.Object> objectsTable, ObservableList<Material> materialsTable, ObservableList<SimpleTableObject> commonMaterialPropertiesTable, ObservableList<Printer> printersTable) {
+        
+        //we are just modifying ordersTable. Currently it contains only data from database table and now we will add other information - we won't create
+        //new list or whatsoever - we are just updating existing list
+        
+        //let's use other tables to complete the table of Orders like a puzzle
+        //This method basically calculates all we need about order except for customer
+        OrderItem.getOrderItemsForOrders(ordersTable, orderItemsTable, objectsTable, materialsTable, commonMaterialPropertiesTable, printersTable);
+        
         
         for (int i = 0; i < ordersTable.size(); i++) {
             
             Order ordersTable_item = ordersTable.get(i);            
             
             //table columns - in database
-            SimpleIntegerProperty order_id, order_customerID;    
-                        
-            //table view columns - in application
-            SimpleIntegerProperty order_quantity, order_buildTime;
-            SimpleDoubleProperty order_costs, order_price, order_weight, order_support_weight;
-            SimpleStringProperty order_customer, order_buildTime_formated;
-                
-            
-            //table columns
-            order_id = ordersTable_item.getOrder_id();
+            SimpleIntegerProperty order_customerID;                        
+            SimpleStringProperty order_customer;
             order_customerID = ordersTable_item.getOrder_customerID();
+                        
+            //System.out.println("Number of OrderItems in OrderID " + order_id.get() + ": " + orderItems.size());            
+            //we have list of items available, now we can calculate summary. We can start by defining variables for storing values for table columns
             
-            //search for order Items belonging to this particular order
-            ObservableList<OrderItem> orderItems = OrderItem.getOrderItemsByOrderId(order_id, allOrderItems);
-            
-            //table view columns
-            int totalQuantity = 0, totalBuildTime = 0;
-            double totalCosts = 0, totalPrice = 0, totalWeight = 0, totalSupportWeight = 0;
-            
-            for (int j = 0; j < orderItems.size(); j++) {
-                
-                OrderItem item = allOrderItems.get(j);
-                
-                totalBuildTime += item.getObject_buildTime().get();
-                totalCosts += item.getCosts().get();
-                totalPrice += item.getPrice().get();
-                totalQuantity += item.getQuantity().get();
-                totalSupportWeight += item.getObject_supportWeight().get();
-                totalWeight += item.getObject_weight().get();
-                
-            }
-            
-            order_quantity = new SimpleIntegerProperty(totalQuantity);
-            order_buildTime = new SimpleIntegerProperty(totalBuildTime);
-            order_costs = new SimpleDoubleProperty(totalCosts);
-            order_price = new SimpleDoubleProperty(totalPrice);
-            order_weight = new SimpleDoubleProperty(totalWeight);
-            order_support_weight = new SimpleDoubleProperty(totalSupportWeight);            
-            
-            order_buildTime_formated = MngApi.convertToFormattedTime(totalBuildTime);            
-                
-            Customer customer = Customer.getCustomerById(order_customerID, customers);
+            Customer customer = Customer.getCustomerById(order_customerID, customersTable);
             order_customer = new SimpleStringProperty(customer.getCustomer_firstName().get() + " " + customer.getCustomer_lastName().get());                
             
-            ordersTable_item.setOrder_quantity(order_quantity);
-            ordersTable_item.setOrder_buildTime(order_buildTime);
-            ordersTable_item.setOrder_costs(order_costs);
-            ordersTable_item.setOrder_price(order_price);
-            ordersTable_item.setOrder_weighht(order_weight);
-            ordersTable_item.setOrder_buildTime_formated(order_buildTime_formated);
+            ordersTable_item.setCustomer(customer);
             ordersTable_item.setOrder_customer(order_customer);
-            ordersTable_item.setOrder_support_weight(order_support_weight);
-            
-            //Order order = new Order(order_id, order_customerID, order_status, order_comment, order_dateCreated, order_dueDate, order_quantity, order_buildTime, order_costs, order_price, order_weight, order_support_weight, order_customer, order_buildTime_formated, orderItems, customer);
-                
-            ordersTable.add(ordersTable_item);
         }
                 
-        return orderList;
+        return ordersTable;
     } 
    
     public static void insertNewOrder(Order order, Label info, HikariDataSource ds){
@@ -363,5 +393,31 @@ public class Order {
     public void setOrder_support_weight(SimpleDoubleProperty order_support_weight) {
         this.order_support_weight = order_support_weight;
     }
+
+    public SimpleDoubleProperty getOrder_weight() {
+        return order_weight;
+    }
+
+    public void setOrder_weight(SimpleDoubleProperty order_weight) {
+        this.order_weight = order_weight;
+    }
+
+    public ObservableList<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(ObservableList<OrderItem> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+    
+    
     
 }//class end

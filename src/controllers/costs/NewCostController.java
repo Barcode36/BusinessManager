@@ -57,7 +57,7 @@ public class NewCostController implements Initializable {
     private Button cost_btn_create, cost_btn_cancel;
     
     @FXML
-    private ComboBox<SimpleTableObject> comboBox_printer;
+    private ComboBox<Printer> comboBox_printer;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -82,8 +82,8 @@ public class NewCostController implements Initializable {
                 cost_id = new SimpleIntegerProperty(getCost_label_id_value());
                 cost_quantity = new SimpleIntegerProperty(Integer.parseInt(cost_txtField_quantity.getText()));
                         
-                cost_printerID = new SimpleIntegerProperty(comboBox_printer.getValue().getProperty_id().get());
-                cost_printer = new SimpleStringProperty(comboBox_printer.getValue().getProperty_name().get());
+                cost_printerID = new SimpleIntegerProperty(comboBox_printer.getValue().getPrinter_id().get());
+                cost_printer = new SimpleStringProperty(comboBox_printer.getValue().getPrinter_name().get());
             
                 cost_name = new SimpleStringProperty(cost_txtField_name.getText());            
                 cost_purchaseDate = new SimpleStringProperty(cost_datePicker_purchaseDate.getValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
@@ -92,7 +92,7 @@ public class NewCostController implements Initializable {
                 cost_price = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_price.getText()));
                 cost_shipping = new SimpleDoubleProperty(Double.parseDouble(cost_txtField_shipping.getText()));
             
-                newCost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_printer, cost_shipping, cost_price);
+                newCost = new Cost(cost_id, cost_quantity, cost_printerID, cost_name, cost_purchaseDate, cost_comment, cost_shipping, cost_price);
             
                 Cost.insertNewCost(newCost, ds);
             
@@ -126,17 +126,17 @@ public class NewCostController implements Initializable {
         int id = MngApi.getCurrentAutoIncrementValue(ds, "Costs");
         this.cost_label_id.setText(String.valueOf(id));
 
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrintersShort(mainController.getTv_printers()));
+        ObservableList<Printer> printers = mainController.getTv_printers().getItems();
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
-        comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
+        comboBox_printer.setConverter(new StringConverter<Printer>() {
             @Override
-            public String toString(SimpleTableObject object) {
-                return object.getProperty_name().get();
+            public String toString(Printer object) {
+                return object.getPrinter_name().get();
             }
 
             @Override
-            public SimpleTableObject fromString(String string) {
+            public Printer fromString(String string) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });
@@ -160,17 +160,17 @@ public class NewCostController implements Initializable {
         LocalDate purchaseDate = LocalDate.parse(cost.getCost_purchaseDate().get());
         cost_datePicker_purchaseDate.setValue(purchaseDate);        
         
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(Printer.getPrintersShort(ds));
+        ObservableList<Printer> printers = mainController.getTv_printers().getItems();
         comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);        
-        comboBox_printer.setConverter(new StringConverter<SimpleTableObject>() {
+        comboBox_printer.setConverter(new StringConverter<Printer>() {
             @Override
-            public String toString(SimpleTableObject object) {
-                return object.getProperty_name().get();
+            public String toString(Printer object) {
+                return object.getPrinter_name().get();
             }
 
             @Override
-            public SimpleTableObject fromString(String string) {
+            public Printer fromString(String string) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });
@@ -180,7 +180,7 @@ public class NewCostController implements Initializable {
                 
         for (int i = 0; i < printers.size(); i++) {
             
-            if (printer_id == printers.get(i).getProperty_id().get())comboBox_printer.getSelectionModel().select(i);
+            if (printer_id == printers.get(i).getPrinter_id().get())comboBox_printer.getSelectionModel().select(i);
                     
         }  
     }

@@ -100,7 +100,7 @@ public class NewPrinterController implements Initializable {
                 printer_expenses = new SimpleDoubleProperty(0);
                 printer_overallIncome = new SimpleDoubleProperty(0);
                 
-                Printer newPrinter = new Printer(printer_id, printer_itemsSold, printer_type_id, printer_name, printer_purchaseDate, printer_comment, printer_type, printer_shipping, printer_price, printer_incomes, printer_expenses, printer_overallIncome, printer_duty, printer_tax);
+                Printer newPrinter = new Printer(printer_id, printer_type_id, printer_name, printer_purchaseDate, printer_comment, printer_shipping, printer_price, printer_duty, printer_tax);
                 
                 Printer.insertNewPrinter(newPrinter, ds);
             

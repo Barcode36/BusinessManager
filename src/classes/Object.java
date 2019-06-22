@@ -12,11 +12,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 
@@ -27,13 +26,15 @@ import javafx.scene.control.Label;
 public class Object {
     
     //table columns
-    private SimpleStringProperty  object_name, object_stlLink, object_buildTime_formated, object_comment;
+    private SimpleStringProperty  object_name, object_stlLink, object_comment;
     private SimpleIntegerProperty object_id, object_buildTime, object_project_id;
     private SimpleDoubleProperty object_supportWeight, object_weight;
 
+    //additional columns
+    private SimpleStringProperty object_buildTime_formated;
     private SimpleIntegerProperty object_SoldCount;
     private SimpleDoubleProperty  object_soldPrice, object_costs;
-
+    
     //simple constructor for database table objects
 
     public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleStringProperty object_comment, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_project_id, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight) {
@@ -47,27 +48,11 @@ public class Object {
         this.object_supportWeight = object_supportWeight;
         this.object_weight = object_weight;
     }
-        
-    //complex constructor for table view objects
-    public Object(SimpleStringProperty object_name, SimpleStringProperty object_stlLink, SimpleStringProperty object_buildTime_formated, SimpleStringProperty object_comment, SimpleIntegerProperty object_id, SimpleIntegerProperty object_buildTime, SimpleIntegerProperty object_project_id, SimpleDoubleProperty object_supportWeight, SimpleDoubleProperty object_weight, SimpleIntegerProperty object_SoldCount, SimpleDoubleProperty object_soldPrice, SimpleDoubleProperty object_costs) {
-        this.object_name = object_name;
-        this.object_stlLink = object_stlLink;
-        this.object_buildTime_formated = object_buildTime_formated;
-        this.object_comment = object_comment;
-        this.object_id = object_id;
-        this.object_buildTime = object_buildTime;
-        this.object_project_id = object_project_id;
-        this.object_supportWeight = object_supportWeight;
-        this.object_weight = object_weight;
-        this.object_SoldCount = object_SoldCount;
-        this.object_soldPrice = object_soldPrice;
-        this.object_costs = object_costs;
-    }
     
-    public static List<Object> downloadObjectsTable(HikariDataSource ds){
+    public static ObservableList<Object> downloadObjectsTable(HikariDataSource ds){
         
         //Create list
-        List<Object> objectList = new ArrayList<>();
+        ObservableList<Object> objectList = FXCollections.observableArrayList();
         
         //Create query
         String query = "SELECT * FROM Objects ORDER BY ObjectID";
@@ -147,31 +132,28 @@ public class Object {
     }
 
     //we need to pass complex list of orderItems with calculated costs
-    public static List<Object> getObjects(ObservableList<Object> objectsTable, ObservableList<OrderItem> orderItems){
-        //Create list
-        List<Object> objectList = objectsTable;
-        List<OrderItem> items = new ArrayList<>(orderItems);
-                
+    public static ObservableList<Object> getObjects(ObservableList<Object> objectsTable, ObservableList<OrderItem> orderItems){
+                                
         for (int i = 0; i < objectsTable.size(); i++) {
             
             int object_SoldCount = 0;
             double object_soldPrice = 0, object_costs = 0;
             
-            Object object = objectList.get(i);
+            Object object = objectsTable.get(i);
             
-            for (int j = 0; j < items.size(); j++) {
+            for (int j = 0; j < orderItems.size(); j++) {
                 
-                OrderItem item = items.get(i);
+                OrderItem item = orderItems.get(i);
                 
                 if(item.getObject_id().get() == object.getObject_id().get()){
                     
                     object_SoldCount += item.getQuantity().get();
                     object_soldPrice += item.getPrice().get();
-                    object_costs += item.getCosts().get();
+                    object_costs += item.getObject().getObject_costs().get();
                     
                 } else {
                     
-                    items.remove(item);
+                    orderItems.remove(item);
                     
                 }
             }
@@ -181,7 +163,7 @@ public class Object {
             object.setObject_soldPrice(new SimpleDoubleProperty(object_soldPrice));
             
         }        
-        return objectList;
+        return objectsTable;
     }
     
     public static void insertNewObject(classes.Object obj, HikariDataSource ds){
@@ -266,7 +248,63 @@ public class Object {
             
         }        
     }
+    
+    //returns object with table values (from table Objects) + calculated information like soldCount, SoldPrice based on information from OrderItems table
+    public static classes.Object getObjectByID(SimpleIntegerProperty object_id, ObservableList<classes.Object> objectsTable, ObservableList<OrderItem> orderItemsTable, Material material){
+        
+        Object object = null;
+        
+        //binary search: we are searching first orderItem with material_id and then we will find beginning of series (there could be multiple orderItems with same material_id
+        int numberToGuess = object_id.get();
+        int start = 0;
+        int end = objectsTable.size() - 1;
+        int position;
+        
+        while(start <= end){
+            position = (start + end)/2;
+            
+            object = objectsTable.get(position);
+            
+            if (object.getObject_id()== object_id)break;
+            
+            if(numberToGuess < object.getObject_id().get()){
+                
+                end = position - 1;                
+                
+            } else {
+                
+                start = position + 1;
+                
+            }            
+        }
 
+        //we have now table values, we need non-table values (build time formatted, sold count, sold price, costs)        
+        int soldCount = 0;
+        double soldPrice = 0, costs = 0;
+        
+        for (int i = 0; i < orderItemsTable.size(); i++) {
+            
+            OrderItem item = orderItemsTable.get(i);
+            
+            if(item.getObject_id().get() == object_id.get()){
+                                
+                soldCount += item.getQuantity().get();
+                soldPrice += item.getPrice().get();
+                costs += Material.getObjectsCosts(item, material);
+                
+            }
+            
+        }
+        
+        object.setObject_buildTime_formated(MngApi.convertToFormattedTime(object.getObject_buildTime().get()));
+        object.setObject_SoldCount(new SimpleIntegerProperty(soldCount));
+        object.setObject_soldPrice(new SimpleDoubleProperty(soldPrice));
+        object.setObject_costs(new SimpleDoubleProperty(costs));        
+        
+        return object;
+    }
+    
+    
     public SimpleStringProperty getObject_name() {
         return object_name;
     }

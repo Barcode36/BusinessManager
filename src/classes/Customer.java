@@ -13,8 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -74,13 +72,13 @@ public class Customer  {
         this.customer_ordersPrice = customer_ordersPrice;
     }
     
-    public static List<Customer> downloadCustomersTable(HikariDataSource ds){
+    public static ObservableList<Customer> downloadCustomersTable(HikariDataSource ds){
             
         //Create list
-        List<Customer> customersList = new ArrayList<>();
+        ObservableList<Customer> customersList = FXCollections.observableArrayList();
         
         //Create query
-        String query = "SELECT * FROM Customer ORDER BY CustomerID";
+        String query = "SELECT * FROM Customers ORDER BY CustomerID";
 
         Connection conn = null;
         Statement stmt = null;
@@ -157,7 +155,7 @@ public class Customer  {
         return customersList;
     }
     
-    public static List<Customer> getCustomers(List<Customer> customersTable, ObservableList<Order> orders, List<SimpleTableObject> commonCustomerProperties){
+    public static ObservableList<Customer> getCustomers(ObservableList<Customer> customersTable, ObservableList<Order> ordersTable, ObservableList<SimpleTableObject> commonCustomerProperties){
         
         for (int i = 0; i < customersTable.size(); i++) {
             
@@ -173,9 +171,16 @@ public class Customer  {
             customer_country = getCommonCustomerPropertiesByID(commonCustomerProperties, customer.getCustomer_id_country().get()).getProperty_name();
             customer_company = getCommonCustomerPropertiesByID(commonCustomerProperties, customer.getCustomer_id_company().get()).getProperty_name();
             
-            for (int j = 0; j < orders.size(); j++) {
+            //Debugging
+            
+
+            
+            
+            //Debugging
+            
+            for (int j = 0; j < ordersTable.size(); j++) {
                 
-                Order order = orders.get(j);
+                Order order = ordersTable.get(j);
                 
                 if(order.getOrder_customerID().get() == customer.getCustomer_id().get()){
                     
@@ -199,80 +204,6 @@ public class Customer  {
         return customersTable;
     }
     
-    public static List<SimpleTableObject> getCommonCustomerProperties(HikariDataSource ds) {
-        
-        //Create list
-        List<SimpleTableObject> properties = new ArrayList<>();
-        
-        //Create query
-        String query = "select * from CommonCustomerProperties";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                SimpleIntegerProperty property_id, property_type_id;
-                SimpleStringProperty property_type_name;
-                
-                property_id = new SimpleIntegerProperty(rs.getInt("PropertyID"));
-                property_type_id = new SimpleIntegerProperty(rs.getInt("PropertyTypeID"));
-                property_type_name = new SimpleStringProperty(rs.getString("PropertyName"));
-                
-                SimpleTableObject obj = new SimpleTableObject(property_id, property_type_id, property_type_name);
-                
-                properties.add(obj);
-                
-            }
-
-            rs.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return properties;
-    }
         
     public static void insertNewCustomer(Customer customer, HikariDataSource ds){
         
@@ -384,18 +315,7 @@ public class Customer  {
             }            
         }
         
-        //now that we have position of at least one orderItem with order_id, we can find first occurence of such a orderItem        
-        while(customers.get(position).getCustomer_id() == customer_id){
-            position--;
-        }
-        position++;
-        
-        //now we should be at the beggining of orderItems with same order_id, so we can add them to the list
-        while(customers.get(position).getCustomer_id() == customer_id){
-            filteredCustomer.add(customers.get(position));
-        }
-        
-        return null;        
+        return customers.get(position);        
     }
     
     
@@ -410,7 +330,7 @@ public class Customer  {
         }        
     }
     
-    private static SimpleTableObject getCommonCustomerPropertiesByID(List<SimpleTableObject> commonCustomerProperties, int id){
+    private static SimpleTableObject getCommonCustomerPropertiesByID(ObservableList<SimpleTableObject> commonCustomerProperties, int id){
         return commonCustomerProperties.get(id-1);
     }
     

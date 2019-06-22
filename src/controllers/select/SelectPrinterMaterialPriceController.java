@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -181,8 +180,8 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                     String buildTime_formatted = txtField_hours.getText() + "h " + txtField_minutes.getText() + "m";
                         buildTime = MngApi.convertToMinutes(buildTime_formatted);
                                      
-                    int printerID = comboBox_printer.getValue().getProperty_id().get();
-                    String printer_name = comboBox_printer.getValue().getProperty_name().get();
+                    int printerID = comboBox_printer.getValue().getPrinter_id().get();
+                    String printer_name = comboBox_printer.getValue().getPrinter_name().get();
             
                     String[] material2 = txtField_material.getText().split(";");
                         String material_id = material2[0];
@@ -196,17 +195,17 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                     if((weight + supportWeight) > material_remaining) throw new IndexOutOfBoundsException();
                     
                     selectedObject.setQuantity(new SimpleIntegerProperty(quantity));
-                    selectedObject.setObject_weight(new SimpleDoubleProperty(weight));
-                    selectedObject.setObject_supportWeight(new SimpleDoubleProperty(supportWeight));
-                    selectedObject.setObject_buildTime(new SimpleIntegerProperty(buildTime));
-                    selectedObject.setObject_buildTime_formated(MngApi.convertToFormattedTime(buildTime));
+                    selectedObject.setOrderItem_weight(new SimpleDoubleProperty(weight));
+                    selectedObject.setOrderItem_supportWeight(new SimpleDoubleProperty(supportWeight));
+                    selectedObject.getObject().setObject_buildTime(new SimpleIntegerProperty(buildTime));
+                    selectedObject.getObject().setObject_buildTime_formated(MngApi.convertToFormattedTime(buildTime));
                     selectedObject.setPrinter_id(new SimpleIntegerProperty(printerID));
-                    selectedObject.setPrinter_name(new SimpleStringProperty(printer_name));
+                    selectedObject.getPrinter().setPrinter_name(new SimpleStringProperty(printer_name));
                     selectedObject.setMaterial_id(new SimpleIntegerProperty(materialID));
-                    selectedObject.setMaterial_type(new SimpleStringProperty(material_type));
-                    selectedObject.setMaterial_color(new SimpleStringProperty(material_color));
+                    selectedObject.getMaterial().setMaterial_type(new SimpleStringProperty(material_type));
+                    selectedObject.getMaterial().setMaterial_color(new SimpleStringProperty(material_color));
                     selectedObject.setPrice(new SimpleDoubleProperty(price));
-                    selectedObject.setCosts(new SimpleDoubleProperty(costs));
+                    selectedObject.getObject().setObject_costs(new SimpleDoubleProperty(costs));
                 
                     newOrderController.setSelectedObjects();
                     newOrderController.refreshSelectedObjects();
@@ -285,10 +284,10 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                         break;
                     //it is not 3D printing - in this case it is previously defined object with weights and times, we only want ot edit quantity - other fields must be locked
                     default:
-                        txtField_weight.setText("" + selectedObject.getObject_weight().get());
-                        txtField_supportWeight.setText("" + selectedObject.getObject_supportWeight().get());
-                        txtField_hours.setText("" + ((selectedObject.getObject_buildTime().get() - selectedObject.getObject_buildTime().get()%60)/60));
-                        txtField_minutes.setText("" + selectedObject.getObject_buildTime().get()%60);
+                        txtField_weight.setText("" + selectedObject.getOrderItem_weight().get());
+                        txtField_supportWeight.setText("" + selectedObject.getOrderItem_supportWeight().get());
+                        txtField_hours.setText("" + ((selectedObject.getObject().getObject_buildTime().get() - selectedObject.getObject().getObject_buildTime().get()%60)/60));
+                        txtField_minutes.setText("" + selectedObject.getObject().getObject_buildTime().get()%60);
                         txtField_quantity.setEditable(true);                        
                 }                        
                 break;
@@ -309,12 +308,12 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     
     private void setTextFields(){
-        label_editedObject.setText(selectedObject.getObject_id().get() + "; "+ selectedObject.getObject_name().get());
+        label_editedObject.setText(selectedObject.getObject_id().get() + "; "+ selectedObject.getObject().getObject_name().get());
         txtField_quantity.setText("" + selectedObject.getQuantity().get());
-        txtField_weight.setText("" + selectedObject.getObject_weight().get());
-        txtField_supportWeight.setText("" + selectedObject.getObject_supportWeight().get());
-        txtField_hours.setText("" + ((selectedObject.getObject_buildTime().get() - selectedObject.getObject_buildTime().get()%60)/60));
-        txtField_minutes.setText("" + selectedObject.getObject_buildTime().get()%60);
+        txtField_weight.setText("" + selectedObject.getOrderItem_weight().get());
+        txtField_supportWeight.setText("" + selectedObject.getOrderItem_supportWeight().get());
+        txtField_hours.setText("" + ((selectedObject.getObject().getObject_buildTime().get() - selectedObject.getObject().getObject_buildTime().get()%60)/60));
+        txtField_minutes.setText("" + selectedObject.getObject().getObject_buildTime().get()%60);
         txtField_material.setText("");
         
         //getting material
@@ -329,13 +328,13 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         
         txtField_price.setText("" + selectedObject.getPrice().get());
         //costs are calculated when loading order items 
-        txtField_costs.setText("" + selectedObject.getCosts().get());
+        txtField_costs.setText("" + selectedObject.getObject().getObject_costs().get());
         
         //We need to set unit weight and print time so when user changes quantity, a unit value will be miltiplied
         double quantity = Double.parseDouble(txtField_quantity.getText());
-        selectedObject.setObject_weight(new SimpleDoubleProperty(selectedObject.getObject_weight().get()/quantity));
-        selectedObject.setObject_weight(new SimpleDoubleProperty(selectedObject.getObject_supportWeight().get()/quantity));
-        selectedObject.setObject_buildTime(new SimpleIntegerProperty(selectedObject.getObject_buildTime().get()/(int) quantity));        
+        selectedObject.setOrderItem_weight(new SimpleDoubleProperty(selectedObject.getOrderItem_weight().get()/quantity));
+        selectedObject.setOrderItem_weight(new SimpleDoubleProperty(selectedObject.getOrderItem_supportWeight().get()/quantity));
+        selectedObject.getObject().setObject_buildTime(new SimpleIntegerProperty(selectedObject.getObject().getObject_buildTime().get()/(int) quantity));        
     }
     
     //this triggers only in case of pre-defined object. Because user can cahnge only quantity, it basically multiplies everything by quantity - this this method is included only in 
@@ -354,14 +353,14 @@ public class SelectPrinterMaterialPriceController implements Initializable {
                 txtField_costs.setText("" + MngApi.round(costs, 2));
                 
                 //Time setting = just multiply time by quantity
-                int build_time = Math.abs((int) quantity*selectedObject.getObject_buildTime().get());
+                int build_time = Math.abs((int) quantity*selectedObject.getObject().getObject_buildTime().get());
                 
                 txtField_hours.setText("" + ((build_time - build_time%60)/60));
                 txtField_minutes.setText("" + build_time%60);
                 
                 //Weight settings - just multiply fields by quantity
-                txtField_weight.setText("" + selectedObject.getObject_weight().get()*quantity);
-                txtField_supportWeight.setText("" + selectedObject.getObject_supportWeight().get()*quantity);
+                txtField_weight.setText("" + selectedObject.getOrderItem_weight().get()*quantity);
+                txtField_supportWeight.setText("" + selectedObject.getOrderItem_supportWeight().get()*quantity);
                 
             } catch(NumberFormatException e){
                 label_info.setText("Enter some positive, non-zero numeric value!");
@@ -381,10 +380,10 @@ public class SelectPrinterMaterialPriceController implements Initializable {
     
     public void setComboBox(){
         //set list of printers
-        ObservableList<SimpleTableObject> printers = FXCollections.observableArrayList(getPrintersShort(mainController.getTv_printers()));
+        ObservableList<Printer> printers = mainController.getTv_printers().getItems();
             
         //edit all combo boxes to eliminate usage of Simple table object and possibly get rid of that class            
-        comboBox_printer.setItems(printers2);
+        comboBox_printer.setItems(printers);
         comboBox_printer.setVisibleRowCount(7);
         comboBox_printer.setConverter(new StringConverter<Printer>() {
             @Override
@@ -402,7 +401,7 @@ public class SelectPrinterMaterialPriceController implements Initializable {
         int printer_id = selectedObject.getPrinter_id().get();                
         for (int i = 0; i < printers.size(); i++) {
             
-            if (printer_id == printers.get(i).getProperty_id().get()){
+            if (printer_id == printers.get(i).getPrinter_id().get()){
                 comboBox_printer.getSelectionModel().select(i);
             } else {
                 comboBox_printer.setValue(printers.get(0));   
@@ -424,14 +423,14 @@ public class SelectPrinterMaterialPriceController implements Initializable {
             }
             
             //set up weights
-            weight = quantity*selectedObject.getObject_weight().get();
-            support_weight = quantity*selectedObject.getObject_supportWeight().get();
+            weight = quantity*selectedObject.getOrderItem_weight().get();
+            support_weight = quantity*selectedObject.getOrderItem_supportWeight().get();
             total_weight = weight + support_weight;            
             txtField_weight.setText(String.valueOf(weight));
             txtField_supportWeight.setText(String.valueOf(support_weight));
             
             //set up build time            
-            build_time = quantity*selectedObject.getObject_buildTime().get();
+            build_time = quantity*selectedObject.getObject().getObject_buildTime().get();
             minutes = build_time % 60;
             hours = (build_time - minutes)/60;
             txtField_hours.setText(String.valueOf(hours));

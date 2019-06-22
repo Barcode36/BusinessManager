@@ -5,9 +5,6 @@
  */
 package classes;
 
-import Database.tables.Costs;
-import Database.tables.OrderItems;
-import Database.tables.Printers;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,11 +12,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 
@@ -29,27 +25,291 @@ import javafx.scene.control.Label;
  */
 public class Printer {
     
-    private SimpleIntegerProperty printer_id, printer_itemsSold, printer_type_id;
-    private SimpleStringProperty printer_name, printer_purchaseDate, printer_comment, printer_type;
-    private SimpleDoubleProperty printer_shipping, printer_price, printer_incomes, printer_expenses, printer_overallIncome, printer_duty, printer_tax;
+    //table columns
+    private SimpleIntegerProperty printer_id, printer_type_id;
+    private SimpleStringProperty printer_name, printer_purchaseDate, printer_comment;
+    private SimpleDoubleProperty printer_shipping, printer_price, printer_duty, printer_tax;
+    
+    //additional columns
+    private SimpleIntegerProperty printer_itemsSold;
+    private SimpleStringProperty printer_type;
+    private SimpleDoubleProperty printer_overallIncome, printer_expenses, printer_incomes;
 
-    public Printer(SimpleIntegerProperty printer_id, SimpleIntegerProperty printer_itemsSold, SimpleIntegerProperty printer_type_id, SimpleStringProperty printer_name, SimpleStringProperty printer_purchaseDate, SimpleStringProperty printer_comment, SimpleStringProperty printer_type, SimpleDoubleProperty printer_shipping, SimpleDoubleProperty printer_price, SimpleDoubleProperty printer_incomes, SimpleDoubleProperty printer_expenses, SimpleDoubleProperty printer_overallIncome, SimpleDoubleProperty printer_duty, SimpleDoubleProperty printer_tax) {
+    public Printer(SimpleIntegerProperty printer_id, SimpleIntegerProperty printer_type_id, SimpleStringProperty printer_name, SimpleStringProperty printer_purchaseDate, SimpleStringProperty printer_comment, SimpleDoubleProperty printer_shipping, SimpleDoubleProperty printer_price, SimpleDoubleProperty printer_duty, SimpleDoubleProperty printer_tax) {
         this.printer_id = printer_id;
-        this.printer_itemsSold = printer_itemsSold;
         this.printer_type_id = printer_type_id;
         this.printer_name = printer_name;
         this.printer_purchaseDate = printer_purchaseDate;
         this.printer_comment = printer_comment;
-        this.printer_type = printer_type;
         this.printer_shipping = printer_shipping;
         this.printer_price = printer_price;
-        this.printer_incomes = printer_incomes;
-        this.printer_expenses = printer_expenses;
-        this.printer_overallIncome = printer_overallIncome;
         this.printer_duty = printer_duty;
         this.printer_tax = printer_tax;
     }
+    
+    public static ObservableList<Printer> downloadPrintersTable(HikariDataSource ds) {
+        //Create list
+        ObservableList<Printer> printers = FXCollections.observableArrayList();
+        
+        //Create query        
+        String query = "SELECT * FROM Printers ORDER BY PrinterID";
 
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection            
+            conn = ds.getConnection();
+            
+            //STEP 4: Execute a query
+            stmt = conn.createStatement();
+            
+            rs = stmt.executeQuery(query);            
+            //Query is executed, resultSet saved. Now we need to process the data
+            //rs.next() loads row            
+            //in this loop we sequentialy add columns to list of Strings
+            while(rs.next()){
+                
+                SimpleIntegerProperty printer_id, printer_type_id;
+                SimpleStringProperty printer_name, printer_purchaseDate, printer_comment;
+                SimpleDoubleProperty printer_shipping, printer_price, printer_duty, printer_tax;
+                
+                printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
+                printer_type_id = new SimpleIntegerProperty(rs.getInt("PrinterTypeID"));
+                
+                printer_name = new SimpleStringProperty(rs.getString("PrinterName"));
+                printer_purchaseDate = new SimpleStringProperty(rs.getString("PurchaseDate"));
+                printer_comment = new SimpleStringProperty(rs.getString("Comment"));
+                
+                printer_shipping = new SimpleDoubleProperty(rs.getDouble("PrinterShipping"));
+                printer_price = new SimpleDoubleProperty(rs.getDouble("PrinterPrice"));
+                printer_duty = new SimpleDoubleProperty(rs.getDouble("Duty"));
+                printer_tax = new SimpleDoubleProperty(rs.getDouble("Tax"));
+                    
+                Printer printer = new Printer(printer_id, printer_type_id, printer_name, printer_purchaseDate, printer_comment, printer_shipping, printer_price, printer_duty, printer_tax);
+                                
+                printers.add(printer);
+                
+            }
+
+            rs.close();
+        } catch (NullPointerException e){
+            //signIn(event);
+            e.printStackTrace();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj = new MngApi();
+            obj.alertConnectionLost();
+            se.printStackTrace();
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } catch (ClassNotFoundException se) {
+            //Handle errors for Class.forName
+            
+            se.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+        
+        return printers;
+    }
+    
+    public static ObservableList<Printer> getPrinters(ObservableList<Printer> printers, ObservableList<SimpleTableObject> commonMaterialProperties, ObservableList<OrderItem> orderItems, ObservableList<Cost> costs) {
+        
+        for (int i = 0; i < printers.size(); i++) {
+            
+            Printer currentPrinter = printers.get(i);
+                        
+            //additional columns
+            SimpleIntegerProperty printer_itemsSold;
+            SimpleStringProperty printer_type;
+            SimpleDoubleProperty printer_overallIncome, printer_expenses, printer_incomes;
+                
+            final SimpleIntegerProperty printer_id = currentPrinter.getPrinter_id();
+            final SimpleIntegerProperty printer_type_id = currentPrinter.getPrinter_type_id();
+            
+            printer_itemsSold = new SimpleIntegerProperty(Printer.getItemsSold(orderItems, printer_id));                
+            printer_type = currentPrinter.getPrinter_type();
+            
+            double expenses[] = null;
+            expenses[0] = Printer.getPrinterIncomesAndMaterialExpenses(orderItems, printer_id)[0];//load printer incomes
+            expenses[1] = Printer.getPrinterIncomesAndMaterialExpenses(orderItems, printer_id)[1];//load material expenses
+            
+            printer_incomes = new SimpleDoubleProperty(expenses[0]);
+                
+            double material_expenses, cost_expenses;
+                
+            material_expenses = expenses[1];
+            cost_expenses = getPrinterCosts(costs, printer_id);                
+            printer_expenses = new SimpleDoubleProperty(MngApi.round(material_expenses + cost_expenses, 2));                
+            printer_overallIncome = new SimpleDoubleProperty(MngApi.round(printer_incomes.get() - printer_expenses.get(), 2));
+                
+            currentPrinter.setPrinter_itemsSold(printer_itemsSold);
+            currentPrinter.setPrinter_type(printer_type);
+            currentPrinter.setPrinter_overallIncome(printer_overallIncome);
+            currentPrinter.setPrinter_expenses(printer_expenses);
+            currentPrinter.setPrinter_incomes(printer_incomes);
+            
+        }           
+        return printers;
+    } 
+    
+    public static double getPrinterCosts(ObservableList<Cost> costs, SimpleIntegerProperty printer_id){
+        
+        double sumOfCosts = 0;
+        
+        for (int i = 0; i < costs.size(); i++) {
+            
+            if(costs.get(i).getCost_printerID() == printer_id){
+                sumOfCosts += costs.get(i).getCost_price().get();
+                sumOfCosts += costs.get(i).getCost_shipping().get();
+            }
+            
+        }
+        return sumOfCosts;
+    }
+    
+    public static Printer getPrinterById(ObservableList<Printer> printers, SimpleIntegerProperty id){
+        
+        for (int i = 0; i < printers.size(); i++) {
+            if(printers.get(i).getPrinter_id() == id)return printers.get(i);
+        }        
+        return null;
+    }
+    
+    public static int getItemsSold(ObservableList<OrderItem> orderItems, SimpleIntegerProperty printer_id){
+        
+        int itemsPrinted = 0;
+        
+        for (int i = 0; i < orderItems.size(); i++) {
+            
+            if(orderItems.get(i).getPrinter().getPrinter_id() == printer_id)return itemsPrinted + orderItems.get(1).getQuantity().get();
+            
+        }
+        
+        return itemsPrinted;
+    }
+    
+    //those are from the same table so why don't load them at once so we dont have to run through same table twice?
+    public static double[] getPrinterIncomesAndMaterialExpenses(ObservableList<OrderItem> orderItems, SimpleIntegerProperty printer_id){
+        
+        double[] expenses = null;
+        
+        double incomes = 0, material_expenses = 0;
+        
+        for (int i = 0; i < orderItems.size(); i++) {            
+            if(orderItems.get(i).getPrinter().getPrinter_id() == printer_id) {
+                incomes += orderItems.get(i).getPrice().get();
+                material_expenses += orderItems.get(i).getObject().getObject_costs().get();
+            }            
+        }
+        
+        expenses[0] = incomes;
+        expenses[1] = material_expenses;
+        
+        return expenses;        
+    }
+    
+    public static void insertNewPrinter(Printer printer, HikariDataSource ds){
+     
+        //Create query
+        String updateQuery;
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            
+            //STEP 2: Register JDBC driver
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            //STEP 3: Open a connection
+
+            conn = ds.getConnection();            
+            //STEP 4: Execute a query
+	    
+                int i =1;
+                updateQuery = "INSERT INTO Printers (PrinterID,PrinterName,PrinterPrice,Comment,PrinterShipping,PrinterTypeID,PurchaseDate,Duty,Tax) VALUES (?,?,?,?,?,?,?,?,?) "
+                    + "ON DUPLICATE KEY UPDATE PrinterID=?,PrinterName=?,PrinterPrice=?,Comment=?,PrinterShipping=?,PrinterTypeID=?,PurchaseDate=?,Duty=?,Tax=?";    
+                stmt = conn.prepareStatement(updateQuery);
+               
+                stmt.setInt(i, printer.getPrinter_id().get());i++;
+                stmt.setString(i, printer.getPrinter_name().get());i++;
+                stmt.setDouble(i, printer.getPrinter_price().get());i++;
+                stmt.setString(i, printer.getPrinter_comment().get());i++;
+                stmt.setDouble(i, printer.getPrinter_shipping().get());i++;
+                stmt.setInt(i, printer.getPrinter_type_id().get());i++;
+                stmt.setString(i, printer.getPrinter_purchaseDate().get());i++;
+                stmt.setDouble(i, printer.getPrinter_duty().get());i++;
+                stmt.setDouble(i, printer.getPrinter_tax().get());i++;
+                
+                stmt.setInt(i, printer.getPrinter_id().get());i++;
+                stmt.setString(i, printer.getPrinter_name().get());i++;
+                stmt.setDouble(i, printer.getPrinter_price().get());i++;
+                stmt.setString(i, printer.getPrinter_comment().get());i++;
+                stmt.setDouble(i, printer.getPrinter_shipping().get());i++;
+                stmt.setInt(i, printer.getPrinter_type_id().get());i++;
+                stmt.setString(i, printer.getPrinter_purchaseDate().get());i++;
+                stmt.setDouble(i, printer.getPrinter_duty().get());i++;
+                stmt.setDouble(i, printer.getPrinter_tax().get());i++;
+                                                
+                stmt.executeUpdate();
+            
+            stmt.close();
+            conn.close();
+        } catch (SQLNonTransientConnectionException se) {
+            MngApi obj2 = new MngApi();
+            obj2.alertConnectionLost();
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (stmt != null)
+                    conn.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try    
+        
+    }
+    
+    public static void deletePrinters(ObservableList<Printer> printers, Label info, HikariDataSource ds){
+        
+        for (int i = 0; i < printers.size(); i++) {
+            
+            int id = printers.get(i).getPrinter_id().get();
+            String query = "DELETE FROM Printers WHERE PrinterID=" + id;
+            System.out.println(query);
+            MngApi.performUpdateQuery(query, info, ds);
+            
+        }
+        info.setText("Printer(s) deleted.");
+    }
+    
     public SimpleIntegerProperty getPrinter_id() {
         return printer_id;
     }
@@ -160,211 +420,5 @@ public class Printer {
 
     public void setPrinter_tax(SimpleDoubleProperty printer_tax) {
         this.printer_tax = printer_tax;
-    }
-   
-    
-    //gets list of printer as simple table objects - thus only id and name
-    public static List<SimpleTableObject> getPrintersShort(ObservableList<Printer> allPrinters) {
-        
-        //Create list
-        List<SimpleTableObject> allPrinters = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT PrinterID, PrinterName FROM Printers ORDER BY PrinterID ASC";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                SimpleIntegerProperty id;
-                SimpleStringProperty name;
-                
-                id = new SimpleIntegerProperty(rs.getInt("PrinterID"));
-                name = new SimpleStringProperty(rs.getString("PrinterName"));
-                
-                allPrinters.add(new SimpleTableObject(id, id, name));
-            }
-
-            rs.close();
-        }catch (NullPointerException e){
-            //signIn(event);
-            e.printStackTrace();
-        }catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-    
-        
-    return allPrinters;
-    }
-    
-    public static List<Printer> getPrintersLong(List<Printers> printers, List<SimpleTableObject> commonMaterialProperties, List<OrderItems> orderItems, List<Costs> costs) {
-        
-        //Create list
-        List<Printer> printerList = new ArrayList<>();
-        
-        for (int i = 0; i < printers.size(); i++) {
-         
-            SimpleIntegerProperty printer_id, printer_itemsSold, printer_type_id;
-            SimpleStringProperty printer_name, printer_purchaseDate, printer_comment, printer_type;
-            SimpleDoubleProperty printer_shipping, printer_price, printer_duty, printer_tax, printer_incomes, printer_expenses, printer_overallIncome;
-                
-            printer_id = printers.get(i).getPrinterID();
-            printer_itemsSold = new SimpleIntegerProperty(Printers.getItemsSold(orderItems, printer_id));
-            printer_type_id = printers.get(i).getPrinterTypeID();
-                
-            printer_name = printers.get(i).getPrinterName();
-            printer_purchaseDate = printers.get(i).getPurchaseDate();
-            printer_comment = printers.get(i).getComment();
-            printer_type = Printers.getPrinterType(commonMaterialProperties, printer_type_id);
-                
-            printer_shipping = new SimpleDoubleProperty(MngApi.round(printers.get(i).getPrinterShipping().get(), 2));
-            printer_price = new SimpleDoubleProperty(MngApi.round(printers.get(i).getPrinterPrice().get(), 2));
-            printer_duty = new SimpleDoubleProperty(MngApi.round(printers.get(i).getDuty().get(), 2));
-            printer_tax = new SimpleDoubleProperty(MngApi.round(printers.get(i).getTax().get(), 2));
-            
-            double expenses[] = null;
-            expenses[0] = Printers.getPrinterIncomesAndMaterialExpenses(orderItems, printer_id)[0];//load printer incomes
-            expenses[1] = Printers.getPrinterIncomesAndMaterialExpenses(orderItems, printer_id)[1];//load material expenses
-            
-            printer_incomes = new SimpleDoubleProperty(expenses[0]);
-                
-            double material_expenses, cost_expenses;
-                
-            material_expenses = expenses[1];
-            cost_expenses = Printers.getPrinterCosts(costs, printer_id);
-                
-                
-            printer_expenses = new SimpleDoubleProperty(MngApi.round(material_expenses + cost_expenses, 2));
-                
-            printer_overallIncome = new SimpleDoubleProperty(MngApi.round(printer_incomes.get() - printer_expenses.get(), 2));
-                
-            Printer printer = new Printer(printer_id, printer_itemsSold, printer_type_id, printer_name, printer_purchaseDate, printer_comment, printer_type, printer_shipping, printer_price, printer_incomes, printer_expenses, printer_overallIncome, printer_duty, printer_tax);
-                
-            printerList.add(printer);
-            
-        }           
-        return null;
-    } 
-    
-    public static void insertNewPrinter(Printer printer, HikariDataSource ds){
-     
-        //Create query
-        String updateQuery;
-
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();            
-            //STEP 4: Execute a query
-	    
-                int i =1;
-                updateQuery = "INSERT INTO Printers (PrinterID,PrinterName,PrinterPrice,Comment,PrinterShipping,PrinterTypeID,PurchaseDate,Duty,Tax) VALUES (?,?,?,?,?,?,?,?,?) "
-                    + "ON DUPLICATE KEY UPDATE PrinterID=?,PrinterName=?,PrinterPrice=?,Comment=?,PrinterShipping=?,PrinterTypeID=?,PurchaseDate=?,Duty=?,Tax=?";    
-                stmt = conn.prepareStatement(updateQuery);
-               
-                stmt.setInt(i, printer.getPrinter_id().get());i++;
-                stmt.setString(i, printer.getPrinter_name().get());i++;
-                stmt.setDouble(i, printer.getPrinter_price().get());i++;
-                stmt.setString(i, printer.getPrinter_comment().get());i++;
-                stmt.setDouble(i, printer.getPrinter_shipping().get());i++;
-                stmt.setInt(i, printer.getPrinter_type_id().get());i++;
-                stmt.setString(i, printer.getPrinter_purchaseDate().get());i++;
-                stmt.setDouble(i, printer.getPrinter_duty().get());i++;
-                stmt.setDouble(i, printer.getPrinter_tax().get());i++;
-                
-                stmt.setInt(i, printer.getPrinter_id().get());i++;
-                stmt.setString(i, printer.getPrinter_name().get());i++;
-                stmt.setDouble(i, printer.getPrinter_price().get());i++;
-                stmt.setString(i, printer.getPrinter_comment().get());i++;
-                stmt.setDouble(i, printer.getPrinter_shipping().get());i++;
-                stmt.setInt(i, printer.getPrinter_type_id().get());i++;
-                stmt.setString(i, printer.getPrinter_purchaseDate().get());i++;
-                stmt.setDouble(i, printer.getPrinter_duty().get());i++;
-                stmt.setDouble(i, printer.getPrinter_tax().get());i++;
-                                                
-                stmt.executeUpdate();
-            
-            stmt.close();
-            conn.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj2 = new MngApi();
-            obj2.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try    
-        
-    }
-    
-    public static void deletePrinters(ObservableList<Printer> printers, Label info, HikariDataSource ds){
-        
-        for (int i = 0; i < printers.size(); i++) {
-            
-            int id = printers.get(i).getPrinter_id().get();
-            String query = "DELETE FROM Printers WHERE PrinterID=" + id;
-            System.out.println(query);
-            MngApi.performUpdateQuery(query, info, ds);
-            
-        }
-        info.setText("Printer(s) deleted.");
     }
 }

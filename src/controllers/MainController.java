@@ -11,6 +11,7 @@ import classes.Material;
 import classes.MngApi;
 import classes.Object;
 import classes.Order;
+import classes.OrderItem;
 import classes.Printer;
 import classes.SimpleTableObject;
 import com.zaxxer.hikari.HikariDataSource;
@@ -50,6 +51,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+
 /**
  * FXML Controller class
  *
@@ -72,10 +74,21 @@ public class MainController implements Initializable {
     @FXML
     private Label label_main_info;
         
-    //private List<SimpleTableObject> commonMaterialProperties, commonCustomerProperties;
+    private ObservableList<SimpleTableObject> commonCustomerProperties;
+    private ObservableList<SimpleTableObject> commonMaterialProperties;
+    private ObservableList<SimpleTableObject> customerPropertyTypes;
+    private ObservableList<SimpleTableObject> materialPropertyTypes;
+    private ObservableList<SimpleTableObject> orderStatus;
     
-    private List<CommonCustomerProperties> commonCustomerProperties;
-    private List<CommonMaterialProperties> commonMaterialProperties;    
+    private ObservableList<Cost> costsTable;
+    private ObservableList<Customer> customersTable;    
+    private ObservableList<Material> materialsTable;
+    private ObservableList<Object> objectsTable;
+    private ObservableList<OrderItem> orderItemsTable;        
+    private ObservableList<Printer> printersTable;
+    private ObservableList<Order> ordersTable;
+    
+    
     
      // Create the service
     private final Service<Void> service_refreshAll = new Service<Void>() {
@@ -96,34 +109,39 @@ public class MainController implements Initializable {
         }
     };
     
-    /*****************************          GENERAL - METHODS *****************************/
+    /*****************************          GENERAL - METHODS
+     * @param ds *****************************/
     
     public void downloadTables(HikariDataSource ds){
         
         System.out.println("Downloading has started...");
-        commonCustomerProperties = Customer.getCommonCustomerProperties(ds);
-        commonMaterialProperties = Material.getCommonMaterialProperties(ds);
-        costs = Costs.getCosts(ds);
-        customerPropertyTypes = CustomerPropertyTypes.getCustomerPropertyTypes(ds);
-        customers = Customers.getCustomers(ds);
-        materialPropertyTypes = MaterialPropertyTypes.getMaterialPropertyTypes(ds);
-        materials = Materials.getMaterials(ds);
-        objects = Objects.getObjects(ds);
-        orderItems = OrderItems.getOrderItems(ds);
-        orderStatus = OrderStatus.getOrderStatuses();
-        printers = Printers.getPrinters(ds);        
+        long start = System.currentTimeMillis();
+        commonCustomerProperties = SimpleTableObject.downloadCommonCustomerProperties(ds);
+        commonMaterialProperties = SimpleTableObject.downloadCommonMaterialProperties(ds);
+        costsTable = Cost.downloadCostsTable(ds);
+        customerPropertyTypes = SimpleTableObject.downloadCustomerPropertyTypes(ds);
+        customersTable = Customer.downloadCustomersTable(ds);
+        materialPropertyTypes = SimpleTableObject.downloadMaterialPropertyTypes(ds);
+        materialsTable = Material.downloadMaterialsTable(ds);
+        objectsTable = Object.downloadObjectsTable(ds);
+        orderItemsTable = OrderItem.downloadOrderItemsTable(ds);
+        orderStatus = Order.downloadOrderStatusTable(ds);
+        printersTable = Printer.downloadPrintersTable(ds);
+        ordersTable = Order.downloadOrdersTable(ds);
         System.out.println("\nDownloading completed.");
-        
+        long finish = System.currentTimeMillis();
+        System.out.println("Elapsed time: " + (finish - start));
+                
     }
     
     public void loadAll(){        
-        runService(service_refreshCustomers);
-        runService(service_refreshCosts);
-        runService(service_refreshObjects);        
-        runService(service_refreshMaterials);
+//        runService(service_refreshCustomers);
+//        runService(service_refreshCosts);
+//        runService(service_refreshObjects);        
+//        runService(service_refreshMaterials);
         runService(service_refreshOrders);
-        runService(service_refreshPrinters);
-        runService(service_refreshStatistics);
+//        runService(service_refreshPrinters);
+//        runService(service_refreshStatistics);
     }
     
     //gets list of common material properties (loaded at the begining) based on types
@@ -180,6 +198,8 @@ public class MainController implements Initializable {
         return properties;
     }
     
+    
+    
     public void setDataSource(HikariDataSource ds){
         this.ds = ds;        
     }
@@ -215,22 +235,6 @@ public class MainController implements Initializable {
 
     public Service<Void> getService_refreshAll() {
         return service_refreshAll;
-    }
-
-    public List<SimpleTableObject> getCommonMaterialProperties() {
-        return commonMaterialProperties;
-    }
-
-    public void setCommonMaterialProperties(List<SimpleTableObject> commonMaterialProperties) {
-        this.commonMaterialProperties = commonMaterialProperties;
-    }
-    
-    public List<SimpleTableObject> getCommonCustomerProperties() {
-        return commonCustomerProperties;
-    }
-
-    public void setCommonCustomerProperties(List<SimpleTableObject> commonCustomerProperties) {
-        this.commonCustomerProperties = commonCustomerProperties;
     }
 
     public TableView<Order> getTv_orders() {
@@ -377,7 +381,7 @@ public class MainController implements Initializable {
     public void refreshOrdersTable(HikariDataSource ds) {
         
         //Create list of orders
-        ObservableList<Order> orderList = FXCollections.observableArrayList(Order.getOrders(ds));
+        ObservableList<Order> orderList = Order.getOrders(ordersTable, customersTable, orderItemsTable, objectsTable, materialsTable, commonMaterialProperties, printersTable);
         
         //set cell value factory for columns by type
         
@@ -540,7 +544,7 @@ public class MainController implements Initializable {
     
     public void refreshCustomersTable(HikariDataSource ds) {
         //Create list of orders
-        ObservableList<Customer> customerList = FXCollections.observableArrayList(Customer.getCustomers(commonCustomerProperties,ds));
+        ObservableList<Customer> customerList = Customer.getCustomers(customersTable, ordersTable, commonCustomerProperties);
         
         
         //set cell value factory for columns by type
@@ -862,10 +866,10 @@ public class MainController implements Initializable {
     public void refreshMaterialsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Material> materialList = FXCollections.observableArrayList(Material.getMaterials(commonMaterialProperties,ds));
+        ObservableList<Material> materialList = Material.getMaterials(commonMaterialProperties, materialsTable, orderItemsTable);
         
         material_col_color.setCellValueFactory((param) -> {return param.getValue().getMaterial_color();});
-        material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_distributor();});           
+        material_col_distributor.setCellValueFactory((param) -> {return param.getValue().getMaterial_seller();});           
         material_col_finished.setCellValueFactory((param) -> {return param.getValue().getMaterial_finished();});
         material_col_manufacturer.setCellValueFactory((param) -> {return param.getValue().getMaterial_manufacturer();});
         material_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getMaterial_purchaseDate();});
@@ -1011,7 +1015,9 @@ public class MainController implements Initializable {
     public void refreshCostsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Cost> costsList = FXCollections.observableArrayList(Cost.getCosts(ds));
+        System.out.println("Costs Table: " + costsTable.size() + "/n");
+        System.out.println("Printers Table: " + printersTable.size() + "/n");
+        ObservableList<Cost> costsList = Cost.getCosts(costsTable, printersTable);
         
         cost_col_comment.setCellValueFactory((param) -> {return param.getValue().getCost_comment();});
         cost_col_name.setCellValueFactory((param) -> {return param.getValue().getCost_name();});           
@@ -1180,7 +1186,7 @@ public class MainController implements Initializable {
     public void refreshPrintersTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Printer> printersList = FXCollections.observableArrayList(Printer.getPrintersLong(ds));
+        ObservableList<Printer> printersList = Printer.getPrinters(printersTable, commonMaterialProperties, orderItemsTable, costsTable);
         
         printer_col_name.setCellValueFactory((param) -> {return param.getValue().getPrinter_name();});
         printer_col_purchaseDate.setCellValueFactory((param) -> {return param.getValue().getPrinter_purchaseDate();});           

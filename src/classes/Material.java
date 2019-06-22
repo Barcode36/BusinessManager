@@ -12,11 +12,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 
@@ -32,7 +31,7 @@ public class Material {
     SimpleStringProperty material_comment, material_finished, material_purchaseDate;
             
     //additional columns
-    SimpleStringProperty material_color, material_manufacturer, material_type, material_distributor;    
+    SimpleStringProperty material_color, material_manufacturer, material_type, material_seller;    
     SimpleDoubleProperty material_diameter, material_used, material_trash, material_soldFor, material_profit, material_remaining, material_weight;
     
     //simple constructor for database table
@@ -58,7 +57,7 @@ public class Material {
         this.material_manufacturer = material_manufacturer;
         this.material_type = material_type;
         this.material_finished = material_finished;
-        this.material_distributor = material_distributor;
+        this.material_seller = material_distributor;
         this.material_purchaseDate = material_purchaseDate;
         this.material_comment = material_comment;
         this.material_id = material_id;
@@ -79,10 +78,10 @@ public class Material {
         this.material_remaining = material_remaining;
     }
     
-    public static List<Material> downloadMaterialsTable(HikariDataSource ds) {
+    public static ObservableList<Material> downloadMaterialsTable(HikariDataSource ds) {
         
         //Create list
-        List<Material> materials = new ArrayList<>();
+        ObservableList<Material> materials = FXCollections.observableArrayList();
         
         //Create query        
         String query = "SELECT * FROM Materials";
@@ -163,17 +162,17 @@ public class Material {
     }
     
     //this method get list of materials - ONLY materials, without statistics
-    public static List<Material> getMaterials(List<SimpleTableObject> commonMaterialProperties, ObservableList<Material> materialsTable, ObservableList<OrderItem> allOrderItems) {
+    public static ObservableList<Material> getMaterials(ObservableList<SimpleTableObject> commonMaterialProperties, ObservableList<Material> materialsTable, ObservableList<OrderItem> allOrderItems) {
         
         //Create list
-        List<Material> allMaterialsList = new ArrayList<>();
+        ObservableList<Material> allMaterialsList = FXCollections.observableArrayList();
                 
         for (int i = 0; i < materialsTable.size(); i++) {
                         
             Material currentMaterial = materialsTable.get(i);
             ObservableList<OrderItem> orderItems = OrderItem.getOrderItemsByMaterialId(currentMaterial.getMaterial_id(), allOrderItems);
             
-//            SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_distributor, material_purchaseDate, material_comment;
+//            SimpleStringProperty material_color, material_manufacturer, material_type, material_finished, material_seller, material_purchaseDate, material_comment;
 //            SimpleIntegerProperty material_id, material_id_manufacturer, material_id_materialType, material_id_color, material_id_weight, material_id_seller, material_id_diameter;
 //            SimpleDoubleProperty material_diameter, material_price, material_shipping, material_used, material_trash, material_soldFor, material_profit, material_weight, material_remaining;
             
@@ -200,7 +199,7 @@ public class Material {
                 
                 OrderItem item = orderItems.get(j);
                 
-                material_used_absolute += item.getObject_supportWeight().get() + item.getObject_weight().get();
+                material_used_absolute += item.getOrderItem_supportWeight().get() + item.getOrderItem_weight().get();
                 soldFor += item.getPrice().get();
                 
             }
@@ -223,10 +222,10 @@ public class Material {
     return allMaterialsList;
     }
     
-    public static List<Material> getNotSpentMaterials(List<SimpleTableObject> commonMaterialProperties, ObservableList<Material>materialsTable, ObservableList<OrderItem> allOrderItems) {
+    public static ObservableList<Material> getNotSpentMaterials(ObservableList<SimpleTableObject> commonMaterialProperties, ObservableList<Material>materialsTable, ObservableList<OrderItem> allOrderItems) {
           
         //Create list
-        List<Material> allMaterialsList = new ArrayList<>();
+        ObservableList<Material> allMaterialsList = FXCollections.observableArrayList();
                 
         for (int i = 0; i < materialsTable.size(); i++) {
                         
@@ -277,7 +276,7 @@ public class Material {
                 
                 OrderItem item = orderItems.get(j);
                 
-                material_used_absolute += item.getObject_supportWeight().get() + item.getObject_weight().get();
+                material_used_absolute += item.getOrderItem_supportWeight().get() + item.getOrderItem_weight().get();
                 soldFor += item.getPrice().get();
                 
             }
@@ -297,85 +296,21 @@ public class Material {
     }
     
     
-    private static SimpleTableObject getCommonMaterialPropertiesByID(List<SimpleTableObject> commonMaterialProperties, int id){
+    private static SimpleTableObject getCommonMaterialPropertiesByID(ObservableList<SimpleTableObject> commonMaterialProperties, int id){
         return commonMaterialProperties.get(id-1);
     }
     
-    public static List<SimpleTableObject> getCommonMaterialProperties(HikariDataSource ds) {
+    public static double getObjectsCosts(OrderItem item, Material material){
+                
+        double totalWeight = item.getOrderItem_weight().get() + item.getOrderItem_supportWeight().get();
+        double pricePerGram = (material.getMaterial_price().get() + material.getMaterial_shipping().get()) / material.getMaterial_weight().get();
+        double quantity = item.getQuantity().get();
+        double costs = totalWeight*pricePerGram*quantity;        
         
-        //Create list
-        List<SimpleTableObject> properties = new ArrayList<>();
-        
-        //Create query
-        String query = "SELECT * FROM CommonMaterialProperties";
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            
-            if(conn.isValid(10) == false) {
-                MngApi obj = new MngApi();
-                obj.alertConnectionLost();
-            }
-            
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
-                
-                SimpleIntegerProperty property_id, property_type_id;
-                SimpleStringProperty property_type_name;
-                
-                property_id = new SimpleIntegerProperty(rs.getInt("PropertyID"));
-                property_type_id = new SimpleIntegerProperty(rs.getInt("PropertyTypeID"));
-                property_type_name = new SimpleStringProperty(rs.getString("PropertyName"));
-                
-                SimpleTableObject property = new SimpleTableObject(property_id, property_type_id, property_type_name);
-                
-                properties.add(property);
-                
-            }
-
-            rs.close();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-    return properties;
+        return costs;
     }
     
+    //add binary search and use for loading from complete list    
     public static Material getMaterialByID(ObservableList<Material> materials, int material_id){
         Material material = null;
         
@@ -383,27 +318,27 @@ public class Material {
             
             material = materials.get(i);
             
-            if(material.getMaterial_id().get() == material_id)break;
-            
+            if(material.getMaterial_id().get() == material_id)break;            
         }
         
         return material;
     }
     
-    public static Material getMaterialByID(SimpleIntegerProperty material_id, ObservableList<Material> allMaterials) {
+    //use this for partial listing - like when we want to display orderItems in "new order" dialog windows - we dont need all the information about material, only ID, Type and Color
+    public static Material getMaterialByID(SimpleIntegerProperty material_id, ObservableList<Material> materialsTable, ObservableList<SimpleTableObject> commonMaterialProperties, ObservableList<SimpleTableObject> MaterialPropertyTypes) {
         
-        Material material = null;
+        Material material = materialsTable.get(0);
         
         //binary search: we are searching first orderItem with material_id and then we will find beginning of series (there could be multiple orderItems with same material_id
         int numberToGuess = material_id.get();
-        int start = 1;
-        int end = allMaterials.size();
-        int position = 0;
+        int start = 0;
+        int end = materialsTable.size() - 1;
+        int position;
         
         while(start <= end){
             position = (start + end)/2;
             
-            material = allMaterials.get(position);
+            material = materialsTable.get(position);
             
             if (material.getMaterial_id() == material_id)break;
             
@@ -416,6 +351,26 @@ public class Material {
                 start = position + 1;
                 
             }            
+        }
+        
+        //now, we should have material from 'Materials' table, but only IDs. We need types, colors, manufacturers, sellers... 
+        //these information are listed in 'CommonMaterialProperties'
+        try {
+            
+            material.setMaterial_color(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_color()));            
+            material.setMaterial_type(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_materialType()));
+            material.setMaterial_manufacturer(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_manufacturer()));
+            material.setMaterial_seller(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_seller()));
+            material.setMaterial_diameter(new SimpleDoubleProperty(Double.parseDouble(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_diameter()).get())));
+                        
+            double materialWeight = Double.parseDouble(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_weight()).get());
+                        
+            material.setMaterial_weight(new SimpleDoubleProperty(materialWeight));
+            
+            
+        } catch (NullPointerException e) {
+            System.out.println("Is null/n");
+            e.printStackTrace();
         }
         
         return material;
@@ -544,12 +499,12 @@ public class Material {
         this.material_finished = material_finished;
     }
 
-    public SimpleStringProperty getMaterial_distributor() {
-        return material_distributor;
+    public SimpleStringProperty getMaterial_seller() {
+        return material_seller;
     }
 
-    public void setMaterial_distributor(SimpleStringProperty material_distributor) {
-        this.material_distributor = material_distributor;
+    public void setMaterial_seller(SimpleStringProperty material_seller) {
+        this.material_seller = material_seller;
     }
 
     public SimpleStringProperty getMaterial_purchaseDate() {
