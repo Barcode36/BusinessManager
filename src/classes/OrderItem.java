@@ -292,172 +292,119 @@ public class OrderItem {
     //in this method we will assign orderItems to particular OrderItem
     public static void getOrderItemsForOrders(ObservableList<Order> ordersTable, ObservableList<OrderItem> orderItemsTable, ObservableList<classes.Object> objectsTable, ObservableList<Material> materialsTable, ObservableList<SimpleTableObject> commonMaterialPropertiesTable, ObservableList<Printer> printersTable){
         
-        OrderItem orderItem;
-        ObservableList<OrderItem> orderItems = FXCollections.observableArrayList();
-        
+//        System.out.println("Number of orders: "  + ordersTable.size());
+//        System.out.println("Number of order items: " + orderItemsTable.size());
         //let's take orders one by one
         for (int i = 0; i < ordersTable.size(); i++) {
-            
-            Order order = ordersTable.get(i);            
-            
-            SimpleIntegerProperty order_id = order.getOrder_id();
-            int j = 0;
-            
-            //now that we have order loaded we can scan orderItems list for orderItems with particular order_id  and add those orederItems to list
-            //OrderItems list must be sorted by order_id so first object in OrderItems must belong to first order in Order list
-                      
             try {
-                while (orderItemsTable.get(j).getOrder_id().get() == order_id.get()){
-                    orderItems.add(orderItemsTable.get(j));                    
-                    j++;
-                }                
-            } catch (IndexOutOfBoundsException e) {
-                break;
-            }
+                
+                Order order = ordersTable.get(i);
+                if(order == null)return;        
+                ObservableList<OrderItem> orderItems = FXCollections.observableArrayList();
+                OrderItem orderItem;
             
-            
-            //now we should have Order loaded in "order" object we have created
-            //we should also have list of orderItem bolinging to that particular order loaded in orderItems list we have created
-            
-            //before further proceeding we will delete "found" OrderItems so when next Order is loaded, there won't be
-            //OrderItems with order_id of previous Order
-            orderItemsTable.removeAll(orderItems);
+                SimpleIntegerProperty order_id = order.getOrder_id();            
+                            
+                //now that we have order loaded we can scan orderItemsTable list for order items with particular order_id  and add those to orederItems list
+                //OrderItems list must be sorted by order_id so first object in OrderItems must belong to first order in Order list                      
+                //System.out.println("\nScanning order ID " + order_id.get() + " for order items:");
+                for (int k = 0; k < orderItemsTable.size(); k++) {
                         
-            //we now take every of that orderItems and set other details lika printer, material, object, etc.
-            for (int k = 0; k < orderItems.size(); k++) {
-                
-                orderItem = orderItems.get(k);                
-                orderItem.setPrinter(Printer.getPrinterById(printersTable, orderItem.getPrinter_id()));
-                orderItem.setMaterial(Material.getMaterialByID(order_id, materialsTable, commonMaterialPropertiesTable, commonMaterialPropertiesTable));
-                orderItem.setObject(Object.getObjectByID(order_id, objectsTable, orderItemsTable, orderItem.getMaterial()));
-                
+                    if(orderItemsTable.size() == 0)break;                        
+                    if(orderItemsTable.get(k).getOrder_id().get() == order_id.get()){
+                        orderItems.add(orderItemsTable.get(k));
+                    } else {                        
+                        break;
+                    }
+                }
+                //System.out.println(orderItems.size() + " items found in order ID " + order_id.get());
+            
+                //now we should have Order loaded in "order" object we have created
+                //we should also have list of orderItem belonging to that particular order loaded in orderItems list we have created
+            
+                //before further proceeding we will delete "found" OrderItems so when next Order is loaded, there won't be
+                //OrderItems with order_id of previous Order
+                //System.out.println("Removing found order items(" + orderItems.size() + ") from list of all order items.\nLooping found order items for stats.\n");
+                orderItemsTable.removeAll(orderItems);
+                //System.out.println("Number of order items: " + orderItemsTable.size());
+            
+//                System.out.println("Orders in processing queue: ");
+//                for (int g = 0; g < orderItems.size(); g++) {
+//                    System.out.println(orderItems.get(g).getOrder_id().get());
+//                }
+            
+                //we now take every of that orderItems and set other details like printer, material, object, etc.
                 //collecting some statistics about order
                 //table view columns
                 int totalQuantity = 0, totalBuildTime = 0;
                 double totalCosts = 0, totalPrice = 0, totalWeight = 0, totalSupportWeight = 0;
-            
-                totalBuildTime += orderItem.getObject().getObject_buildTime().get();
-                totalCosts += orderItem.getObject().getObject_costs().get();
-                totalPrice += orderItem.getPrice().get();
-                totalQuantity += orderItem.getQuantity().get();
-                totalSupportWeight += orderItem.getOrderItem_supportWeight().get();
-                totalWeight += orderItem.getOrderItem_weight().get();   
+        
+                for (int k = 0; k < orderItems.size(); k++) {
                 
+                    orderItem = orderItems.get(k);                
+                
+                    //System.out.println("\nProccessing " + (k+1) + ". item with ID: " + orderItem.getOrderItem_id().get());                
+                    orderItem.setPrinter(Printer.getPrinterById(printersTable, orderItem.getPrinter_id()));
+                    //System.out.println("Setting a printer: " + orderItem.getPrinter().getPrinter_id().get() + ";" +orderItem.getPrinter().getPrinter_name().get());
+                    orderItem.setMaterial(Material.binarySearchMaterial(orderItem.getMaterial_id(), materialsTable, commonMaterialPropertiesTable, commonMaterialPropertiesTable));
+                    //System.out.println("Setting material: " + orderItem.getMaterial().getMaterial_id().get() + ";" + orderItem.getMaterial().getMaterial_type().get() + ";" + orderItem.getMaterial().getMaterial_color().get() + ";" + orderItem.getMaterial().getMaterial_weight().get() + ";" + orderItem.getMaterial().getMaterial_seller().get());
+                    orderItem.setObject(Object.binarySearchObject(objectsTable, orderItem.getObject_id()));
+                    //System.out.println("Setting object "  + orderItem.getObject().getObject_id().get() + "(" + orderItem.getObject_id().get() + ");" + orderItem.getObject().getObject_name().get());
+                            
+//                    System.out.println("Calculating statistics for order item " + orderItem.getOrderItem_id().get() + " of order " + order.getOrder_id().get() + "...");
+//                    System.out.println("Current total build time: " + totalBuildTime);
+//                    System.out.println("Current total costs: " + totalCosts);
+//                    System.out.println("Current total price: " + totalPrice);
+//                    System.out.println("Current total qantity: " + totalQuantity);
+//                    System.out.println("Current total support weight: " + totalSupportWeight);
+//                    System.out.println("Current total weight (supports excl.): " + totalWeight);
+                                
+                    totalBuildTime += orderItem.getOrderItem_buildTime().get();
+                    totalCosts += orderItem.getOrderItemCosts(orderItem.getMaterial(), orderItem);
+                    totalPrice += orderItem.getPrice().get();
+                    totalQuantity += orderItem.getQuantity().get();
+                    totalSupportWeight += orderItem.getOrderItem_supportWeight().get();
+                    totalWeight += orderItem.getOrderItem_weight().get();   
+                                
+    //                System.out.println("New total build time: " + totalBuildTime);
+    //                System.out.println("New total costs: " + totalCosts);
+    //                System.out.println("New total price: " + totalPrice);
+    //                System.out.println("New total qantity: " + totalQuantity);
+    //                System.out.println("New total support weight: " + totalSupportWeight);
+    //                System.out.println("New total weight (supports excl.): " + totalWeight);                                    
+                }
+            
+                //and finally we add this list of complete order items to order. Because orderItems list is created withing a loop, it is always erased
+                //This ensures that all already processed items are deleted to avoid of getting into endless loop
+                order.setOrder_costs(new SimpleDoubleProperty(MngApi.round(totalCosts, 2)));
                 order.setOrder_buildTime(new SimpleIntegerProperty(totalBuildTime));
-                order.setOrder_buildTime_formated(MngApi.convertToFormattedTime(totalBuildTime));
-                order.setOrder_costs(new SimpleDoubleProperty(totalCosts));
-                order.setOrder_price(new SimpleDoubleProperty(totalPrice));
+                order.setOrder_buildTime_formated(MngApi.convertToFormattedTime(totalBuildTime));                
+                order.setOrder_price(new SimpleDoubleProperty(MngApi.round(totalPrice, 2)));
                 order.setOrder_quantity(new SimpleIntegerProperty(totalQuantity));
-                order.setOrder_weight(new SimpleDoubleProperty(totalWeight));
-                order.setOrder_support_weight(new SimpleDoubleProperty(totalSupportWeight));
+                order.setOrder_weight(new SimpleDoubleProperty(MngApi.round(totalWeight, 2)));
+                order.setOrder_support_weight(new SimpleDoubleProperty(MngApi.round(totalSupportWeight, 2)));
+                    
+                order.setOrderItems(orderItems);
+            } catch (IndexOutOfBoundsException e) {
+//              break;
+                e.printStackTrace();
             }
+            //System.out.println("Quantity of order no.: " + order.getOrder_id().get() + " is " + order.getOrder_quantity().get());
         }
     }
-    
-    //values in database are not multiplied by quantity - that means that total wieght is ObjectWeight*ItemQuantity
-    public static ObservableList<OrderItem> getOrderItems(ObservableList<Material> materials, int order_id, HikariDataSource ds){
+       
+    public double getOrderItemCosts(Material material, OrderItem orderItem){
+        int quantity = orderItem.getQuantity().get();
+                
+        double weight = orderItem.getOrderItem_weight().get() + orderItem.getOrderItem_supportWeight().get();        
+        double materiaWeight = material.getMaterial_weight().get();
+        double materialPrice = material.getMaterial_price().get() + material.getMaterial_shipping().get();
         
-        //Create list
-        ObservableList<OrderItem> itemList = FXCollections.observableArrayList();
-        
-        //Create query
-        String query =  "SELECT Objects.ObjectID, Objects.ObjectName, OrderItems.*, Printers.PrinterID, Printers.PrinterName FROM OrderItems  JOIN Objects ON Objects.ObjectID = OrderItems.ObjectID  JOIN Printers ON Printers.PrinterID = OrderItems.PrinterID WHERE OrderID=" + order_id + " ORDER BY OrderItems.OrderItemID";
-        
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            
-            //STEP 2: Register JDBC driver
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            //STEP 3: Open a connection
-
-            conn = ds.getConnection();
-            //STEP 4: Execute a query
-            stmt = conn.createStatement();
-            
-            rs = stmt.executeQuery(query);            
-            //Query is executed, resultSet saved. Now we need to process the data
-            //rs.next() loads row            
-            //in this loop we sequentialy add columns to list of Strings
-            while(rs.next()){
+        double priceperGram = materialPrice/materiaWeight;
                 
-                SimpleStringProperty  object_name, object_buildTime_formated, printer_name, material_type, material_color;
-                SimpleIntegerProperty orderItem_id, object_id, object_buildTime, quantity, printer_id, material_id;
-                SimpleDoubleProperty object_supportWeight, object_weight, price, item_costs;
-                
-                material_id = new SimpleIntegerProperty(rs.getInt("ItemMaterialID"));
-                
-                Material material = Material.getMaterialByID(materials, material_id.get());
-                
-                object_name = new SimpleStringProperty(rs.getString("ObjectName"));                
-                printer_name = new SimpleStringProperty(rs.getString("PrinterName"));
-                material_type = material.getMaterial_type();
-                material_color = material.getMaterial_color();
-                                
-                orderItem_id = new SimpleIntegerProperty(rs.getInt("OrderItemID"));
-                object_id = new SimpleIntegerProperty(rs.getInt("ObjectID"));
-                object_buildTime = new SimpleIntegerProperty(rs.getInt("ItemBuildTime"));
-                    object_buildTime_formated = MngApi.convertToFormattedTime(object_buildTime.get());
-                quantity = new SimpleIntegerProperty(rs.getInt("ItemQuantity"));
-                printer_id = new SimpleIntegerProperty(rs.getInt("PrinterID"));                
-                
-                
-               
-                object_supportWeight = new SimpleDoubleProperty(rs.getDouble("ItemSupportWeight"));
-                object_weight = new SimpleDoubleProperty(rs.getDouble("ItemWeight"));
-                price = new SimpleDoubleProperty(rs.getDouble("ItemPrice"));
-                
-                //costs calculation
-                    Double material_price, material_shipping, price_per_gram, total_weight, costs;
-                    double material_weight;
-                    
-                    material_price = material.getMaterial_price().get();
-                    material_shipping = material.getMaterial_shipping().get();
-                    material_weight = material.getMaterial_weight().get();        
-                    price_per_gram = (material_price+material_shipping)/material_weight;        
-                    total_weight = object_weight.get() + object_supportWeight.get();                                                                    
-                    costs = MngApi.round(price_per_gram*total_weight, 2);                                
-                    item_costs = new SimpleDoubleProperty(costs);
-                    
-                    OrderItem item = new OrderItem(orderItem_id, printer_id, object_id, material_id, quantity, printer_id, object_buildTime, object_supportWeight, object_weight, price);
-               
-                itemList.add(item);
-            }
-
-            rs.close();
-        } catch (NullPointerException e){
-            //signIn(event);
-            e.printStackTrace();
-        } catch (SQLNonTransientConnectionException se) {
-            MngApi obj = new MngApi();
-            obj.alertConnectionLost();
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (ClassNotFoundException se) {
-            //Handle errors for Class.forName
-            se.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null)
-                    conn.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (conn != null)
-                    conn.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        
-        return itemList; 
-        
+        return priceperGram*quantity*weight;
     }
-
+    
     public SimpleIntegerProperty getOrderItem_id() {
         return orderItem_id;
     }

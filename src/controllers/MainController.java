@@ -134,14 +134,86 @@ public class MainController implements Initializable {
                 
     }
     
-    public void loadAll(){        
-//        runService(service_refreshCustomers);
-//        runService(service_refreshCosts);
-//        runService(service_refreshObjects);        
-//        runService(service_refreshMaterials);
+    public void loadAll(){       
         runService(service_refreshOrders);
+        runService(service_refreshCustomers);
+//        runService(service_refreshCosts);
+        runService(service_refreshObjects);        
+//        runService(service_refreshMaterials);        
 //        runService(service_refreshPrinters);
 //        runService(service_refreshStatistics);
+    }
+
+    public ObservableList<SimpleTableObject> getCommonCustomerProperties() {
+        return commonCustomerProperties;
+    }
+
+    public void setCommonCustomerProperties(ObservableList<SimpleTableObject> commonCustomerProperties) {
+        this.commonCustomerProperties = commonCustomerProperties;
+    }
+
+    public ObservableList<SimpleTableObject> getCommonMaterialProperties() {
+        return commonMaterialProperties;
+    }
+
+    public void setCommonMaterialProperties(ObservableList<SimpleTableObject> commonMaterialProperties) {
+        this.commonMaterialProperties = commonMaterialProperties;
+    }
+
+    public ObservableList<Cost> getCostsTable() {
+        return costsTable;
+    }
+
+    public void setCostsTable(ObservableList<Cost> costsTable) {
+        this.costsTable = costsTable;
+    }
+
+    public ObservableList<Customer> getCustomersTable() {
+        return customersTable;
+    }
+
+    public void setCustomersTable(ObservableList<Customer> customersTable) {
+        this.customersTable = customersTable;
+    }
+
+    public ObservableList<Material> getMaterialsTable() {
+        return materialsTable;
+    }
+
+    public void setMaterialsTable(ObservableList<Material> materialsTable) {
+        this.materialsTable = materialsTable;
+    }
+
+    public ObservableList<Object> getObjectsTable() {
+        return objectsTable;
+    }
+
+    public void setObjectsTable(ObservableList<Object> objectsTable) {
+        this.objectsTable = objectsTable;
+    }
+
+    public ObservableList<OrderItem> getOrderItemsTable() {
+        return orderItemsTable;
+    }
+
+    public void setOrderItemsTable(ObservableList<OrderItem> orderItemsTable) {
+        this.orderItemsTable = orderItemsTable;
+    }
+
+    public ObservableList<Order> getOrdersTable() {
+        return ordersTable;
+    }
+
+    public void setOrdersTable(ObservableList<Order> ordersTable) {
+        this.ordersTable = ordersTable;
+    }
+
+    public ObservableList<Printer> getPrintersTable() {
+        return printersTable;
+    }
+
+    public void setPrintersTable(ObservableList<Printer> printersTable) {
+        this.printersTable = printersTable;
     }
     
     //gets list of common material properties (loaded at the begining) based on types
@@ -157,7 +229,8 @@ public class MainController implements Initializable {
     |              6 | Weight           |
     |              7 | Printer Type     |
     +----------------+------------------+
-    */
+    */   
+    
     public List<SimpleTableObject> getListOfMaterialProperties(int type){
         
         List<SimpleTableObject> properties = new ArrayList<>();
@@ -299,53 +372,58 @@ public class MainController implements Initializable {
     /*****************************          ORDERS TAB - METHODS        *****************************/    
     //calculates statics of all orders
     private void calculateOrderStatistics(){
-        
         int sold_orders = 0, notSold_orders = 0, total_orders, total_itemsSold = 0, total_buildTime = 0;        
         double sold_price = 0, sold_costs = 0, notSold_price = 0, notSold_costs = 0, total_costs = 0, total_price = 0, total_weight = 0, total_supportWeight = 0;
+            
+        Order order = tv_orders.getItems().get(0);
         
-                
-        for (int i = 0; i < tv_orders.getItems().size(); i++) {
-            Order order = tv_orders.getItems().get(i);
-            if (order.getOrder_status().get().equals("Sold")){
-                sold_costs += order.getOrder_costs().get();
-                sold_price += order.getOrder_price().get();
-                sold_orders++;
-            }  else {
-                notSold_costs += order.getOrder_costs().get();
-                notSold_price += order.getOrder_price().get();
-                notSold_orders++;
+        try {            
+            for (int i = 0; i < tv_orders.getItems().size(); i++) {
+                order = tv_orders.getItems().get(i);            
+                if (order.getOrder_status().get().equals("Sold")){                   
+                    sold_costs += order.getOrder_costs().get();
+                    sold_price += order.getOrder_price().get();                
+                    sold_orders++;
+                }  else {
+                    notSold_costs += order.getOrder_costs().get();
+                    notSold_price += order.getOrder_price().get();
+                    notSold_orders++;
+                }
+            
+                total_weight += order.getOrder_weighht().get();
+                total_supportWeight += order.getOrder_support_weight().get();
+            
+                total_buildTime += order.getOrder_buildTime().get();
+            
+                total_itemsSold += order.getOrder_quantity().get();
             }
-            
-            total_weight += order.getOrder_weighht().get();
-            total_supportWeight += order.getOrder_support_weight().get();
-            
-            total_buildTime += order.getOrder_buildTime().get();
-            
-            total_itemsSold += order.getOrder_quantity().get();
+        
+            label_order_SoldOrders.setText(String.format(Locale.US, "Sold(%d)", sold_orders));
+            label_order_SoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", sold_price, sold_costs));
+            label_order_OrderProfit.setText(String.format(Locale.US, "%.2f $", sold_price - sold_costs));
+        
+            label_order_NotSoldOrders.setText(String.format(Locale.US, "Not Sold(%d)", notSold_orders));
+            label_order_NotSoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", notSold_price, notSold_costs));
+            label_order_NotSoldOrderProfit.setText(String.format(Locale.US, "%.2f $", notSold_price - notSold_costs));
+        
+            total_costs = sold_costs + notSold_costs;
+            total_price = sold_price + notSold_price;
+            total_orders = sold_orders + notSold_orders;
+        
+            label_order_totalOrders.setText(String.format(Locale.US, "Total(%d)", total_orders));
+            label_order_TotalCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", total_price, total_costs));
+            label_order_TotalPricePerHour.setText(String.format(Locale.US, "%.2f $/h", total_price/total_buildTime*60));
+            if (total_weight >= 1000){
+                label_order_TotalWeight.setText(String.format(Locale.US, "%.2f kg/%.2f kg", total_weight/1000, total_supportWeight/1000));
+            } else {
+                label_order_TotalWeight.setText(String.format(Locale.US, "%.2f g/%.2f g", total_weight, total_supportWeight));
+            }        
+            label_order_TotalBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToFormattedTime(total_buildTime).get()));
+            label_order_TotalItemsPrinted.setText(String.valueOf(total_itemsSold));
+        } catch (NullPointerException e) {
+            System.out.println("Null Order is: " + order.getOrder_id().get());
+            System.out.println("Costs of null order are: " + order.getOrder_costs().get());
         }
-        
-        label_order_SoldOrders.setText(String.format(Locale.US, "Sold(%d)", sold_orders));
-        label_order_SoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", sold_price, sold_costs));
-        label_order_OrderProfit.setText(String.format(Locale.US, "%.2f $", sold_price - sold_costs));
-        
-        label_order_NotSoldOrders.setText(String.format(Locale.US, "Not Sold(%d)", notSold_orders));
-        label_order_NotSoldCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", notSold_price, notSold_costs));
-        label_order_NotSoldOrderProfit.setText(String.format(Locale.US, "%.2f $", notSold_price - notSold_costs));
-        
-        total_costs = sold_costs + notSold_costs;
-        total_price = sold_price + notSold_price;
-        total_orders = sold_orders + notSold_orders;
-        
-        label_order_totalOrders.setText(String.format(Locale.US, "Total(%d)", total_orders));
-        label_order_TotalCostPrice.setText(String.format(Locale.US, "%.2f $/%.2f $", total_price, total_costs));
-        label_order_TotalPricePerHour.setText(String.format(Locale.US, "%.2f $/h", total_price/total_buildTime*60));
-        if (total_weight >= 1000){
-            label_order_TotalWeight.setText(String.format(Locale.US, "%.2f kg/%.2f kg", total_weight/1000, total_supportWeight/1000));
-        } else {
-            label_order_TotalWeight.setText(String.format(Locale.US, "%.2f g/%.2f g", total_weight, total_supportWeight));
-        }        
-        label_order_TotalBuildTime.setText(String.format(Locale.US, "%s", MngApi.convertToFormattedTime(total_buildTime).get()));
-        label_order_TotalItemsPrinted.setText(String.valueOf(total_itemsSold));        
     }
     
     private void calculateOrderStatistics(ObservableList<Order> selectedOrders){
@@ -544,6 +622,7 @@ public class MainController implements Initializable {
     
     public void refreshCustomersTable(HikariDataSource ds) {
         //Create list of orders
+        System.out.println("OrderItemsTable size: " + ordersTable.size());
         ObservableList<Customer> customerList = Customer.getCustomers(customersTable, ordersTable, commonCustomerProperties);
         
         
@@ -656,7 +735,7 @@ public class MainController implements Initializable {
     public void refreshObjectsTable(HikariDataSource ds){
         
         //Create list of orders
-        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.downloadObjectsTable(ds));
+        ObservableList<Object> objectList = FXCollections.observableArrayList(Object.getObjects(objectsTable, ordersTable));
         
         object_col_name.setCellValueFactory((param) -> {return param.getValue().getObject_name();});
         object_col_stlLink.setCellValueFactory((param) -> {return param.getValue().getObject_stlLink();});           

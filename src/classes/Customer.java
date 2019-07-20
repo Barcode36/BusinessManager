@@ -157,48 +157,43 @@ public class Customer  {
     
     public static ObservableList<Customer> getCustomers(ObservableList<Customer> customersTable, ObservableList<Order> ordersTable, ObservableList<SimpleTableObject> commonCustomerProperties){
         
-        for (int i = 0; i < customersTable.size(); i++) {
+        Customer customer = null;
+        Order order = null;
+        
+        try {
+            for (int i = 0; i < customersTable.size(); i++) {
             
-            Customer customer = customersTable.get(i);
+                customer = customersTable.get(i);
             
-            SimpleStringProperty customer_country, customer_company;
-            SimpleIntegerProperty customer_orderCount;
-            SimpleDoubleProperty customer_ordersPrice;
+                SimpleStringProperty customer_country, customer_company;               
             
-            double ordersPrice = 0;
-            int orderCount = 0;
+                double ordersPrice = 0;
+                int orderCount = 0;
             
-            customer_country = getCommonCustomerPropertiesByID(commonCustomerProperties, customer.getCustomer_id_country().get()).getProperty_name();
-            customer_company = getCommonCustomerPropertiesByID(commonCustomerProperties, customer.getCustomer_id_company().get()).getProperty_name();
-            
-            //Debugging
-            
-
-            
-            
-            //Debugging
-            
-            for (int j = 0; j < ordersTable.size(); j++) {
+                customer_country = getCommonCustomerPropertiesByID(commonCustomerProperties, customer.getCustomer_id_country().get()).getProperty_name();
+                customer_company = getCommonCustomerPropertiesByID(commonCustomerProperties, customer.getCustomer_id_company().get()).getProperty_name();
+           
+                for (int j = 0; j < ordersTable.size(); j++) {
                 
-                Order order = ordersTable.get(j);
+                    order = ordersTable.get(j);
                 
-                if(order.getOrder_customerID().get() == customer.getCustomer_id().get()){
+                    if(order.getOrder_customerID().get() == customer.getCustomer_id().get()){
                     
-                    orderCount += order.getOrder_quantity().get();
-                    ordersPrice += order.getOrder_price().get();
+                        orderCount += order.getOrder_quantity().get();
+                        ordersPrice += order.getOrder_price().get();
                     
-                } else {
-                    continue;
-                }                
-            }
-            
-            customer_orderCount = new SimpleIntegerProperty(orderCount);                
-            customer_ordersPrice = new SimpleDoubleProperty(ordersPrice);
-            
-            customer.setCustomer_country(customer_country);
-            customer.setCustomer_company(customer_company);
-            customer.setCustomer_orderCount(customer_orderCount);
-            customer.setCustomer_ordersPrice(customer_ordersPrice);
+                    } else {
+                        continue;
+                    }                
+                }
+                        
+                customer.setCustomer_country(customer_country);
+                customer.setCustomer_company(customer_company);
+                customer.setCustomer_orderCount(new SimpleIntegerProperty(orderCount));
+                customer.setCustomer_ordersPrice(new SimpleDoubleProperty(ordersPrice));
+            }            
+        } catch (NullPointerException e) {
+            System.out.println("Null order and Customer: " + order.getOrder_id().get() + ";" + customer.getCustomer_id().get());
         }
         
         return customersTable;

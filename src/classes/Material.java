@@ -84,7 +84,7 @@ public class Material {
         ObservableList<Material> materials = FXCollections.observableArrayList();
         
         //Create query        
-        String query = "SELECT * FROM Materials";
+        String query = "SELECT * FROM Materials ORDER BY MaterialID ASC";
 
         Connection conn = null;
         Statement stmt = null;
@@ -306,7 +306,7 @@ public class Material {
         double pricePerGram = (material.getMaterial_price().get() + material.getMaterial_shipping().get()) / material.getMaterial_weight().get();
         double quantity = item.getQuantity().get();
         double costs = totalWeight*pricePerGram*quantity;        
-        
+                
         return costs;
     }
     
@@ -324,46 +324,50 @@ public class Material {
         return material;
     }
     
-    //use this for partial listing - like when we want to display orderItems in "new order" dialog windows - we dont need all the information about material, only ID, Type and Color
-    public static Material getMaterialByID(SimpleIntegerProperty material_id, ObservableList<Material> materialsTable, ObservableList<SimpleTableObject> commonMaterialProperties, ObservableList<SimpleTableObject> MaterialPropertyTypes) {
+    //submethod used in binarySearchMaterial
+    public static Material binarySearchMaterial(ObservableList<Material> materialsTable, SimpleIntegerProperty material_id){  
         
-        Material material = materialsTable.get(0);
+        int first = 0;
+        int last = materialsTable.size() - 1;
+        int mid = (first + last)/2;  
+        int key = material_id.get();
         
-        //binary search: we are searching first orderItem with material_id and then we will find beginning of series (there could be multiple orderItems with same material_id
-        int numberToGuess = material_id.get();
-        int start = 0;
-        int end = materialsTable.size() - 1;
-        int position;
-        
-        while(start <= end){
-            position = (start + end)/2;
+        while(first <= last ){
             
-            material = materialsTable.get(position);
-            
-            if (material.getMaterial_id() == material_id)break;
-            
-            if(numberToGuess < material.getMaterial_id().get()){
-                
-                end = position - 1;                
-                
+            if ( materialsTable.get(mid).getMaterial_id().get() < key ){  
+                first = mid + 1;     
+            } else if ( materialsTable.get(mid).getMaterial_id().get() == key ){  
+                return materialsTable.get(mid);
             } else {
-                
-                start = position + 1;
-                
-            }            
+                last = mid - 1;  
+            }  
+           
+            mid = (first + last)/2;  
+        }  
+        
+        if ( first > last ){  
+            System.out.println("Element is not found!");  
         }
+        
+        return materialsTable.get(mid);
+    }  
+    
+    //use this for partial listing - like when we want to display orderItems in "new order" dialog windows - we dont need all the information about material, only ID, Type and Color
+    public static Material binarySearchMaterial(SimpleIntegerProperty material_id, ObservableList<Material> materialsTable, ObservableList<SimpleTableObject> commonMaterialProperties, ObservableList<SimpleTableObject> MaterialPropertyTypes) {
+        
+        Material material = Material.binarySearchMaterial(materialsTable, material_id);
         
         //now, we should have material from 'Materials' table, but only IDs. We need types, colors, manufacturers, sellers... 
         //these information are listed in 'CommonMaterialProperties'
         try {
             
-            material.setMaterial_color(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_color()));            
-            material.setMaterial_type(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_materialType()));
-            material.setMaterial_manufacturer(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_manufacturer()));
-            material.setMaterial_seller(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_seller()));
-            material.setMaterial_diameter(new SimpleDoubleProperty(Double.parseDouble(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_diameter()).get())));
-                        
-            double materialWeight = Double.parseDouble(SimpleTableObject.getPropertyByID(commonMaterialProperties, material.getMaterial_id_weight()).get());
+            material.setMaterial_color(SimpleTableObject.binarySearchSimpleTableObject(commonMaterialProperties, material.getMaterial_id_color()));      
+            material.setMaterial_type(SimpleTableObject.binarySearchSimpleTableObject(commonMaterialProperties, material.getMaterial_id_materialType()));
+            material.setMaterial_manufacturer(SimpleTableObject.binarySearchSimpleTableObject(commonMaterialProperties, material.getMaterial_id_manufacturer()));
+            material.setMaterial_seller(SimpleTableObject.binarySearchSimpleTableObject(commonMaterialProperties, material.getMaterial_id_seller()));
+            material.setMaterial_diameter(new SimpleDoubleProperty(Double.parseDouble(SimpleTableObject.binarySearchSimpleTableObject(commonMaterialProperties, material.getMaterial_id_diameter()).get())));
+            
+            double materialWeight = Double.parseDouble(SimpleTableObject.binarySearchSimpleTableObject(commonMaterialProperties, material.getMaterial_id_weight()).get());
                         
             material.setMaterial_weight(new SimpleDoubleProperty(materialWeight));
             

@@ -132,37 +132,53 @@ public class Object {
     }
 
     //we need to pass complex list of orderItems with calculated costs
-    public static ObservableList<Object> getObjects(ObservableList<Object> objectsTable, ObservableList<OrderItem> orderItems){
-                                
-        for (int i = 0; i < objectsTable.size(); i++) {
+    public static ObservableList<Object> getObjects(ObservableList<Object> objectsTable, ObservableList<Order> ordersTable){
+        
+        int object_SoldCount = 0;
+        double object_soldPrice = 0, object_costs = 0;
             
-            int object_SoldCount = 0;
-            double object_soldPrice = 0, object_costs = 0;
+        Object object = null;
+        OrderItem item = null;
+        //copy list so changes wont affect main list
+        ObservableList<OrderItem> orderItems = FXCollections.observableArrayList();
+        
+        //we have stored orderitems with already calculated costs in Orders list, so if we dont wnat co calculate those things again,
+        //which we dont, we have to create list of orderItems out of Orders
+        for (int i = 0; i < ordersTable.size(); i++) {
             
-            Object object = objectsTable.get(i);
+            orderItems.addAll(ordersTable.get(i).getOrderItems());
             
-            for (int j = 0; j < orderItems.size(); j++) {
+        }
+        
+        try {            
+            for (int i = 0; i < objectsTable.size(); i++) {            
+                for (int j = 0; j < orderItems.size(); j++) {
+                    
+                    object = objectsTable.get(i);
+                    item = orderItems.get(i);
                 
-                OrderItem item = orderItems.get(i);
-                
-                if(item.getObject_id().get() == object.getObject_id().get()){
+                    if(item.getObject_id().get() == object.getObject_id().get()){
                     
-                    object_SoldCount += item.getQuantity().get();
-                    object_soldPrice += item.getPrice().get();
-                    object_costs += item.getObject().getObject_costs().get();
+                        object_SoldCount += item.getQuantity().get();
+                        object_soldPrice += item.getPrice().get();
+                        object_costs += item.getObject().getObject_costs().get();
                     
-                } else {
+                    } else {
                     
-                    orderItems.remove(item);
+                        orderItems.remove(item);
                     
+                    }
                 }
-            }
             
-            object.setObject_SoldCount(new SimpleIntegerProperty(object_SoldCount));
-            object.setObject_costs(new SimpleDoubleProperty(object_costs));
-            object.setObject_soldPrice(new SimpleDoubleProperty(object_soldPrice));
+                object.setObject_SoldCount(new SimpleIntegerProperty(object_SoldCount));
+                object.setObject_costs(new SimpleDoubleProperty(object_costs));
+                object.setObject_soldPrice(new SimpleDoubleProperty(object_soldPrice));
             
-        }        
+            }        
+        } catch (NullPointerException e) {
+            System.out.println("Object ID: " + object.getObject_id().get());
+            //System.out.println("Order ID:" + );
+        }                       
         return objectsTable;
     }
     
@@ -249,6 +265,32 @@ public class Object {
         }        
     }
     
+    public static classes.Object binarySearchObject(ObservableList<classes.Object> objectsTable, SimpleIntegerProperty object_id){
+        int first = 0;
+        int last = objectsTable.size() - 1;
+        int mid = (first + last)/2;  
+        int key = object_id.get();
+        
+        while(first <= last ){
+            
+            if ( objectsTable.get(mid).getObject_id().get() < key ){  
+                first = mid + 1;     
+            } else if ( objectsTable.get(mid).getObject_id().get() == key ){  
+                return objectsTable.get(mid);
+            } else {
+                last = mid - 1;  
+            }  
+           
+            mid = (first + last)/2;  
+        }  
+        
+        if ( first > last ){  
+            System.out.println("Element is not found!");  
+        }
+        
+        return objectsTable.get(mid);
+    }
+    
     //returns object with table values (from table Objects) + calculated information like soldCount, SoldPrice based on information from OrderItems table
     public static classes.Object getObjectByID(SimpleIntegerProperty object_id, ObservableList<classes.Object> objectsTable, ObservableList<OrderItem> orderItemsTable, Material material){
         
@@ -256,7 +298,7 @@ public class Object {
         
         //binary search: we are searching first orderItem with material_id and then we will find beginning of series (there could be multiple orderItems with same material_id
         int numberToGuess = object_id.get();
-        int start = 0;
+        int start = 1;
         int end = objectsTable.size() - 1;
         int position;
         

@@ -38,7 +38,7 @@ public class SimpleTableObject {
         ObservableList<SimpleTableObject> properties = FXCollections.observableArrayList();
         
         //Create query
-        String query = "SELECT * FROM CommonMaterialProperties";
+        String query = "SELECT * FROM CommonMaterialProperties ORDER BY PropertyID ASC";
 
         Connection conn = null;
         Statement stmt = null;
@@ -329,35 +329,32 @@ public class SimpleTableObject {
         return types;    
     }
     
-    public static SimpleStringProperty getPropertyByID(ObservableList<SimpleTableObject> propertiesTable, SimpleIntegerProperty property_id){
-                
-        SimpleTableObject property = null;
+    
+    public static SimpleStringProperty binarySearchSimpleTableObject(ObservableList<SimpleTableObject> propertiesTable, SimpleIntegerProperty property_id){  
         
-        //binary search: we are searching first orderItem with material_id and then we will find beginning of series (there could be multiple orderItems with same material_id
-        int numberToGuess = property_id.get();
-        int start = 1;
-        int end = propertiesTable.size();
-        int position;
+        int first = 0;
+        int last = propertiesTable.size() - 1;
+        int mid = (first + last)/2;  
+        int key = property_id.get();
         
-        while(start <= end){
-            position = (start + end)/2;
+        while(first <= last ){
             
-            property = propertiesTable.get(position);
-            
-            if (property.getProperty_id()== property_id)break;
-            
-            if(numberToGuess < property.getProperty_id().get()){
-                
-                end = position - 1;
-                
+            if ( propertiesTable.get(mid).getProperty_id().get() < key ){  
+                first = mid + 1;     
+            } else if ( propertiesTable.get(mid).getProperty_id().get() == key ){  
+                return propertiesTable.get(mid).getProperty_name();                  
             } else {
-                
-                start = position + 1;
-                
-            }            
+                last = mid - 1;  
+            }  
+           
+            mid = (first + last)/2;  
+        }  
+        
+        if ( first > last ){  
+            System.out.println("Element is not found!");  
         }
         
-        return property.getProperty_name();
+        return propertiesTable.get(mid).getProperty_name();
     }
     
     //get number of properties of particular type passed as parameter - used for statistic calculation like number of material types, number of colors, etc....

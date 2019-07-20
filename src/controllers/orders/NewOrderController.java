@@ -506,7 +506,7 @@ public class NewOrderController implements Initializable {
         txtField_customer.setText(order.getOrder_customerID().get() + ";" + order.getOrder_customer().get());        
             
         //list order items which belongs to particular order
-        ObservableList<OrderItem> itemList = FXCollections.observableArrayList(OrderItem.getOrderItems(mainController.getTv_materials().getItems(),order.getOrder_id().get(), ds));
+        ObservableList<OrderItem> itemList = FXCollections.observableArrayList();//FXCollections.observableArrayList(OrderItem.getOrderItemsForOrders(mainController.getOrdersTable(), mainController.getOrderItemsTable(), mainController.getObjectsTable(), mainController.getMaterialsTable(), mainController.getCommonMaterialProperties(), mainController.getPrintersTable()));
         //add listed order items to global list
         orderObjects.addAll(itemList);
         //display this global list in table

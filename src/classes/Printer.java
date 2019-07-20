@@ -183,10 +183,14 @@ public class Printer {
         return sumOfCosts;
     }
     
-    public static Printer getPrinterById(ObservableList<Printer> printers, SimpleIntegerProperty id){
+    public static Printer getPrinterById(/*ObservableList<SimpleTableObject> commonMaterialProperties, */ObservableList<Printer> printersTable, SimpleIntegerProperty id){
         
-        for (int i = 0; i < printers.size(); i++) {
-            if(printers.get(i).getPrinter_id() == id)return printers.get(i);
+        for (int i = 0; i < printersTable.size(); i++) {
+            if(printersTable.get(i).getPrinter_id().get() == id.get()){
+                //need to add printer type
+                //Printer printer = printersTable.get(i);                
+                return printersTable.get(i);
+            }
         }        
         return null;
     }
@@ -197,7 +201,7 @@ public class Printer {
         
         for (int i = 0; i < orderItems.size(); i++) {
             
-            if(orderItems.get(i).getPrinter().getPrinter_id() == printer_id)return itemsPrinted + orderItems.get(1).getQuantity().get();
+            if(orderItems.get(i).getPrinter().getPrinter_id() == printer_id)return itemsPrinted + orderItems.get(i).getQuantity().get();
             
         }
         
